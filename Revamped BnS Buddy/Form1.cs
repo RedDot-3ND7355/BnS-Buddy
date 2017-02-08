@@ -63,7 +63,7 @@ namespace Revamped_BnS_Buddy
         // End Taiwan
         public string CustomGamePath = "";
         public string CustomClientPath = "";
-        public string DefaultValues = "unattended = false" + Environment.NewLine + "notexturestreaming = false" + Environment.NewLine + "savelogs = false" + Environment.NewLine + "showlogs = true" + Environment.NewLine + "variables = false" + Environment.NewLine + "tooltips = true" + Environment.NewLine + "customgame = false" + Environment.NewLine + "customclient = false" + Environment.NewLine + "admincheck = true" + Environment.NewLine + "ncsoftlogin = false" + Environment.NewLine + "showdonate = true" + Environment.NewLine + "minimize = true" + Environment.NewLine + "launcherlogs = false" + Environment.NewLine + "modmanlogs = false" + Environment.NewLine + "customclientpath = " + Environment.NewLine + "customgamepath = " + Environment.NewLine + "updatechecker = true" + Environment.NewLine + "pingchecker = true" + Environment.NewLine + "gamekiller = true" + Environment.NewLine + "useallcores = false" + Environment.NewLine + "arguements = " + Environment.NewLine + "prtime = 500" + Environment.NewLine + "autoupdate = true" + Environment.NewLine + "firsttime = true" + Environment.NewLine + "default = " + Environment.NewLine + "defaultset = false" + Environment.NewLine + "defaultclient =  ";
+        public string DefaultValues = "unattended = false" + Environment.NewLine + "notexturestreaming = false" + Environment.NewLine + "savelogs = false" + Environment.NewLine + "showlogs = true" + Environment.NewLine + "variables = false" + Environment.NewLine + "tooltips = true" + Environment.NewLine + "customgame = false" + Environment.NewLine + "customclient = false" + Environment.NewLine + "admincheck = true" + Environment.NewLine + "ncsoftlogin = false" + Environment.NewLine + "showdonate = true" + Environment.NewLine + "minimize = true" + Environment.NewLine + "launcherlogs = false" + Environment.NewLine + "modmanlogs = false" + Environment.NewLine + "customclientpath = " + Environment.NewLine + "customgamepath = " + Environment.NewLine + "updatechecker = true" + Environment.NewLine + "pingchecker = true" + Environment.NewLine + "gamekiller = true" + Environment.NewLine + "useallcores = false" + Environment.NewLine + "arguements = " + Environment.NewLine + "prtime = 500" + Environment.NewLine + "autoupdate = true" + Environment.NewLine + "firsttime = true" + Environment.NewLine + "default = " + Environment.NewLine + "defaultset = false" + Environment.NewLine + "defaultclient = ";
         public string ActiveDataFile = "";
         public string XmlSavePath = "";
         public string NewDat = "";
@@ -316,9 +316,9 @@ namespace Revamped_BnS_Buddy
         {
             try
             {
-                // Do default = path
+                // Do defaultclient = type
                 lineChanger("defaultclient = " + val, @AppPath + "\\Settings.ini", 27);
-                // Change label val
+                // Change val
                 metroComboBox4.SelectedIndex = metroComboBox4.FindStringExact(val);
                 // Done
             }
@@ -878,7 +878,7 @@ namespace Revamped_BnS_Buddy
                     GetRegDir();
                     BnSFolder();
                 }
-                if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("defaultclient =  "))
+                if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("defaultclient = "))
                 {
                     string line = File.ReadLines(@AppPath + "\\Settings.ini").Skip(26).Take(1).First().Replace("defaultclient = ", "");
                     metroComboBox4.SelectedIndex = metroComboBox4.FindStringExact(line);
@@ -1994,7 +1994,7 @@ namespace Revamped_BnS_Buddy
                 {
                     LaunchPath = RegPath + LauncherPath64 + ".\\Client.exe";
                     AddTextLog("Found! (64 bit)");
-                    clients.Add("64bit", LauncherPath);
+                    clients.Add("64bit", LauncherPath64);
                     i++;
                 }
             }
@@ -2005,24 +2005,23 @@ namespace Revamped_BnS_Buddy
             }
             if (defaultclient != "")
             {
-                LauncherPath = clients[defaultclient].ToString();
+                LaunchPath = RegPath + clients[defaultclient].ToString() + ".\\Client.exe";
                 AddTextLog("Using: " + defaultclient + " Client.exe");
             }
             else if (i > 1)
             {
-                // HEY!
                 DialogResult dialogResult = Prompt.MultipleClient(); 
                 if (dialogResult == DialogResult.Yes)
                 {
-                    LauncherPath = clients["32bit"].ToString();
-                    AddTextLog("Using 32 bit Client.exe");
+                    LaunchPath = RegPath + LauncherPath + ".\\Client.exe";
+                    AddTextLog("Using 32bit Client.exe");
                     SaveDefaultClient("32bit");
                 }
                 else 
                 if (dialogResult == DialogResult.No )
                 {
-                    LauncherPath = clients["64bit"].ToString();
-                    AddTextLog("Using 64 bit Client.exe");
+                    LaunchPath = RegPath + LauncherPath64 + ".\\Client.exe";
+                    AddTextLog("Using 64bit Client.exe");
                     SaveDefaultClient("64bit");
                 }
                 else
