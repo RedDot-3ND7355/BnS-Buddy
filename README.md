@@ -25,7 +25,17 @@ Requirements:
 > A brain :P
 
 
-Change Log:
+Change Log:<br />
+Version 5.8
++ Removed: Static paths to Language
++ Removed: Static paths to Client.exe
++ Added: Recursive check for Language
++ Added: Recursive check for Client.exe (32bit & 64Bit)
++ Added: Option to change from 32bit to 64bit in settings
++ Added: Saving of Client choice as default launcher
++ Reworked: Using of path to Client.exe
+> You can now change the default client in settings page 2
+
 Version 5.7
 + Removed: Integrated Updater
 + Added: External Updater/Downloader
