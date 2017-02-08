@@ -9,6 +9,7 @@
 
 Disclaimer: 
 +If game is rendered unstartable, you are the only one responsible. Therefore using this tool, you agree to the "risks".
+
 > You can always use the Original NCSoft Launcher to restore files to Original and start the game
 
 
@@ -22,10 +23,11 @@ Credits:
 Requirements:
 + .Net Framework 4.0 (not client profile)
 + MetroFramework.dll (included in download)
-> A brain :P
+
+> A brain.
 
 
-Change Log:<br />
+Change Log:
 Version 5.8.5
 + Fixed Bug: Setted Default Client wouldn't switch back to 32bit
 
@@ -37,6 +39,7 @@ Version 5.8
 + Added: Option to change from 32bit to 64bit in settings
 + Added: Saving of Client choice as default launcher
 + Reworked: Using of path to Client.exe
+
 > You can now change the default client in settings page 2
 
 Version 5.7
@@ -44,7 +47,8 @@ Version 5.7
 + Added: External Updater/Downloader
 + Reworked: Settings.ini handling not overwriting current settings after update
 + Reworked: Change Text in Settings for easier understanding of wich is wich of Client/Game paths
-> You can now use the Updater/Downloader to download BnS Buddy
+
+> You can now use the Updater-Downloader to download BnS Buddy
 
 Version 5.6
 + Removed: Static checks for Server/Lang
@@ -88,6 +92,7 @@ Version 5.4
 + Fixed Bug: Admin check function wasnt being called by proper method
 + Fixed Bug: Closing the pop-up for choosing directory of game or launcher would crash the app
 + Fixed Bug: Topmost bug, form stays ontop of everything
+
 > Donation: Added lovely community members
 
 Version 5.3
@@ -101,6 +106,7 @@ Version 5.3
 + Fixed Bug: listbox for splash changer errors out when empty
 + Fixed Bug: error handling when splash changes when empty
 + Fixed Bug: installing/uninstalling would be done all at same time and confuses tool
+
 > Unhid the dll for the tool because people could not see it when the tool needed it to run
 
 - Version 5.2.5
@@ -118,6 +124,7 @@ Version 5.3
 + Added: Save trackbar(ms) value to settings.ini automatically
 + Modified: Mod Manager 3.0
 + Modified: About Tab
+
 > Known bugs with Dat editor with custom files not unpacking.
 
 Version 5.1
@@ -133,6 +140,7 @@ Version 5.0
 + Added: Automatic config.dat patcher
 + Added: Toggle for using Use All Available Cores Arguement
 + Added: Extra Settings (page 2)
+
 > The 32-bit reg check is untested, plz report any errors
 
 Version 4.6
@@ -142,6 +150,7 @@ Version 4.6
 Version 4.5
 + Fixed Bug: No use-agent for getting newest version
 + New Mod Manager (2.0)
+
 > Mod Manager 2.0 is in BETA! Report any errors
 
 Version 4.2
@@ -149,6 +158,7 @@ Version 4.2
 + Fixed Bug: Hanged app caused by Ping running as mainworker and not background
 + Fixed Bug: Config.dat Checks were comparing to original(old), now compares to modded instead
 + Fixed Bug: Pings were resulting in errors and crashing app when offline
+
 > Dat Editor is in BETA stage, may result in errors
 
 Version 4.1
@@ -159,17 +169,20 @@ Version 4.1
 + Fixed Bug: Check Tab routine not running because form is not initialized
 + Fixed Bug: Login to NCSoft repeating itself after successful login
 + Fixed Bug: Update Check for tool causing unknown errors when not connecting
+
 > NCSoft login travel time reduced
  
 Version 4.0
 + Added proper logs to Mod Manager
 + Added settings tabs
 + Started .dat editor (incomplete)
+
 > Relocated the Settings.ini for the app
 
 Version 3.7
 + Changed App Icon to distinguish between game
 + Added new Donators to the donate tab 
+
 > Did some fixes on the Login to NCSoft, wich will not be published as of yet
 
 Version 3.6
@@ -179,6 +192,7 @@ Version 3.6
 + Workaround: Completely reworked mod managers paths and usage(again)
 + Future: Coded an internal login to NCSoft ( for *maybe* a near future )
 + Security: Signed application for windowss trust issues
+
 > To also avoid Strictor triggers i removed the admin flag on app, you have to add run-as admin
 
 Version 3.5
@@ -186,6 +200,7 @@ Version 3.5
 + Change the text when Mods folder in mod manager is empty
 + Spinning progress bar not showing in Mod Manager while working
 + Found an alternative method for using the mods in mod manager
+
 > Mod Manager conflicting cross-threading issue fixed
 
 Version 3.4
@@ -193,12 +208,14 @@ Version 3.4
 + Added Routine to check if game is running or not to restore app
 + Added Donators tab
 + Added ToolTips
+
 > Tooltips available on each button to help understand what they do
 
 Version 3.3
 + Fixed Bug: Conflicting routine for RegionID
 + Reworked: Routines for the checkboxes(unattended & no texture streaming)
 + Fixed Bug: Patch!/Play! button text not changing properly
+
 > Removed Routines when launching game(faster process)
 
 Version 3.2
@@ -207,6 +224,7 @@ Version 3.2
 + Added: Status of settings(showing values before launch)
 + Added: Donation button(for those who appreciate my work) 
 + Reworked the close/minimize buttons at top
+
 > Properly sets RegionID and languageID values.
 
 Version 3.1
@@ -215,33 +233,44 @@ Version 3.1
 + Tool Draggable
 + Server Usage Detection System
 + Save Last Used Settings
+
 > Fully resonsive design(requires MetroFramework.dll)
 
 Version 3.0
 + Added Splash Screen Changer!
 + Fixed logs appearing double in Mod Manager
 + Reworked the Restore button for config.dat
+
 > Splash screen changer might have bugs, report them right away!
 
 Version 2.7
 + Fixed the focus of the app(always in background)
 + Fixed the statuses in Mod Manager
 + Fixed the No loading screen after an update
+
 > Now properly checks if the backup already exists after an update
 
 Version 2.6
 + Logs in Mod Manager can not be erased.
 + Statuses at bottom of Mod Manager now tells you if your game has modded files or not properly.
+
 > You can still copy the logs
 
 Version 2.5
 + Added Mod Manager
+
 > Added logs to Mod Manager
+
 > Fixed verification of files
+
 > Added settings for json
+
 > Undo/Mod [Rework]
+
 > Added shortcut to Mod Folder
+
 > Added Refresh if mods folder changed
+
 > Beta release for Mod Manager(tested and worked on my computer[NO WARNING WHILE LAUNCHING GAME!])
 
 Version 2.0
@@ -249,30 +278,36 @@ Version 2.0
 + Grabs path thru registry(installation path)
 + Dialog to find path if path in registry does not exist(installed in another dir)
 + Fixed automatic game language detector(wrong default values fix)
+
 > Added extra logs for more information
 
 Version 1.5
 + Lowered .Net Framework requirements to 3.5 instead of 4.5.2
+
 > For compatibility issues
 
 Version 1.4
 + Fixed Patch!/Play! buttons text
 + Added intergrated version checker!
+
 > You can use the same Download link to download the latest version
 
 Version 1.3
 + Fixed Logs
 + Intergrated config.dat in tool(no longer relies on internet)
 + Tool no longer requires /patch path and config.dat inside of it
+
 > Logs can be paused if you click on it
 
 Version 1.2
 + Added Logs to app
+
 > Tells successes and fails
 
 Version 1.1
 + Patches the config.dat with Miyakos config.dat!
 + Added restore button for config.dat
+
 > Backup kept for restore in /backup/config.dat at the Original config.dats location
 
 Version 1.0
@@ -281,4 +316,5 @@ Version 1.0
 + Added Ping (green,orange,red) [red = unplayable | orange = barely playable | green = perfect gameplay]
 + Added Option to select language of game
 + Added Option to select game server based on your country
+
 > No Loading Screen button toggle
