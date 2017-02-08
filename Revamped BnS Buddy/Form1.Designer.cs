@@ -154,6 +154,8 @@ namespace Revamped_BnS_Buddy
             this.metroTextBox5 = new MetroFramework.Controls.MetroTextBox();
             this.metroLabel46 = new MetroFramework.Controls.MetroLabel();
             this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.metroComboBox4 = new MetroFramework.Controls.MetroComboBox();
+            this.metroLabel20 = new MetroFramework.Controls.MetroLabel();
             this.metroLabel48 = new MetroFramework.Controls.MetroLabel();
             this.metroLabel21 = new MetroFramework.Controls.MetroLabel();
             this.metroToggle17 = new MetroFramework.Controls.MetroToggle();
@@ -225,7 +227,7 @@ namespace Revamped_BnS_Buddy
             this.metroTabControl1.Location = new System.Drawing.Point(0, 63);
             this.metroTabControl1.Multiline = true;
             this.metroTabControl1.Name = "metroTabControl1";
-            this.metroTabControl1.SelectedIndex = 0;
+            this.metroTabControl1.SelectedIndex = 6;
             this.metroTabControl1.Size = new System.Drawing.Size(695, 357);
             this.metroTabControl1.TabIndex = 0;
             this.metroTabControl1.Theme = MetroFramework.MetroThemeStyle.Dark;
@@ -1253,7 +1255,7 @@ namespace Revamped_BnS_Buddy
             this.metroTabControl2.Location = new System.Drawing.Point(3, 0);
             this.metroTabControl2.Multiline = true;
             this.metroTabControl2.Name = "metroTabControl2";
-            this.metroTabControl2.SelectedIndex = 0;
+            this.metroTabControl2.SelectedIndex = 1;
             this.metroTabControl2.ShowToolTips = true;
             this.metroTabControl2.Size = new System.Drawing.Size(684, 318);
             this.metroTabControl2.TabIndex = 15;
@@ -1805,6 +1807,8 @@ namespace Revamped_BnS_Buddy
             // groupBox8
             // 
             this.groupBox8.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox8.Controls.Add(this.metroComboBox4);
+            this.groupBox8.Controls.Add(this.metroLabel20);
             this.groupBox8.Controls.Add(this.metroLabel48);
             this.groupBox8.Controls.Add(this.metroLabel21);
             this.groupBox8.Controls.Add(this.metroToggle17);
@@ -1827,12 +1831,40 @@ namespace Revamped_BnS_Buddy
             this.groupBox8.TabStop = false;
             this.groupBox8.Text = "Startup";
             // 
+            // metroComboBox4
+            // 
+            this.metroComboBox4.FormattingEnabled = true;
+            this.metroComboBox4.ItemHeight = 23;
+            this.metroComboBox4.Items.AddRange(new object[] {
+            "32bit",
+            "64bit"});
+            this.metroComboBox4.Location = new System.Drawing.Point(420, 34);
+            this.metroComboBox4.Name = "metroComboBox4";
+            this.metroComboBox4.Size = new System.Drawing.Size(121, 29);
+            this.metroComboBox4.Sorted = true;
+            this.metroComboBox4.TabIndex = 24;
+            this.metroComboBox4.Theme = MetroFramework.MetroThemeStyle.Dark;
+            this.metroComboBox4.SelectedIndexChanged += new System.EventHandler(this.metroComboBox4_SelectedIndexChanged);
+            // 
+            // metroLabel20
+            // 
+            this.metroLabel20.AutoSize = true;
+            this.metroLabel20.FontSize = MetroFramework.MetroLabelSize.Tall;
+            this.metroLabel20.Location = new System.Drawing.Point(287, 36);
+            this.metroLabel20.Name = "metroLabel20";
+            this.metroLabel20.Size = new System.Drawing.Size(127, 25);
+            this.metroLabel20.TabIndex = 23;
+            this.metroLabel20.Text = "| Default Client:";
+            this.metroLabel20.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.metroLabel20.Theme = MetroFramework.MetroThemeStyle.Dark;
+            this.metroToolTip1.SetToolTip(this.metroLabel20, "This is used when multiple installations of BnS is found.");
+            // 
             // metroLabel48
             // 
             this.metroLabel48.FontSize = MetroFramework.MetroLabelSize.Small;
-            this.metroLabel48.Location = new System.Drawing.Point(429, 16);
+            this.metroLabel48.Location = new System.Drawing.Point(410, 12);
             this.metroLabel48.Name = "metroLabel48";
-            this.metroLabel48.Size = new System.Drawing.Size(237, 22);
+            this.metroLabel48.Size = new System.Drawing.Size(257, 22);
             this.metroLabel48.TabIndex = 22;
             this.metroLabel48.Text = "None";
             this.metroLabel48.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1845,11 +1877,11 @@ namespace Revamped_BnS_Buddy
             // 
             this.metroLabel21.AutoSize = true;
             this.metroLabel21.FontSize = MetroFramework.MetroLabelSize.Tall;
-            this.metroLabel21.Location = new System.Drawing.Point(355, 13);
+            this.metroLabel21.Location = new System.Drawing.Point(287, 9);
             this.metroLabel21.Name = "metroLabel21";
-            this.metroLabel21.Size = new System.Drawing.Size(79, 25);
+            this.metroLabel21.Size = new System.Drawing.Size(117, 25);
             this.metroLabel21.TabIndex = 21;
-            this.metroLabel21.Text = "| Default:";
+            this.metroLabel21.Text = "| Default Path:";
             this.metroLabel21.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.metroLabel21.Theme = MetroFramework.MetroThemeStyle.Dark;
             this.metroToolTip1.SetToolTip(this.metroLabel21, "This is used when multiple installations of BnS is found.");
@@ -1873,11 +1905,11 @@ namespace Revamped_BnS_Buddy
             // 
             this.metroLabel19.AutoSize = true;
             this.metroLabel19.FontSize = MetroFramework.MetroLabelSize.Tall;
-            this.metroLabel19.Location = new System.Drawing.Point(317, 63);
+            this.metroLabel19.Location = new System.Drawing.Point(287, 63);
             this.metroLabel19.Name = "metroLabel19";
-            this.metroLabel19.Size = new System.Drawing.Size(238, 25);
+            this.metroLabel19.Size = new System.Drawing.Size(213, 25);
             this.metroLabel19.TabIndex = 20;
-            this.metroLabel19.Text = "   |   Application Auto Updater";
+            this.metroLabel19.Text = "| Application Auto Updater";
             this.metroLabel19.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.metroLabel19.Theme = MetroFramework.MetroThemeStyle.Dark;
             // 
@@ -1951,7 +1983,7 @@ namespace Revamped_BnS_Buddy
             this.metroToggle14.Checked = true;
             this.metroToggle14.CheckState = System.Windows.Forms.CheckState.Checked;
             this.metroToggle14.FontSize = MetroFramework.MetroLinkSize.Medium;
-            this.metroToggle14.Location = new System.Drawing.Point(571, 38);
+            this.metroToggle14.Location = new System.Drawing.Point(186, 36);
             this.metroToggle14.Name = "metroToggle14";
             this.metroToggle14.Size = new System.Drawing.Size(95, 25);
             this.metroToggle14.TabIndex = 12;
@@ -1978,7 +2010,7 @@ namespace Revamped_BnS_Buddy
             this.metroToggle15.Checked = true;
             this.metroToggle15.CheckState = System.Windows.Forms.CheckState.Checked;
             this.metroToggle15.FontSize = MetroFramework.MetroLinkSize.Medium;
-            this.metroToggle15.Location = new System.Drawing.Point(254, 13);
+            this.metroToggle15.Location = new System.Drawing.Point(186, 9);
             this.metroToggle15.Name = "metroToggle15";
             this.metroToggle15.Size = new System.Drawing.Size(95, 25);
             this.metroToggle15.TabIndex = 10;
@@ -1994,9 +2026,9 @@ namespace Revamped_BnS_Buddy
             this.metroLabel42.FontSize = MetroFramework.MetroLabelSize.Tall;
             this.metroLabel42.Location = new System.Drawing.Point(6, 13);
             this.metroLabel42.Name = "metroLabel42";
-            this.metroLabel42.Size = new System.Drawing.Size(242, 25);
+            this.metroLabel42.Size = new System.Drawing.Size(139, 25);
             this.metroLabel42.TabIndex = 11;
-            this.metroLabel42.Text = "Automatic Game Process Killer";
+            this.metroLabel42.Text = "Auto Game Killer";
             this.metroLabel42.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.metroLabel42.Theme = MetroFramework.MetroThemeStyle.Dark;
             // 
@@ -2371,6 +2403,8 @@ namespace Revamped_BnS_Buddy
         private MetroFramework.Controls.MetroLabel metroLabel48;
         private MetroFramework.Controls.MetroLabel metroLabel21;
         private MetroFramework.Controls.MetroButton metroButton3;
+        private MetroFramework.Controls.MetroLabel metroLabel20;
+        private MetroFramework.Controls.MetroComboBox metroComboBox4;
     }
 }
 

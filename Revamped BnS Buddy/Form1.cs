@@ -57,12 +57,13 @@ namespace Revamped_BnS_Buddy
         public string RegPath = "";
         public string RegPathlol = "";
         public string GamePath = "";
+        public string defaultclient = "";
         // Taiwan
         public string TaiwanPath = "";
         // End Taiwan
         public string CustomGamePath = "";
         public string CustomClientPath = "";
-        public string DefaultValues = "unattended = false" + Environment.NewLine + "notexturestreaming = false" + Environment.NewLine + "savelogs = false" + Environment.NewLine + "showlogs = true" + Environment.NewLine + "variables = false" + Environment.NewLine + "tooltips = true" + Environment.NewLine + "customgame = false" + Environment.NewLine + "customclient = false" + Environment.NewLine + "admincheck = true" + Environment.NewLine + "ncsoftlogin = false" + Environment.NewLine + "showdonate = true" + Environment.NewLine + "minimize = true" + Environment.NewLine + "launcherlogs = false" + Environment.NewLine + "modmanlogs = false" + Environment.NewLine + "customclientpath = " + Environment.NewLine + "customgamepath = " + Environment.NewLine + "updatechecker = true" + Environment.NewLine + "pingchecker = true" + Environment.NewLine + "gamekiller = true" + Environment.NewLine + "useallcores = false" + Environment.NewLine + "arguements = " + Environment.NewLine + "prtime = 500" + Environment.NewLine + "autoupdate = true" + Environment.NewLine + "firsttime = true" + Environment.NewLine + "default = " + Environment.NewLine + "defaultset = false";
+        public string DefaultValues = "unattended = false" + Environment.NewLine + "notexturestreaming = false" + Environment.NewLine + "savelogs = false" + Environment.NewLine + "showlogs = true" + Environment.NewLine + "variables = false" + Environment.NewLine + "tooltips = true" + Environment.NewLine + "customgame = false" + Environment.NewLine + "customclient = false" + Environment.NewLine + "admincheck = true" + Environment.NewLine + "ncsoftlogin = false" + Environment.NewLine + "showdonate = true" + Environment.NewLine + "minimize = true" + Environment.NewLine + "launcherlogs = false" + Environment.NewLine + "modmanlogs = false" + Environment.NewLine + "customclientpath = " + Environment.NewLine + "customgamepath = " + Environment.NewLine + "updatechecker = true" + Environment.NewLine + "pingchecker = true" + Environment.NewLine + "gamekiller = true" + Environment.NewLine + "useallcores = false" + Environment.NewLine + "arguements = " + Environment.NewLine + "prtime = 500" + Environment.NewLine + "autoupdate = true" + Environment.NewLine + "firsttime = true" + Environment.NewLine + "default = " + Environment.NewLine + "defaultset = false" + Environment.NewLine + "defaultclient =  ";
         public string ActiveDataFile = "";
         public string XmlSavePath = "";
         public string NewDat = "";
@@ -218,8 +219,6 @@ namespace Revamped_BnS_Buddy
         {
             // Step 1
             // Get Dir
-            //if (workedREG == false)
-            //{
                 AddTextLog("Reading Registry...");
                 try
                 {
@@ -240,9 +239,6 @@ namespace Revamped_BnS_Buddy
                     }
                 }
                 catch { AddTextLog("Null Value of RegKey"); }
-                //}
-                //if (workedREG == false)
-                //{
                 try
                 {
                     RegistryKey regKey = Registry.LocalMachine;
@@ -261,9 +257,6 @@ namespace Revamped_BnS_Buddy
                     }
                 }
                 catch { AddTextLog("Null Value of RegKey"); }
-                //}
-                //if (workedREG == false)
-                //{
                 try
                 {
                     RegistryKey regKey = Registry.LocalMachine;
@@ -282,9 +275,6 @@ namespace Revamped_BnS_Buddy
                     }
                 }
                 catch { AddTextLog("Null Value of RegKey"); }
-                //}
-                //if (workedREG == false)
-                //{
                 try
                 {
                     RegistryKey regKey = Registry.LocalMachine;
@@ -304,7 +294,6 @@ namespace Revamped_BnS_Buddy
                     }
                 }
                 catch { AddTextLog("Null Value of RegKey"); }
-            //}
             if (workedREG == false)
             {
                 RegPath = null;
@@ -322,7 +311,19 @@ namespace Revamped_BnS_Buddy
                 }
             }
         }
-        
+
+        public void SaveDefaultClient(string val)
+        {
+            try
+            {
+                // Do default = path
+                lineChanger("defaultclient = " + val, @AppPath + "\\Settings.ini", 27);
+                // Change label val
+                metroComboBox4.SelectedIndex = metroComboBox4.FindStringExact(val);
+                // Done
+            }
+            catch { AddTextLog("Error: Could not save default client!"); }
+        }
 
         public void SaveDefault(string val)
         {
@@ -369,7 +370,6 @@ namespace Revamped_BnS_Buddy
                     if (installs["NA/EU"].ToString().Length > 1)
                     {
                         combobox.Items.Add("NA/EU");
-                        //combobox.Text = "NA/EU";
                     }
                 }
                 if (installs.ContainsKey("NA/EU"))
@@ -377,16 +377,13 @@ namespace Revamped_BnS_Buddy
                     if (installs["Taiwan"].ToString().Length > 1)
                     {
                         combobox.Items.Add("Taiwan");
-                        //combobox.Text = "Taiwan";
                     }
                 }
                 prompt.Controls.Add(combobox);
                 prompt.Controls.Add(confirmation);
                 prompt.Controls.Add(textLabel);
                 prompt.AcceptButton = confirmation;
-                //return prompt.ShowDialog() == DialogResult.OK ? installs[combobox.SelectedItem.ToString()].ToString() : "";
                 prompt.ShowDialog();
-                //combobox.SelectedIndex = combobox.FindStringExact(combobox.SelectedItem.ToString());
                 if (combobox.SelectedItem.ToString() == "Choose Default Installation")
                 {
                     combobox.SelectedIndex = 0;
@@ -451,6 +448,37 @@ namespace Revamped_BnS_Buddy
                 DialogResult test = prompt.ShowDialog();
                 return test;
             }
+
+            public static DialogResult MultipleClient()
+            {
+                ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+                MetroFramework.Forms.MetroForm prompt = new MetroFramework.Forms.MetroForm()
+                {
+                    Width = 280,
+                    Height = 135,
+                    FormBorderStyle = FormBorderStyle.None,
+                    Resizable = false,
+                    AutoSize = true,
+                    Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon"))),
+                    AutoSizeMode = AutoSizeMode.GrowOnly,
+                    ControlBox = false,
+                    Theme = MetroFramework.MetroThemeStyle.Dark,
+                    DisplayHeader = false,
+                    TopMost = true,
+                    Text = "",
+                    StartPosition = FormStartPosition.CenterScreen
+                };
+                MetroFramework.Controls.MetroLabel textLabel = new MetroFramework.Controls.MetroLabel() { Text = "32bit and 64bit clients were found. Wich would you like to use by default?", AutoSize = true, Left = 5, Top = 20, Width = 270, Height = 40, TextAlign = ContentAlignment.MiddleCenter, Theme = MetroFramework.MetroThemeStyle.Dark };
+                MetroFramework.Controls.MetroButton confirmation = new MetroFramework.Controls.MetroButton() { Text = "32 bit", Left = 5, Width = 100, Top = 100, DialogResult = DialogResult.Yes, Theme = MetroFramework.MetroThemeStyle.Dark };
+                MetroFramework.Controls.MetroButton nobutton = new MetroFramework.Controls.MetroButton() { Text = "64 bit", Left = 125, Width = 100, Top = 100, DialogResult = DialogResult.No, Theme = MetroFramework.MetroThemeStyle.Dark };
+                prompt.Controls.Add(confirmation);
+                prompt.Controls.Add(textLabel);
+                prompt.Controls.Add(nobutton);
+                prompt.AcceptButton = confirmation;
+                prompt.AcceptButton = nobutton;
+                DialogResult test = prompt.ShowDialog();
+                return test;
+            }
         }
 
         string autofinder = "";
@@ -482,46 +510,73 @@ namespace Revamped_BnS_Buddy
             
             if (Directory.Exists(AutoFoundModPath))
             {
+                // Permanent
                 string langpath = "";
+                // Temporary
+                string orig = "";
+                string tmp = "";
+                // Default
                 GamePath = AutoFoundModPath;
-                // English Path (NA/EU)
-                if (GamePath.Contains("\\NCWEST\\ENGLISH\\")) {
-                    FullPath = GamePath; metroComboBox2.SelectedIndex = metroComboBox2.FindStringExact("English");
-                    langpath = "ENGLISH";
+                try
+                {
+                    //////////////////////////
                     AddTextLog("Path Found!");
+                    //////////////////////////
+                    //   Find Lang of game  //
+                    //////////////////////////
+                    orig = GamePath; ;
+                    tmp = Path.GetFileName(orig.Replace("\\CookedPC", "")).ToString();
+                    langpath = tmp;
+                    //////////////////////////
+                    AddTextLog("Lang Found!");
+                    //////////////////////////
+                    //    Set after Found   //
+                    //////////////////////////
+                } catch(Exception e) { Prompt.Popup("Error: Couldnt find game Language & it's container." + Environment.NewLine + e.ToString()); }
+
+                if (langpath == "ENGLISH")
+                {
+                    FullPath = GamePath; metroComboBox2.SelectedIndex = metroComboBox2.FindStringExact("English");
+                    AddTextLog("Path Validated!");
                     metroButton1.Enabled = true;
                     PathFound = true;
                     metroToggle1.Enabled = true;
                 }
-                // French Path (NA/EU)
-                if (GamePath.Contains("\\NCWEST\\FRENCH\\"))
+                else if (langpath == "FRENCH")
                 {
                     FullPath = GamePath; metroComboBox2.SelectedIndex = metroComboBox2.FindStringExact("French");
-                    langpath = "FRENCH";
-                    AddTextLog("Path Found!");
+                    AddTextLog("Path Validated!");
                     metroButton1.Enabled = true;
                     PathFound = true;
                     metroToggle1.Enabled = true;
                 }
-                // German Path (NA/EU)
-                if (GamePath.Contains("\\NCWEST\\GERMAN\\"))
+                else if (langpath == "GERMAN")
                 {
                     FullPath = GamePath; metroComboBox2.SelectedIndex = metroComboBox2.FindStringExact("German");
-                    langpath = "GERMAN";
-                    AddTextLog("Path Found!");
+                    AddTextLog("Path Validated!");
                     metroButton1.Enabled = true;
                     PathFound = true;
                     metroToggle1.Enabled = true;
                 }
-                // Taiwan Path (Taiwan/Asia)
-                if (GamePath.Contains("\\NCTAIWAN\\CHINESET\\"))
+                else if (langpath == "CHINESET")
                 {
                     FullPath = GamePath; metroComboBox2.SelectedIndex = metroComboBox2.FindStringExact("Taiwan");
-                    langpath = "CHINESET";
-                    AddTextLog("Path Found!");
+                    AddTextLog("Path Validated!");
                     metroButton1.Enabled = true;
                     PathFound = true;
                     metroToggle1.Enabled = true;
+                }
+                else
+                {
+                    FullPath = GamePath;
+                    AddTextLog("Lang/Path Unknown!");
+                    metroButton1.Enabled = true;
+                    PathFound = true;
+                    metroToggle1.Enabled = true;
+                    // Add custom option since we don't know what it is.
+                    metroComboBox2.Items.Add(langpath);
+                    metroComboBox2.SelectedIndex = metroComboBox2.FindStringExact(langpath);
+                    // End adding
                 }
                 if (PathFound == true)
                 {
@@ -540,7 +595,7 @@ namespace Revamped_BnS_Buddy
                     dlg.Description = "Select BnS folder";
                     if (dlg.ShowDialog() == DialogResult.OK)
                     {
-                        if (File.Exists(dlg.SelectedPath + "\\bin\\Client.exe"))
+                        if (File.Exists(dlg.SelectedPath + "\\bin\\Client.exe") || File.Exists(dlg.SelectedPath + "\\bin64\\Client.exe"))
                         {
                             RegPath = dlg.SelectedPath;
                             AddTextLog("Path Inputed Found!");
@@ -570,6 +625,7 @@ namespace Revamped_BnS_Buddy
             if (autocook != "")
             {
                 DataPath = FullPath.Replace("\\" + autocook + "\\CookedPC", "\\data");
+                if (!Directory.Exists(DataPath)) { Prompt.Popup("Error: Invalid Data Path!" + Environment.NewLine + "Path: " + DataPath); }
             }
             else
             {
@@ -686,7 +742,7 @@ namespace Revamped_BnS_Buddy
                 // Create if missing
                 if (!File.Exists(AppPath + "\\Settings.ini")) { File.WriteAllText(AppPath + "\\Settings.ini", DefaultValues); }
                 // Check if updated.
-                if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("default"))
+                if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("defaultclient"))
                 {
                     // Save current settigns
                     string[] currentsettings = File.ReadAllLines(AppPath + "\\Settings.ini");
@@ -821,6 +877,12 @@ namespace Revamped_BnS_Buddy
                     MultipleInstallationFound = true;
                     GetRegDir();
                     BnSFolder();
+                }
+                if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("defaultclient =  "))
+                {
+                    string line = File.ReadLines(@AppPath + "\\Settings.ini").Skip(26).Take(1).First().Replace("defaultclient = ", "");
+                    metroComboBox4.SelectedIndex = metroComboBox4.FindStringExact(line);
+                    defaultclient = line;
                 }
                 if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("autoupdate = false"))
                 {
@@ -1054,21 +1116,26 @@ namespace Revamped_BnS_Buddy
             {
                 languageID = "English";
                 AddTextLog("languageID = English");
-            }
+            } else
             if (metroComboBox2.SelectedItem.ToString() == "French")
             {
                 languageID = "French";
                 AddTextLog("languageID = French");
-            }
+            } else
             if (metroComboBox2.SelectedItem.ToString() == "German")
             {
                 languageID = "German";
                 AddTextLog("languageID = German");
-            }
+            } else
             if (metroComboBox2.SelectedItem.ToString() == "Taiwan")
             {
                 languageID = "CHINESET";
                 AddTextLog("languageID = Chineset");
+            }
+            else
+            {
+                languageID = metroComboBox2.SelectedItem.ToString();
+                AddTextLog("languageID = " + languageID + " (unknown)");
             }
             Details();
         }
@@ -1245,8 +1312,11 @@ namespace Revamped_BnS_Buddy
                 GetRegDir();
             }
             // Recursively find path
-            AutoDirFinder();
-            SetBnSFolder();
+            try
+            {
+                AutoDirFinder();
+                SetBnSFolder();
+            } catch(Exception e) { Prompt.Popup("Error: " + e.ToString()); }
         }
 
         public void UpdateCheck()
@@ -1909,20 +1979,56 @@ namespace Revamped_BnS_Buddy
             metroButton11.Enabled = false;
             // Start Client.exe
             AddTextLog("Finding Client.exe...");
-            if (Directory.Exists(RegPath + LauncherPath))
+            int i = 0;
+            Dictionary<string, string> clients = new Dictionary<string, string>();
+            if (Directory.Exists(RegPath + LauncherPath) || Directory.Exists(RegPath + LauncherPath64))
             {
-                LaunchPath = RegPath + LauncherPath + ".\\Client.exe";
-                AddTextLog("Found! (32 bit)");
-            }
-            else if (Directory.Exists(RegPath + LauncherPath64))
-            {
-                LaunchPath = RegPath + LauncherPath64 + ".\\Client.exe";
-                AddTextLog("Found! (64 bit)");
+                if (Directory.Exists(RegPath + LauncherPath))
+                {
+                    LaunchPath = RegPath + LauncherPath + ".\\Client.exe";
+                    AddTextLog("Found! (32 bit)");
+                    clients.Add("32bit", LauncherPath);
+                    i++;
+                }
+                if (Directory.Exists(RegPath + LauncherPath64))
+                {
+                    LaunchPath = RegPath + LauncherPath64 + ".\\Client.exe";
+                    AddTextLog("Found! (64 bit)");
+                    clients.Add("64bit", LauncherPath);
+                    i++;
+                }
             }
             else
             {
                 AddTextLog("Error: Path to Client.exe not found!");
                 return;
+            }
+            if (defaultclient != "")
+            {
+                LauncherPath = clients[defaultclient].ToString();
+                AddTextLog("Using: " + defaultclient + " Client.exe");
+            }
+            else if (i > 1)
+            {
+                // HEY!
+                DialogResult dialogResult = Prompt.MultipleClient(); 
+                if (dialogResult == DialogResult.Yes)
+                {
+                    LauncherPath = clients["32bit"].ToString();
+                    AddTextLog("Using 32 bit Client.exe");
+                    SaveDefaultClient("32bit");
+                }
+                else 
+                if (dialogResult == DialogResult.No )
+                {
+                    LauncherPath = clients["64bit"].ToString();
+                    AddTextLog("Using 64 bit Client.exe");
+                    SaveDefaultClient("64bit");
+                }
+                else
+                {
+                    AddTextLog("Skipping default launcher!");
+                }
             }
             AddTextLog("Starting Client...");
             Process proc = new Process();
@@ -3833,6 +3939,12 @@ namespace Revamped_BnS_Buddy
             }
         }
 
+        private void metroComboBox4_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            defaultclient = metroComboBox4.SelectedItem.ToString();
+            lineChanger("defaultclient = " + defaultclient, @AppPath + "\\Settings.ini", 27);
+        }
+
         public void RestoreDefault()
         {
             if (metroLabel48.Text != "None")
@@ -4175,7 +4287,6 @@ namespace Revamped_BnS_Buddy
                 }
             } catch { AddTextLog("Could not remove folder -> " + DataPath + "\\editing\\" + localvar + "\\"); } 
         }
-        
     }
    
 }

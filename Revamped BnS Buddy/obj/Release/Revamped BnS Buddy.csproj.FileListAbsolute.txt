@@ -1,0 +1,17 @@
+C:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamped BnS Buddy\obj\Release\Revamped_BnS_Buddy.Properties.Resources.resources
+C:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamped BnS Buddy\obj\Release\Revamped BnS Buddy.csproj.GenerateResource.Cache
+C:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamped BnS Buddy\obj\Release\Revamped BnS Buddy.csprojResolveAssemblyReference.cache
+C:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamped BnS Buddy\bin\Release\BnS Buddy.exe.config
+C:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamped BnS Buddy\obj\Release\BnS Buddy.exe
+C:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamped BnS Buddy\obj\Release\BnS Buddy.pdb
+C:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamped BnS Buddy\bin\Release\BnS Buddy.exe
+C:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamped BnS Buddy\bin\Release\BnS Buddy.pdb
+C:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamped BnS Buddy\obj\Release\Revamped_BnS_Buddy.Splash1.resources
+C:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamped BnS Buddy\bin\Release\MetroFramework.dll
+C:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamped BnS Buddy\obj\Release\Revamped_BnS_Buddy.Form2.resources
+C:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamped BnS Buddy\bin\Release\BnS Buddy.exe.manifest
+C:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamped BnS Buddy\bin\Release\BnS Buddy.application
+C:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamped BnS Buddy\obj\Release\BnS Buddy.TrustInfo.xml
+C:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamped BnS Buddy\obj\Release\BnS Buddy.exe.manifest
+C:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamped BnS Buddy\obj\Release\BnS Buddy.application
+C:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamped BnS Buddy\obj\Release\Revamped_BnS_Buddy.Form1.resources
