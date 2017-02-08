@@ -26,6 +26,9 @@ Requirements:
 
 
 Change Log:<br />
+Version 5.8.5
++ Fixed Bug: Setted Default Client wouldn't switch back to 32bit
+
 Version 5.8
 + Removed: Static paths to Language
 + Removed: Static paths to Client.exe
