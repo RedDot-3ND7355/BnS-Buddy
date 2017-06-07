@@ -28,6 +28,24 @@ Requirements:
 
 
 Change Log:
+Version 5.8.7 (TESTING PHASE)
++ Server: Unblocked all countries that could not download BnS Buddy, online version check and updater 
++ Added: Custom paths for mods (General use) 
++ Added: Automatic restore of config/config64 if modded to skip error at client start 
++ Added: Game Process Killer after started 
++ Added: Addons (Patches the mods you want automatically after every launch) 
++ Added: Routines to determine wich Lang path you are actually using if multiple are found 
++ Added: Process Priority dropdown in settings page 3 
++ Added: Japan Support 
++ Added: Korean Support 
++ Fixed Bug: Kept asking wich client version you wanted to run if the paths were found by default at start
++ Fixed Bug: The first ping is now in background worker instead of main thread, preventing freeze at start
++ Fixed Bug: When game won't start and dies. A popup will ask to verify your ip.
++ Fixed Bug: Forms in tabs won't fit and goes out of bounds
++ Fixed Bug: Form won't change when tab is changed
++ Reworked: Changed ip to check your game ping correctly (na & eu)
++ Reworked: Login Form
+
 Version 5.8.5
 + Fixed Bug: Setted Default Client wouldn't switch back to 32bit
 
