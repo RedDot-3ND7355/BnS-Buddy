@@ -24,13 +24,14 @@ using SharpCompress.Archive;
 using SharpCompress.Common;
 using System.Windows.Controls;
 using Ionic.Zlib;
+using Mono.Math;
+using System.Net.Sockets;
 
 namespace Revamped_BnS_Buddy
 {
     
-
     // Things marked with "HEY!" Are unfinished and to be completed :)
-    public partial class Form1 : MetroFramework.Forms.MetroForm
+    public unsafe partial class Form1 : MetroFramework.Forms.MetroForm
     {
         // static form
         public static Form1 CurrentForm;
@@ -42,6 +43,7 @@ namespace Revamped_BnS_Buddy
         public string AppPath = Path.GetDirectoryName(Application.ExecutablePath);
         public string mine = Process.GetCurrentProcess().Id.ToString();
         public string IP = "64.25.35.100";
+        public string FinalToken = "";
         public string regionID = "0";
         public string languageID = "English";
         public string LaunchPath = "";
@@ -63,12 +65,13 @@ namespace Revamped_BnS_Buddy
         // End Taiwan
         public string CustomGamePath = "";
         public string CustomClientPath = "";
-        public string DefaultValues = "unattended = false" + Environment.NewLine + "notexturestreaming = false" + Environment.NewLine + "savelogs = false" + Environment.NewLine + "showlogs = true" + Environment.NewLine + "variables = false" + Environment.NewLine + "tooltips = true" + Environment.NewLine + "customgame = false" + Environment.NewLine + "customclient = false" + Environment.NewLine + "admincheck = true" + Environment.NewLine + "ncsoftlogin = false" + Environment.NewLine + "showdonate = true" + Environment.NewLine + "minimize = true" + Environment.NewLine + "launcherlogs = false" + Environment.NewLine + "modmanlogs = false" + Environment.NewLine + "customclientpath = " + Environment.NewLine + "customgamepath = " + Environment.NewLine + "updatechecker = true" + Environment.NewLine + "pingchecker = true" + Environment.NewLine + "gamekiller = true" + Environment.NewLine + "useallcores = false" + Environment.NewLine + "arguements = " + Environment.NewLine + "prtime = 500" + Environment.NewLine + "autoupdate = true" + Environment.NewLine + "firsttime = true" + Environment.NewLine + "default = " + Environment.NewLine + "defaultset = false" + Environment.NewLine + "defaultclient = ";
+        public string DefaultValues = "unattended = false" + Environment.NewLine + "notexturestreaming = false" + Environment.NewLine + "savelogs = false" + Environment.NewLine + "showlogs = true" + Environment.NewLine + "variables = false" + Environment.NewLine + "tooltips = true" + Environment.NewLine + "customgame = false" + Environment.NewLine + "customclient = false" + Environment.NewLine + "admincheck = true" + Environment.NewLine + "ncsoftlogin = false" + Environment.NewLine + "showdonate = true" + Environment.NewLine + "minimize = true" + Environment.NewLine + "launcherlogs = false" + Environment.NewLine + "modmanlogs = false" + Environment.NewLine + "customclientpath = " + Environment.NewLine + "customgamepath = " + Environment.NewLine + "updatechecker = true" + Environment.NewLine + "pingchecker = true" + Environment.NewLine + "gamekiller = true" + Environment.NewLine + "useallcores = false" + Environment.NewLine + "arguements = " + Environment.NewLine + "prtime = 500" + Environment.NewLine + "autoupdate = true" + Environment.NewLine + "firsttime = true" + Environment.NewLine + "default = " + Environment.NewLine + "defaultset = false" + Environment.NewLine + "defaultclient = " + Environment.NewLine + "priority = Normal" + Environment.NewLine + "modfolder = " + Environment.NewLine + "modfolderset = false" + Environment.NewLine + "customlangset = false" + Environment.NewLine + "customlang = " + Environment.NewLine + "rememberme = false";
         public string ActiveDataFile = "";
         public string XmlSavePath = "";
         public string NewDat = "";
         public string UseAllCores = "";
         public string LoadingSplash = "";
+        public bool UseToken = false;
         public bool Backup = false;
         public bool PathFound = true;
         public bool logs_active = true;
@@ -87,6 +90,7 @@ namespace Revamped_BnS_Buddy
         public bool nonmodded = false;
         public bool AutoUpdate = true;
         public bool FirstTime = true;
+        public bool readyclient = false;
         public bool MultipleInstallationFound = false;
         public string online = "";
         public string offline = "";
@@ -119,8 +123,6 @@ namespace Revamped_BnS_Buddy
             //  Seperator   //
             // Launcher Tab //
             //////////////////
-            // Set Ping to Server
-            SetPing();
             // 1: Check Registry for Dir(Game) | 2: Auto browser and Set Path to CookedPC | 3: Set Global Variables
             try
             {
@@ -128,7 +130,8 @@ namespace Revamped_BnS_Buddy
                 {
                     BnSFolder();
                 }
-            } catch(Exception e) { Prompt.Popup(e.ToString()); }
+            }
+            catch (Exception e) { Prompt.Popup(e.ToString()); }
             // Check backup for Loading Screen
             CheckBackup();
             // 1: Check Registry for Dir(Client) | 2: Auto ini reader to Path | 3: Set Global Variables
@@ -138,7 +141,8 @@ namespace Revamped_BnS_Buddy
                 {
                     CheckServer();
                 }
-            } catch(Exception e) { Prompt.Popup(e.ToString()); }
+            }
+            catch (Exception e) { Prompt.Popup(e.ToString()); }
             VerifySettings();
             ///////////////////////
             //     Seperator     //
@@ -160,9 +164,14 @@ namespace Revamped_BnS_Buddy
             //    Seperator   //
             // Dat Editor Tab //
             ////////////////////
-            CleanMess();
+            //CleanMess(); /* Skip Cleaning */
             DefaultDatValues();
             CreateDatPaths();
+            ////////////////////
+            //    Seperator   //
+            //   Addons Tab   //
+            ////////////////////
+            InitializeAddons();
             ///////////////
             // Seperator //
             //   MISCS   //
@@ -181,7 +190,7 @@ namespace Revamped_BnS_Buddy
             p.Kill();
         }
 
-        public void FirstTimeUse() 
+        public void FirstTimeUse()
         {
             if (FirstTime == true)
             {
@@ -209,7 +218,8 @@ namespace Revamped_BnS_Buddy
                         fileContents = fileContents.Replace("autoupdate = true", "autoupdate = false");
                         System.IO.File.WriteAllText(@AppPath + "\\Settings.ini", fileContents);
                     }
-                } else { /* skip */ }
+                }
+                else { /* skip */ }
             }
         }
 
@@ -219,81 +229,158 @@ namespace Revamped_BnS_Buddy
         {
             // Step 1
             // Get Dir
-                AddTextLog("Reading Registry...");
-                try
+            AddTextLog("Reading Registry...");
+            try
+            {
+                RegistryKey regKey = Registry.LocalMachine;
+                regKey = regKey.OpenSubKey(@"SOFTWARE\Wow6432Node\NCWest\BnS\");
+                if (regKey != null)
                 {
-                    RegistryKey regKey = Registry.LocalMachine;
-                    regKey = regKey.OpenSubKey(@"SOFTWARE\Wow6432Node\NCWest\BnS\");
-                    if (regKey != null)
+                    string unique = regKey.GetValue("BaseDir").ToString();
+                    if (workedREG == false)
                     {
-                        string unique = regKey.GetValue("BaseDir").ToString();
-                        if (workedREG == false)
-                        {
-                            RegPath = regKey.GetValue("BaseDir").ToString();
-                        }
-                        AddTextLog(unique);
-                        AddTextLog("Reg Key Valid!");
-                        workedREG = true;
-                        Reg64 = true;
-                        Installs.Add("NA/EU", unique);
+                        RegPath = regKey.GetValue("BaseDir").ToString();
                     }
+                    AddTextLog(unique);
+                    AddTextLog("Reg Key Valid!");
+                    workedREG = true;
+                    Reg64 = true;
+                    Installs.Add("NA/EU", unique);
                 }
-                catch { AddTextLog("Null Value of RegKey"); }
-                try
+            }
+            catch { AddTextLog("Null Value of RegKey"); }
+            try
+            {
+                RegistryKey regKey = Registry.LocalMachine;
+                regKey = regKey.OpenSubKey(@"SOFTWARE\NCWest\BnS\");
+                if (regKey != null)
                 {
-                    RegistryKey regKey = Registry.LocalMachine;
-                    regKey = regKey.OpenSubKey(@"SOFTWARE\NCWest\BnS\");
-                    if (regKey != null)
+                    string unique = regKey.GetValue("BaseDir").ToString();
+                    if (workedREG == false)
                     {
-                        string unique = regKey.GetValue("BaseDir").ToString();
-                        if (workedREG == false)
-                        {
-                            RegPath = regKey.GetValue("BaseDir").ToString();
-                        }
-                        AddTextLog(unique);
-                        AddTextLog("Reg Key Valid!");
-                        workedREG = true;
-                        Installs.Add("NA/EU", unique);
+                        RegPath = regKey.GetValue("BaseDir").ToString();
                     }
+                    AddTextLog(unique);
+                    AddTextLog("Reg Key Valid!");
+                    workedREG = true;
+                    Installs.Add("NA/EU", unique);
                 }
-                catch { AddTextLog("Null Value of RegKey"); }
-                try
+            }
+            catch { AddTextLog("Null Value of RegKey"); }
+            try
+            {
+                RegistryKey regKey = Registry.LocalMachine;
+                regKey = regKey.OpenSubKey(@"SOFTWARE\NCTaiwan\TWBNS22\");
+                if (regKey != null)
                 {
-                    RegistryKey regKey = Registry.LocalMachine;
-                    regKey = regKey.OpenSubKey(@"SOFTWARE\NCTaiwan\TWBNS22\");
-                    if (regKey != null)
+                    string unique = regKey.GetValue("BaseDir").ToString();
+                    if (workedREG == false)
                     {
-                        string unique = regKey.GetValue("BaseDir").ToString();
-                        if (workedREG == false)
-                        {
-                            RegPath = regKey.GetValue("BaseDir").ToString();
-                        }
-                        AddTextLog(unique);
-                        AddTextLog("Reg Key Valid!");
-                        workedREG = true;
-                        Installs.Add("Taiwan", unique);
+                        RegPath = regKey.GetValue("BaseDir").ToString();
                     }
+                    AddTextLog(unique);
+                    AddTextLog("Reg Key Valid!");
+                    workedREG = true;
+                    Installs.Add("Taiwan", unique);
                 }
-                catch { AddTextLog("Null Value of RegKey"); }
-                try
+            }
+            catch { AddTextLog("Null Value of RegKey"); }
+            try
+            {
+                RegistryKey regKey = Registry.LocalMachine;
+                regKey = regKey.OpenSubKey(@"SOFTWARE\Wow6432Node\NCTaiwan\TWBNS22\");
+                if (regKey != null)
                 {
-                    RegistryKey regKey = Registry.LocalMachine;
-                    regKey = regKey.OpenSubKey(@"SOFTWARE\Wow6432Node\NCTaiwan\TWBNS22\");
-                    if (regKey != null)
+                    string unique = regKey.GetValue("BaseDir").ToString();
+                    if (workedREG == false)
                     {
-                        string unique = regKey.GetValue("BaseDir").ToString();
-                        if (workedREG == false)
-                        {
-                            RegPath = regKey.GetValue("BaseDir").ToString();
-                        }
-                        AddTextLog(unique);
-                        AddTextLog("Reg Key Valid!");
-                        workedREG = true;
-                        Reg64 = true;
-                        Installs.Add("Taiwan", unique);
+                        RegPath = regKey.GetValue("BaseDir").ToString();
                     }
+                    AddTextLog(unique);
+                    AddTextLog("Reg Key Valid!");
+                    workedREG = true;
+                    Reg64 = true;
+                    Installs.Add("Taiwan", unique);
                 }
-                catch { AddTextLog("Null Value of RegKey"); }
+            }
+            catch { AddTextLog("Null Value of RegKey"); }
+            try
+            {
+                RegistryKey regKey = Registry.LocalMachine;
+                regKey = regKey.OpenSubKey(@"SOFTWARE\PlayNC\BNS_JPN\");
+                if (regKey != null)
+                {
+                    string unique = regKey.GetValue("BaseDir").ToString();
+                    if (workedREG == false)
+                    {
+                        RegPath = regKey.GetValue("BaseDir").ToString();
+                    }
+                    AddTextLog(unique);
+                    AddTextLog("Reg Key Valid!");
+                    workedREG = true;
+                    Installs.Add("Japanese", unique);
+                }
+            }
+            catch { AddTextLog("Null Value of RegKey"); }
+            try
+            {
+                RegistryKey regKey = Registry.LocalMachine;
+                regKey = regKey.OpenSubKey(@"SOFTWARE\Wow6432Node\PlayNC\BNS_JPN\");
+                if (regKey != null)
+                {
+                    string unique = regKey.GetValue("BaseDir").ToString();
+                    if (workedREG == false)
+                    {
+                        RegPath = regKey.GetValue("BaseDir").ToString();
+                    }
+                    AddTextLog(unique);
+                    AddTextLog("Reg Key Valid!");
+                    workedREG = true;
+                    Reg64 = true;
+                    Installs.Add("Japanese", unique);
+                }
+            }
+            catch { AddTextLog("Null Value of RegKey"); }
+            try
+            {
+                RegistryKey regKey = Registry.LocalMachine;
+                regKey = regKey.OpenSubKey(@"SOFTWARE\plaync\BNS_KOR\");
+                if (regKey != null)
+                {
+                    string unique = regKey.GetValue("BaseDir").ToString();
+                    if (workedREG == false)
+                    {
+                        RegPath = regKey.GetValue("BaseDir").ToString();
+                    }
+                    AddTextLog(unique);
+                    AddTextLog("Reg Key Valid!");
+                    workedREG = true;
+                    Installs.Add("Korean", unique);
+                }
+            }
+            catch { AddTextLog("Null Value of RegKey"); }
+            try
+            {
+                RegistryKey regKey = Registry.LocalMachine;
+                regKey = regKey.OpenSubKey(@"SOFTWARE\Wow6432Node\plaync\BNS_KOR\");
+                if (regKey != null)
+                {
+                    string unique = regKey.GetValue("BaseDir").ToString();
+                    if (workedREG == false)
+                    {
+                        RegPath = regKey.GetValue("BaseDir").ToString();
+                    }
+                    AddTextLog(unique);
+                    AddTextLog("Reg Key Valid!");
+                    workedREG = true;
+                    Reg64 = true;
+                    Installs.Add("Korean", unique);
+                }
+            }
+            catch { AddTextLog("Null Value of RegKey"); }
+
+           
+            
             if (workedREG == false)
             {
                 RegPath = null;
@@ -304,7 +391,7 @@ namespace Revamped_BnS_Buddy
                 if (MultipleInstallationFound == false)
                 {
                     AddTextLog("Multiple Installations Found!");
-                    string promptValue = Prompt.MultipleInstallation("Multiple installations of BnS has been found!" + Environment.NewLine + "Wich version would you like to use?", "Warning!", Installs);
+                    string promptValue = Prompt.MultipleInstallation("Multiple installations of BnS has been found!" + Environment.NewLine + "Which version would you like to use?", "Warning!", Installs);
                     RegPath = promptValue;
                     SaveDefault(promptValue);
                     Prompt.Popup("Notice: You can always remove the default installation in settings.");
@@ -338,11 +425,50 @@ namespace Revamped_BnS_Buddy
                 // Change label val
                 metroLabel48.Text = val;
                 // Done
-            } catch { AddTextLog("Error: Could not save default installation!"); }
+            }
+            catch { AddTextLog("Error: Could not save default installation!"); }
         }
 
         public static class Prompt
         {
+            public static string MultipleLang(string Description, string Title, Dictionary<int, string> languages)
+            {
+                ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+                MetroFramework.Forms.MetroForm prompt = new MetroFramework.Forms.MetroForm()
+                {
+                    Width = 280,
+                    Height = 135,
+                    FormBorderStyle = FormBorderStyle.None,
+                    Resizable = false,
+                    Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon"))),
+                    ControlBox = false,
+                    Theme = MetroFramework.MetroThemeStyle.Dark,
+                    DisplayHeader = false,
+                    TopMost = true,
+                    Text = Title,
+                    StartPosition = FormStartPosition.CenterScreen
+                };
+                MetroFramework.Controls.MetroLabel textLabel = new MetroFramework.Controls.MetroLabel() { Left = 5, Top = 20, Text = Description, Width = 270, Height = 40, TextAlign = ContentAlignment.MiddleCenter, Theme = MetroFramework.MetroThemeStyle.Dark };
+                MetroFramework.Controls.MetroComboBox combobox = new MetroFramework.Controls.MetroComboBox() { Left = 5, Top = 70, Width = 270, Theme = MetroFramework.MetroThemeStyle.Dark, ImeMode = ImeMode.NoControl };
+                MetroFramework.Controls.MetroButton confirmation = new MetroFramework.Controls.MetroButton() { Text = "Ok", Left = 5, Width = 100, Top = 100, DialogResult = DialogResult.OK, Theme = MetroFramework.MetroThemeStyle.Dark };
+                confirmation.Click += (sender, e) => { prompt.Close(); };
+                combobox.Text = "Choose Game Language";
+                for (int i = 0; languages.Count > i; i++)
+                {
+                    combobox.Items.Add(languages[i]);
+                }
+                prompt.Controls.Add(combobox);
+                prompt.Controls.Add(confirmation);
+                prompt.Controls.Add(textLabel);
+                prompt.AcceptButton = confirmation;
+                prompt.ShowDialog();
+                if (combobox.SelectedItem.ToString() == "Choose Game Language")
+                {
+                    combobox.SelectedIndex = 0;
+                }
+                return combobox.SelectedItem.ToString();
+            }
+
             public static string MultipleInstallation(string Description, string Title, Dictionary<string, string> installs)
             {
                 ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
@@ -366,17 +492,31 @@ namespace Revamped_BnS_Buddy
                 confirmation.Click += (sender, e) => { prompt.Close(); };
                 combobox.Text = "Choose Default Installation";
                 if (installs.ContainsKey("NA/EU"))
-                { 
+                {
                     if (installs["NA/EU"].ToString().Length > 1)
                     {
                         combobox.Items.Add("NA/EU");
                     }
                 }
-                if (installs.ContainsKey("NA/EU"))
+                if (installs.ContainsKey("Taiwan"))
                 {
                     if (installs["Taiwan"].ToString().Length > 1)
                     {
                         combobox.Items.Add("Taiwan");
+                    }
+                }
+                if (installs.ContainsKey("Japanese"))
+                {
+                    if (installs["Japanese"].ToString().Length > 1)
+                    {
+                        combobox.Items.Add("Japanese");
+                    }
+                }
+                if (installs.ContainsKey("Korean"))
+                {
+                    if (installs["Korean"].ToString().Length > 1)
+                    {
+                        combobox.Items.Add("Korean");
                     }
                 }
                 prompt.Controls.Add(combobox);
@@ -386,7 +526,7 @@ namespace Revamped_BnS_Buddy
                 prompt.ShowDialog();
                 if (combobox.SelectedItem.ToString() == "Choose Default Installation")
                 {
-                    combobox.SelectedIndex = 0;
+                    combobox.SelectedIndex = 1;
                 }
                 return installs[combobox.SelectedItem.ToString()].ToString();
             }
@@ -468,7 +608,7 @@ namespace Revamped_BnS_Buddy
                     Text = "",
                     StartPosition = FormStartPosition.CenterScreen
                 };
-                MetroFramework.Controls.MetroLabel textLabel = new MetroFramework.Controls.MetroLabel() { Text = "32bit and 64bit clients were found. Wich would you like to use by default?", AutoSize = true, Left = 5, Top = 20, Width = 270, Height = 40, TextAlign = ContentAlignment.MiddleCenter, Theme = MetroFramework.MetroThemeStyle.Dark };
+                MetroFramework.Controls.MetroLabel textLabel = new MetroFramework.Controls.MetroLabel() { Text = "32bit and 64bit clients were found. Which would you like to use by default?", AutoSize = true, Left = 5, Top = 20, Width = 270, Height = 40, TextAlign = ContentAlignment.MiddleCenter, Theme = MetroFramework.MetroThemeStyle.Dark };
                 MetroFramework.Controls.MetroButton confirmation = new MetroFramework.Controls.MetroButton() { Text = "32 bit", Left = 5, Width = 100, Top = 100, DialogResult = DialogResult.Yes, Theme = MetroFramework.MetroThemeStyle.Dark };
                 MetroFramework.Controls.MetroButton nobutton = new MetroFramework.Controls.MetroButton() { Text = "64 bit", Left = 125, Width = 100, Top = 100, DialogResult = DialogResult.No, Theme = MetroFramework.MetroThemeStyle.Dark };
                 prompt.Controls.Add(confirmation);
@@ -481,8 +621,48 @@ namespace Revamped_BnS_Buddy
             }
         }
 
+        private void metroComboBox5_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (metroComboBox5.SelectedItem.ToString() == "English")
+            {
+                metroComboBox2.SelectedIndex = metroComboBox2.FindStringExact("English");
+            }
+            else
+            if (metroComboBox5.SelectedItem.ToString() == "French")
+            {
+                metroComboBox2.SelectedIndex = metroComboBox2.FindStringExact("French");
+            }
+            else
+            if (metroComboBox5.SelectedItem.ToString() == "German")
+            {
+                metroComboBox2.SelectedIndex = metroComboBox2.FindStringExact("German");
+            }
+            else
+            if (metroComboBox5.SelectedItem.ToString() == "Taiwan")
+            {
+                metroComboBox2.SelectedIndex = metroComboBox2.FindStringExact("Taiwan");
+            }
+            else
+            if (metroComboBox5.SelectedItem.ToString() == "Japanese")
+            {
+                metroComboBox2.SelectedIndex = metroComboBox2.FindStringExact("Japanese");
+            }
+            else
+            if (metroComboBox5.SelectedItem.ToString() == "Korean")
+            {
+                metroComboBox2.SelectedIndex = metroComboBox2.FindStringExact("Korean");
+            }
+            else
+            {
+                metroComboBox2.SelectedItem = metroComboBox5.SelectedItem;
+            }
+        }
+
         string autofinder = "";
         string autocook = "";
+        bool Korean = false;
+        bool MultipleLangFound = false;
+        Dictionary<int, string> LangDictionary = new Dictionary<int, string>();
         public void AutoDirFinder()
         {
             // Step 2
@@ -496,18 +676,53 @@ namespace Revamped_BnS_Buddy
                     {
                         autofinder = subdir.ToString();
                         DirectoryInfo path2 = new DirectoryInfo(RegPath + "\\contents\\Local\\" + autofinder);
+                        int ild = 0;
                         foreach (DirectoryInfo subdir2 in path2.GetDirectories())
                         {
-                            if (Directory.Exists(RegPath + "\\contents\\Local\\" + autofinder + "\\" + subdir2.ToString() + "\\CookedPC"))
+                            if (subdir2.ToString() != "korean")
                             {
-                                autocook = subdir2.ToString();
-                            }
+                                if (Directory.Exists(RegPath + "\\contents\\Local\\" + autofinder + "\\" + subdir2.ToString() + "\\CookedPC"))
+                                {
+                                    if (MultipleLangFound == false)
+                                    {
+                                        // Add Lang to Dictionary
+                                        if (!LangDictionary.ContainsValue(subdir2.ToString()))
+                                        {
+                                            LangDictionary.Add(ild, subdir2.ToString());
+                                            // Increase int
+                                            ild++;
+                                        }
+                                        // Set value for found path
+                                        autocook = subdir2.ToString();
+                                    }
+                                }
+                            } else { autocook = subdir2.ToString(); }
                         }
                     }
                 }
-                AutoFoundModPath = RegPath + "\\contents\\Local\\" + autofinder + "\\" + autocook + "\\CookedPC";
+
+                // Check for multiple lang
+                if (LangDictionary.Count > 1 && MultipleLangFound == false)
+                {
+                    string promptValue = Prompt.MultipleLang("Multiple languages of BnS has been found!" + Environment.NewLine + "Which language would you like to use?", "Warning!", LangDictionary);
+                    Prompt.Popup(promptValue);
+                    autocook = promptValue;
+                    MultipleLangFound = true;
+                    for (int i = 0; LangDictionary.Count > i; i++)
+                    {
+                        metroComboBox5.Items.Add(LangDictionary[i]);
+                    }
+                    metroLabel56.Text = RegPath;
+                }
+
+                // Check for korean
+                if (autocook != "korean") {
+                    AutoFoundModPath = RegPath + "\\contents\\Local\\" + autofinder + "\\" + autocook + "\\CookedPC";
+                } else {
+                    AutoFoundModPath = RegPath + "\\contents\\Local\\NCSoft\\" + autocook + "\\";
+                }
             }
-            
+
             if (Directory.Exists(AutoFoundModPath))
             {
                 // Permanent
@@ -525,15 +740,18 @@ namespace Revamped_BnS_Buddy
                     //   Find Lang of game  //
                     //////////////////////////
                     orig = GamePath; ;
-                    tmp = Path.GetFileName(orig.Replace("\\CookedPC", "")).ToString();
+                    if (!orig.ToString().Contains("korean"))
+                    {
+                        tmp = Path.GetFileName(orig.Replace("\\CookedPC", "")).ToString();
+                    } else { tmp = Path.GetFileName(orig.ToString()); }
                     langpath = tmp;
                     //////////////////////////
                     AddTextLog("Lang Found!");
                     //////////////////////////
                     //    Set after Found   //
                     //////////////////////////
-                } catch(Exception e) { Prompt.Popup("Error: Couldnt find game Language & it's container." + Environment.NewLine + e.ToString()); }
-
+                }
+                catch (Exception e) { Prompt.Popup("Error: Couldnt find game Language & it's container." + Environment.NewLine + e.ToString()); }
                 if (langpath == "ENGLISH")
                 {
                     FullPath = GamePath; metroComboBox2.SelectedIndex = metroComboBox2.FindStringExact("English");
@@ -541,6 +759,7 @@ namespace Revamped_BnS_Buddy
                     metroButton1.Enabled = true;
                     PathFound = true;
                     metroToggle1.Enabled = true;
+                    Korean = false;
                 }
                 else if (langpath == "FRENCH")
                 {
@@ -549,6 +768,7 @@ namespace Revamped_BnS_Buddy
                     metroButton1.Enabled = true;
                     PathFound = true;
                     metroToggle1.Enabled = true;
+                    Korean = false;
                 }
                 else if (langpath == "GERMAN")
                 {
@@ -557,6 +777,7 @@ namespace Revamped_BnS_Buddy
                     metroButton1.Enabled = true;
                     PathFound = true;
                     metroToggle1.Enabled = true;
+                    Korean = false;
                 }
                 else if (langpath == "CHINESET")
                 {
@@ -565,17 +786,52 @@ namespace Revamped_BnS_Buddy
                     metroButton1.Enabled = true;
                     PathFound = true;
                     metroToggle1.Enabled = true;
+                    Korean = false;
+                }
+                else if (langpath == "JAPANESE")
+                {
+                    FullPath = GamePath; metroComboBox2.SelectedIndex = metroComboBox2.FindStringExact("Japanese");
+                    AddTextLog("Path Validated!");
+                    metroButton1.Enabled = true;
+                    PathFound = true;
+                    metroToggle1.Enabled = true;
+                    Korean = false;
+                }
+                else if (langpath == "korean" || autocook == "korean")
+                {
+                    FullPath = GamePath; metroComboBox2.SelectedIndex = metroComboBox2.FindStringExact("Korean");
+                    // Fix path aka go back 3 folder
+                    var tmppath = "";
+                    tmppath = Directory.GetParent(FullPath).ToString();
+                    tmppath = Directory.GetParent(tmppath).ToString();
+                    tmppath = Directory.GetParent(tmppath).ToString();
+                    tmppath = Directory.GetParent(tmppath).ToString() + "\\bns\\CookedPC";
+                    FullPath = tmppath.ToString();
+                    AddTextLog("Path Validated!");
+                    metroButton1.Enabled = true;
+                    PathFound = true;
+                    metroToggle1.Enabled = true;
+                    Korean = true;
                 }
                 else
                 {
+                    Korean = false;
                     FullPath = GamePath;
                     AddTextLog("Lang/Path Unknown!");
                     metroButton1.Enabled = true;
                     PathFound = true;
                     metroToggle1.Enabled = true;
                     // Add custom option since we don't know what it is.
-                    metroComboBox2.Items.Add(langpath);
-                    metroComboBox2.SelectedIndex = metroComboBox2.FindStringExact(langpath);
+                    if (langpath.Length > 0)
+                    {
+                        metroComboBox2.Items.Add(langpath);
+                        metroComboBox2.SelectedIndex = metroComboBox2.FindStringExact(langpath);
+                    }
+                    else
+                    {
+                        metroComboBox2.Items.Add(autocook);
+                        metroComboBox2.SelectedIndex = metroComboBox2.FindStringExact(autocook);
+                    }
                     // End adding
                 }
                 if (PathFound == true)
@@ -624,7 +880,10 @@ namespace Revamped_BnS_Buddy
             // Step 3
             if (autocook != "")
             {
-                DataPath = FullPath.Replace("\\" + autocook + "\\CookedPC", "\\data");
+                if (!autocook.Contains("korean"))
+                {
+                    DataPath = FullPath.Replace("\\" + autocook + "\\CookedPC", "\\data");
+                } else { DataPath = FullPath.Replace("\\bns\\CookedPC", "\\local\\NCSoft\\data"); }
                 if (!Directory.Exists(DataPath)) { Prompt.Popup("Error: Invalid Data Path!" + Environment.NewLine + "Path: " + DataPath); }
             }
             else
@@ -641,16 +900,122 @@ namespace Revamped_BnS_Buddy
             bw3.Dispose();
             bw3.CancelAsync();
             Show();
-            AppStarted = true;
             // Check for updates
             UpdateCheck();
             // Make sure app shows after load
             TopMost = true;
             TopMost = false;
+            // Fix tab order
+            //default tab bools
+            bool i0 = false;
+            bool i1 = false;
+            bool i2 = false;
+            bool i3 = false;
+            bool i4 = false;
+            bool i5 = false;
+            bool i6 = false;
+            bool i7 = false;
+
+            foreach (TabPage tmp in metroTabControl1.TabPages)
+            {
+                    if (tmp.Text == "Launcher" && i0 == false)
+                    {
+                    metroTabControl1.TabPages.Remove(tmp);
+                    metroTabControl1.TabPages.Insert(0, tmp);
+                        i0 = true;
+                    }
+                    else
+                    if (tmp.Text == "Dat Editor" && i1 == false)
+                    {
+                    metroTabControl1.TabPages.Remove(tmp);
+                    metroTabControl1.TabPages.Insert(1, tmp);
+                        i1 = true;
+                    }
+                    else
+                    if (tmp.Text == "Mod Manager" && i2 == false)
+                    {
+                    metroTabControl1.TabPages.Remove(tmp);
+                    metroTabControl1.TabPages.Insert(2, tmp);
+                        i2 = true;
+                    }
+                    else
+                    if (tmp.Text == "Splash Changer" && i4 == false)
+                    {
+                    metroTabControl1.TabPages.Remove(tmp);
+                    metroTabControl1.TabPages.Insert(4, tmp);
+                        i4 = true;
+                    }
+                    else
+                    if (tmp.Text == "Addons" && i3 == false)
+                    {
+                    metroTabControl1.TabPages.Remove(tmp);
+                    metroTabControl1.TabPages.Insert(3, tmp);
+                        i3 = true;
+                    }
+                    else
+                    if (tmp.Text == "Settings" && i5 == false)
+                    {
+                    metroTabControl1.TabPages.Remove(tmp);
+                    metroTabControl1.TabPages.Insert(5, tmp);
+                        i5 = true;
+                    }
+                    else
+                    if (tmp.Text == "About" && i7 == false)
+                    {
+                    metroTabControl1.TabPages.Remove(tmp);
+                    metroTabControl1.TabPages.Insert(7, tmp);
+                        i7 = true;
+                    }
+                    else
+                    if (tmp.Text == "Donators" && i6 == false)
+                    {
+                    metroTabControl1.TabPages.Remove(tmp);
+                    metroTabControl1.TabPages.Insert(6, tmp);
+                        i6 = true;
+                    }
+            }
+
+            bool o0 = false;
+            bool o1 = false;
+            bool o2 = false;
+
+            foreach (TabPage tmp in metroTabControl2.TabPages)
+            {
+                if (tmp.Text == "Page 1" && o0 == false)
+                {
+                    metroTabControl2.TabPages.Remove(tmp);
+                    metroTabControl2.TabPages.Insert(0, tmp);
+                    o0 = true;
+                } else
+                if (tmp.Text == "Page 2" && o1 == false)
+                {
+                    metroTabControl2.TabPages.Remove(tmp);
+                    metroTabControl2.TabPages.Insert(1, tmp);
+                    o1 = true;
+                } else
+                if (tmp.Text == "Page 3" && o2 == false)
+                {
+                    metroTabControl2.TabPages.Remove(tmp);
+                    metroTabControl2.TabPages.Insert(2, tmp);
+                    o2 = true;
+                }
+            }
+            
             // Switch tab to Launcher
             metroTabControl1.SelectTab(0);
             // Switch Settings tab to Page 1
             metroTabControl2.SelectTab(0);
+            // Set Ping to Server
+            SetPing();
+            // Activate form
+            AppStarted = true;
+            // Read default Client
+            if (readyclient == true)
+            {
+                string line = File.ReadLines(@AppPath + "\\Settings.ini").Skip(26).Take(1).First().Replace("defaultclient = ", "");
+                metroComboBox4.SelectedIndex = metroComboBox4.FindStringExact(line);
+                defaultclient = line;
+            }
         }
 
         public void SplashScreen()
@@ -664,11 +1029,13 @@ namespace Revamped_BnS_Buddy
             bw3.Disposed += new EventHandler(bw3_Dispoed);
             bw3.RunWorkerAsync();
         }
-
         public void bw3_Dispoed(object Sender, EventArgs e)
         {
             CheckForIllegalCrossThreadCalls = false;
-            s2.Close();
+            if (s2 != null)
+            {
+                s2.Close();
+            }
         }
         public void bw3_DoWork(object Sender, DoWorkEventArgs e)
         {
@@ -681,6 +1048,7 @@ namespace Revamped_BnS_Buddy
         {
             // Global Form
             this.Size = new Size(697, 422);
+            metroTextBox1.Size = new Size(229, 267);
             // Dat editor
             metroPanel2.Size = new Size(450, 318);
             fastColoredTextBox1.Location = new Point(0, 24);
@@ -712,25 +1080,49 @@ namespace Revamped_BnS_Buddy
             //MessageBox.Show(metroTabControl1.SelectedTab.ToString());
             //MessageBox.Show(metroTabControl1.TabIndex.ToString());
             // results ex: {Splash Changer} & index ex: 0
-            if (metroTabControl1.SelectedTab.ToString().Contains("Dat Editor"))
+            if (AppStarted)
             {
-                Resizable = true;
-                metroButton22.Enabled = true;
-                metroButton22.Visible = true;
+                if (metroTabControl1.SelectedTab.ToString().Contains("Dat Editor"))
+                {
+                    Resizable = true;
+                    FixSizes();
+                    metroButton22.Enabled = true;
+                    metroButton22.Visible = true;
+                }
+                else
+                {
+                    // Restore windows state
+                    this.WindowState = FormWindowState.Normal;
+                    // Fix size of global form
+                    Size = new Size(697, 422);
+                    // Disable resize buttons
+                    metroButton22.Enabled = false;
+                    metroButton22.Visible = false;
+                    // Fix sizes
+                    FixSizes();
+                    // Fix size of global form x2
+                    Size = new Size(697, 422);
+                    // Make it unresizable
+                    Resizable = false;
+                }
+                metroTabControl1.Refresh();
+                foreach (TabPage page in metroTabControl1.TabPages)
+                {
+                    page.Refresh();
+                    if (Debugging)
+                        MessageBox.Show("Refreshed: " + page.Text);
+                }
             }
-            else
+        }
+
+        private void metroTabControl2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            metroTabControl2.Refresh();
+            foreach (TabPage page in metroTabControl2.TabPages)
             {
-                // Restore windows state
-                this.WindowState = FormWindowState.Normal;
-                // Make it unresizable
-                Resizable = false;
-                // Fix size of global form
-                Size = new Size(697, 422);
-                // Disable resize buttons
-                metroButton22.Enabled = false;
-                metroButton22.Visible = false;
-                // Fix sizes
-                FixSizes();
+                page.Refresh();
+                if (Debugging)
+                    MessageBox.Show("Refreshed: " + page.Text);
             }
         }
 
@@ -742,7 +1134,7 @@ namespace Revamped_BnS_Buddy
                 // Create if missing
                 if (!File.Exists(AppPath + "\\Settings.ini")) { File.WriteAllText(AppPath + "\\Settings.ini", DefaultValues); }
                 // Check if updated.
-                if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("defaultclient"))
+                if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("rememberme"))
                 {
                     // Save current settigns
                     string[] currentsettings = File.ReadAllLines(AppPath + "\\Settings.ini");
@@ -789,13 +1181,10 @@ namespace Revamped_BnS_Buddy
                     metroToggle8.Checked = false;
                     AdminCheck = false;
                 }
-                if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("ncsoftlogin = true"))
-                {
-                    metroToggle9.Checked = true;
-                    Hide();
-                    Splash1 s1 = new Splash1();
-                    s1.ShowDialog();
-                }
+                //if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("ncsoftlogin = true"))
+                //{
+                //    metroToggle9.Checked = true;
+                //}
                 if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("showdonate = false"))
                 {
                     metroToggle10.Checked = false;
@@ -878,20 +1267,60 @@ namespace Revamped_BnS_Buddy
                     GetRegDir();
                     BnSFolder();
                 }
-                if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("defaultclient = "))
+                if ((File.ReadAllText(AppPath + "\\Settings.ini").Contains("defaultclient = 64bit")) || (File.ReadAllText(AppPath + "\\Settings.ini").Contains("defaultclient = 32bit")))
                 {
-                    string line = File.ReadLines(@AppPath + "\\Settings.ini").Skip(26).Take(1).First().Replace("defaultclient = ", "");
-                    metroComboBox4.SelectedIndex = metroComboBox4.FindStringExact(line);
-                    defaultclient = line;
+                    readyclient = true;
                 }
                 if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("autoupdate = false"))
                 {
                     AutoUpdate = false;
                     metroToggle17.Checked = false;
                 }
+                if (File.ReadAllText(AppPath + "\\Settings.ini").Contains(@"priority = "))
+                {
+                    string line = File.ReadLines(@AppPath + "\\Settings.ini").Skip(27).Take(1).First().Replace("priority = ", "");
+                    if (line == "RealTime")
+                    {
+                        metroComboBox6.SelectedIndex = 0;
+                    }
+                    if (line == "High")
+                    {
+                        metroComboBox6.SelectedIndex = 1;
+                    }
+                    if (line == "AboveNormal")
+                    {
+                        metroComboBox6.SelectedIndex = 2;
+                    }
+                    if (line == "Normal")
+                    {
+                        metroComboBox6.SelectedIndex = 3;
+                    }
+                    if (line == "BelowNormal")
+                    {
+                        metroComboBox6.SelectedIndex = 4;
+                    }
+                    if (line == "Idle")
+                    {
+                        metroComboBox6.SelectedIndex = 5;
+                    }
+                }
                 if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("firsttime = false"))
                 {
                     FirstTime = false;
+                }
+                if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("modfolderset = true"))
+                {
+                    // set custom as true to not overwrite custom values
+                    CustomModSet = true;
+                    // Grab value
+                    string line = File.ReadLines(@AppPath + "\\Settings.ini").Skip(28).Take(1).First().Replace("modfolder = ", "");
+                    metroTextBox7.Text = line;
+                    metroToggle19.Checked = true;
+                    // set custom values
+                    FullBackupPath = metroTextBox7.Text + "\\CookedPC_Backup";
+                    FullModPathMan = metroTextBox7.Text + "\\CookedPC_Mod";
+                    // configure paths
+                    GetPath();
                 }
             }
             catch
@@ -900,6 +1329,58 @@ namespace Revamped_BnS_Buddy
             }
 
         }
+
+        ProcessPriorityClass Priority = ProcessPriorityClass.Normal;
+        private void metroComboBox6_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if(metroComboBox6.SelectedItem.ToString() == "Realtime")
+            {
+                Priority = ProcessPriorityClass.RealTime;
+            }
+            else if (metroComboBox6.SelectedItem.ToString() == "High")
+            {
+                Priority = ProcessPriorityClass.High;
+            }
+            else if (metroComboBox6.SelectedItem.ToString() == "Above normal")
+            {
+                Priority = ProcessPriorityClass.AboveNormal;
+            }
+            else if (metroComboBox6.SelectedItem.ToString() == "Normal")
+            {
+                Priority = ProcessPriorityClass.Normal;
+            }
+            else if (metroComboBox6.SelectedItem.ToString() == "Below normal")
+            {
+                Priority = ProcessPriorityClass.BelowNormal;
+            }
+            else if (metroComboBox6.SelectedItem.ToString() == "Low")
+            {
+                Priority = ProcessPriorityClass.Idle;
+            }
+            else
+            {
+                Priority = ProcessPriorityClass.Normal;
+            }
+            if (GameStarted)
+            {
+                foreach (var process in Process.GetProcessesByName("Client"))
+                {
+                    process.PriorityClass = Priority;
+                    AddTextLog("Changed Priority.");
+                }
+            }
+            if (AppStarted)
+            {
+                // Get
+                string tracker = File.ReadLines(@AppPath + "\\Settings.ini").Skip(27).Take(1).First().Replace("priority = ", "");
+                // Set, replace , write
+                var fileContents2 = File.ReadAllText(@AppPath + "\\Settings.ini");
+                var newfileContents2 = fileContents2.Replace(tracker, Priority.ToString());
+                File.WriteAllText(@AppPath + "\\Settings.ini", newfileContents2);
+            }
+            
+        }
+
 
         public void Details()
         {
@@ -947,11 +1428,12 @@ namespace Revamped_BnS_Buddy
             // Check Server & IP
             if (metroComboBox1.SelectedItem.ToString() == "Europe")
             {
-                IP = "206.127.148.171";
+                IP = "icmp.eu.ncwest.com";
                 regionID = "1";
                 metroLabel11.Text = ping + ms;
                 AddTextLog("Changed RegionID to EU!");
                 regionID = "1";
+                metroButton1.Text = "Play!";
             }
             else if (metroComboBox1.SelectedItem.ToString() == "North America")
             {
@@ -960,6 +1442,7 @@ namespace Revamped_BnS_Buddy
                 metroLabel11.Text = ping + ms;
                 AddTextLog("Changed RegionID to NA!");
                 regionID = "0";
+                metroButton1.Text = "Play!";
             }
             else if (metroComboBox1.SelectedItem.ToString() == "Taiwan")
             {
@@ -968,6 +1451,27 @@ namespace Revamped_BnS_Buddy
                 metroLabel11.Text = ping + ms;
                 AddTextLog("Changed RegionID to Taiwan!");
                 regionID = "15";
+
+                metroButton1.Text = "Patch!";
+            }
+            else if (metroComboBox1.SelectedItem.ToString() == "Japanese")
+            {
+                IP = "111.87.18.30";
+                regionID = "0";
+                metroLabel11.Text = ping + ms;
+                AddTextLog("Changed RegionID to Japanese!");
+                regionID = "0";
+
+                metroButton1.Text = "Patch!";
+            }
+            else if (metroComboBox1.SelectedItem.ToString() == "Korean")
+            {
+                IP = "112.175.209.114";
+                regionID = "0";
+                metroLabel11.Text = ping + ms;
+                AddTextLog("Changed RegionID to Korean!");
+                regionID = "0";
+                metroButton1.Text = "Patch!";
             }
             Details();
         }
@@ -979,13 +1483,13 @@ namespace Revamped_BnS_Buddy
             // NA/EU
             if (workedREG == true)
             {
+                AddTextLog("Reading Registry...");
                 if (Installs.ContainsKey("NA/EU"))
                 {
                     if (Installs["NA/EU"].ToString() == RegPath && Reg64 == true)
                     {
                         if (workedSRV == false)
                         {
-                            AddTextLog("Reading Registry...");
                             try
                             {
                                 RegistryKey regKeylol = Registry.LocalMachine;
@@ -1062,8 +1566,90 @@ namespace Revamped_BnS_Buddy
                         }
                     }
                 }
+                if (Installs.ContainsKey("Japanese"))
+                {
+                    if (Installs["Japanese"].ToString() == RegPath && Reg64 == true)
+                    {
+                        if (workedSRV == false)
+                        {
+                            try
+                            {
+                                RegistryKey regKeylol = Registry.LocalMachine;
+                                regKeylol = regKeylol.OpenSubKey(@"SOFTWARE\Wow6432Node\NCJapan\NCLauncher\");
+                                if (regKeylol != null)
+                                {
+                                    RegPathlol = regKeylol.GetValue("BaseDir").ToString();
+                                    AddTextLog(RegPathlol);
+                                    AddTextLog("Reg Key Valid!");
+                                    workedSRV = true;
+                                }
+                            }
+                            catch { AddTextLog("Null Value of RegKey"); }
+                        }
+                    }
+                    else if (Installs["Japanese"].ToString() == RegPath && Reg64 == false)
+                    {
+                        if (workedSRV == false)
+                        {
+                            try
+                            {
+                                RegistryKey regKeylol = Registry.LocalMachine;
+                                regKeylol = regKeylol.OpenSubKey(@"SOFTWARE\NCJapan\NCLauncher\");
+                                if (regKeylol != null)
+                                {
+                                    RegPathlol = regKeylol.GetValue("BaseDir").ToString();
+                                    AddTextLog(RegPathlol);
+                                    AddTextLog("Reg Key Valid!");
+                                    workedSRV = true;
+                                }
+                            }
+                            catch { AddTextLog("Null Value of RegKey"); }
+                        }
+                    }
+                }
+                if (Installs.ContainsKey("Korean"))
+                {
+                    if (Installs["Korean"].ToString() == RegPath && Reg64 == true)
+                    {
+                        if (workedSRV == false)
+                        {
+                            try
+                            {
+                                RegistryKey regKeylol = Registry.LocalMachine;
+                                regKeylol = regKeylol.OpenSubKey(@"SOFTWARE\WOW6432Node\plaync\NCLauncherS\");
+                                if (regKeylol != null)
+                                {
+                                    RegPathlol = regKeylol.GetValue("BaseDir").ToString();
+                                    AddTextLog(RegPathlol);
+                                    AddTextLog("Reg Key Valid!");
+                                    workedSRV = true;
+                                }
+                            }
+                            catch { AddTextLog("Null Value of RegKey"); }
+                        }
+                    }
+                    else if (Installs["Korean"].ToString() == RegPath && Reg64 == false)
+                    {
+                        if (workedSRV == false)
+                        {
+                            try
+                            {
+                                RegistryKey regKeylol = Registry.LocalMachine;
+                                regKeylol = regKeylol.OpenSubKey(@"SOFTWARE\plaync\NCLauncherS\");
+                                if (regKeylol != null)
+                                {
+                                    RegPathlol = regKeylol.GetValue("BaseDir").ToString();
+                                    AddTextLog(RegPathlol);
+                                    AddTextLog("Reg Key Valid!");
+                                    workedSRV = true;
+                                }
+                            }
+                            catch { AddTextLog("Null Value of RegKey"); }
+                        }
+                    }
+                }
             }
-            
+
             if (workedSRV == false)
             {
                 RegPathlol = null;
@@ -1074,22 +1660,33 @@ namespace Revamped_BnS_Buddy
             {
                 try
                 {
-                    if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("Game_Region=North America"))
+                    if (File.Exists(RegPathlol + "\\NCLauncher.ini"))
                     {
-                        metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("North America");
-                    }
-                    else if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("Game_Region=Europe"))
-                    {
-                        metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Europe");
-                    }
-                    else
-                    {
-                        metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Taiwan");
+                        if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("Game_Region=North America"))
+                        {
+                            metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("North America");
+                        }
+                        else if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("Game_Region=Europe"))
+                        {
+                            metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Europe");
+                        }
+                        else if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("Game_Locale=ja"))
+                        {
+                            metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Japanese");
+                        }
+                        else if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("up4svr.plaync.com.tw"))
+                        {
+                            metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Taiwan");
+                        }
+                        else if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("up4web.plaync.co.kr"))
+                        {
+                            metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Korean");
+                        }
                     }
                 }
-                catch
+                catch (Exception a)
                 {
-                    AddTextLog("Error: Could Not Find NCLauncher.ini");
+                    AddTextLog("Error: Could Not Find NCLauncher.ini" + Environment.NewLine + a.ToString());
                 }
             }
             else
@@ -1116,21 +1713,36 @@ namespace Revamped_BnS_Buddy
             {
                 languageID = "English";
                 AddTextLog("languageID = English");
-            } else
+            }
+            else
             if (metroComboBox2.SelectedItem.ToString() == "French")
             {
                 languageID = "French";
                 AddTextLog("languageID = French");
-            } else
+            }
+            else
             if (metroComboBox2.SelectedItem.ToString() == "German")
             {
                 languageID = "German";
                 AddTextLog("languageID = German");
-            } else
+            }
+            else
             if (metroComboBox2.SelectedItem.ToString() == "Taiwan")
             {
                 languageID = "CHINESET";
                 AddTextLog("languageID = Chineset");
+            }
+            else
+            if (metroComboBox2.SelectedItem.ToString() == "Japanese")
+            {
+                languageID = "JAPANESE";
+                AddTextLog("languageID = Japanese");
+            }
+            else
+            if (metroComboBox2.SelectedItem.ToString() == "Korean")
+            {
+                languageID = "korean";
+                AddTextLog("languageID = Korean");
             }
             else
             {
@@ -1167,9 +1779,9 @@ namespace Revamped_BnS_Buddy
                     AddTextLog("Error: No Files Found!");
                 }
             }
-            
+
             CheckConfigBackup();
-            CleanOtherMess();
+            /* CleanOtherMess(); */ // Skip cleaning
 
         }
 
@@ -1242,7 +1854,8 @@ namespace Revamped_BnS_Buddy
                     {
                         Extractor(usedfile);
                         DoBackupCheck();
-                    } catch(Exception e) { Prompt.Popup(e.ToString()); }
+                    }
+                    catch (Exception e) { Prompt.Popup(e.ToString()); }
                 }
             }
         }
@@ -1277,20 +1890,24 @@ namespace Revamped_BnS_Buddy
 
         public void Extractor(string qwerty)
         {
-            // Check if 64bit or 32bit
-            if (qwerty.Contains("64"))
+            if (qwerty != null)
             {
-                BNSis64 = true;
-            } else { BNSis64 = false; }
-            // Go to task
-            bnsdat = new BackgroundWorker();
-            bnsdat.WorkerSupportsCancellation = true;
-            bnsdat.WorkerReportsProgress = true;
-            bnsdat.DoWork += new DoWorkEventHandler(bnsdat_DoWork);
-            bnsdat.RunWorkerAsync();
-            // Wait until task is complete
-            waitbw.WaitOne();
-            waitbw.Reset();
+                // Check if 64bit or 32bit
+                if (qwerty.Contains("64"))
+                {
+                    BNSis64 = true;
+                }
+                else { BNSis64 = false; }
+                // Go to task
+                bnsdat = new BackgroundWorker();
+                bnsdat.WorkerSupportsCancellation = true;
+                bnsdat.WorkerReportsProgress = true;
+                bnsdat.DoWork += new DoWorkEventHandler(bnsdat_DoWork);
+                bnsdat.RunWorkerAsync();
+                // Wait until task is complete
+                waitbw.WaitOne();
+                waitbw.Reset();
+            }
         }
 
         private void bnsdat_DoWork(object sender, DoWorkEventArgs e)
@@ -1316,7 +1933,8 @@ namespace Revamped_BnS_Buddy
             {
                 AutoDirFinder();
                 SetBnSFolder();
-            } catch(Exception e) { Prompt.Popup("Error: " + e.ToString()); }
+            }
+            catch (Exception e) { Prompt.Popup("Error: " + e.ToString()); }
         }
 
         public void UpdateCheck()
@@ -1366,7 +1984,7 @@ namespace Revamped_BnS_Buddy
                                 metroButton3.Visible = true;
                             }
                         }
-                        else if(online == "Error")
+                        else if (online == "Error")
                         {
                             // If update check is off
                             AddTextLog("Error checking update.");
@@ -1376,7 +1994,8 @@ namespace Revamped_BnS_Buddy
                     {
                         AddTextLog("Up to date.");
                     }
-                } else { AddTextLog("Error checking update."); }
+                }
+                else { AddTextLog("Error checking update."); }
             }
             else
             {
@@ -1434,9 +2053,35 @@ namespace Revamped_BnS_Buddy
             }
             // End Checker
         }
-        
+
         public void bw1_DoWork(object Sender, DoWorkEventArgs e)
         {
+                // Set ping
+                AddTextLog("Getting Ping From Server...");
+                try
+                {
+                    ping = new Ping().Send(IP).RoundtripTime.ToString();
+                }
+                catch { ping = "0"; }
+                if (Regex.IsMatch(ping, @"^\d+$") == true)
+                {
+                    if (ping != "0")
+                    {
+                        metroLabel11.Text = ping + ms;
+                        AddTextLog("Got Ping.");
+                    }
+                    else
+                    {
+                        metroLabel11.Text = "Offline";
+                        AddTextLog("No Ping.");
+                    }
+                }
+                else
+                {
+                    metroLabel11.Text = "Offline";
+                    AddTextLog("No Ping.");
+                }
+
             BackgroundWorker worker = (BackgroundWorker)Sender;
             while (!worker.CancellationPending)
             {
@@ -1473,38 +2118,12 @@ namespace Revamped_BnS_Buddy
 
         public void SetPing()
         {
-            // Set ping
-            AddTextLog("Getting Ping From Server...");
-            try
-            {
-                ping = new Ping().Send(IP).RoundtripTime.ToString();
-            }
-            catch { ping = "0"; }
-            if (Regex.IsMatch(ping, @"^\d+$") == true)
-            {
-                if (ping != "0")
-                {
-                    metroLabel11.Text = ping + ms;
-                    AddTextLog("Got Ping.");
-                }
-                else
-                {
-                    metroLabel11.Text = "Offline";
-                    AddTextLog("No Ping.");
-                }
-            }
-            else
-            {
-                metroLabel11.Text = "Offline";
-                AddTextLog("No Ping.");
-            }
-
             bw1 = new BackgroundWorker();
             bw1.WorkerSupportsCancellation = true;
             bw1.WorkerReportsProgress = true;
             bw1.DoWork += new DoWorkEventHandler(bw1_DoWork);
             bw1.ProgressChanged += new ProgressChangedEventHandler(bw1_ProgressChanged);
-            
+
             if (PingChecker == true)
             {
                 bw1.RunWorkerAsync();
@@ -1524,25 +2143,48 @@ namespace Revamped_BnS_Buddy
             }
             // End Import
             // Check Client.exe in background
-            if (GameStarted == true) {
+            if (GameStarted == true)
+            {
                 GameStarted = false;
                 foreach (var process in Process.GetProcessesByName("Client"))
                 {
+                    metroLabel57.Text = "Running";
+                    // fix priority based on settings live edit
+                    try
+                    {
+                        if (metroComboBox6.SelectedItem != null)
+                        {
+                            if (process.PriorityClass != Priority)
+                            {
+                                process.PriorityClass = Priority;
+                                AddTextLog("Changed Priority.");
+                            }
+                        }
+                        metroLabel60.Text = process.PriorityClass.ToString();
+                    }
+                    catch {/* ignore */}
                     GameStarted = true;
+                    metroButton1.Enabled = true;
+                    metroButton1.Text = "Kill Game";
                 }
                 if (GameStarted == false)
                 {
+                    metroLabel57.Text = "Closed";
+                    metroLabel60.Text = "-";
                     // Verify mod manager
                     foreach (TreeNode nodes in treeView2.Nodes)
                     {
-                        RealModPath = FullModPathMan + "\\" + nodes.FullPath.ToString();
-                        if (Directory.Exists(RealModPath))
+                        if (nodes != null)
                         {
-                            checkButtons(true);
-                        }
-                        else
-                        {
-                            nodes.Remove();
+                            RealModPath = FullModPathMan + "\\" + nodes.FullPath.ToString();
+                            if (Directory.Exists(RealModPath))
+                            {
+                                checkButtons(true);
+                            }
+                            else
+                            {
+                                nodes.Remove();
+                            }
                         }
                     }
                     //
@@ -1553,7 +2195,12 @@ namespace Revamped_BnS_Buddy
                     notifyIcon1.Visible = false; // Hides tray icon again
                     AddTextLog("Game Closed!");
                     AddTextLog("Restored UI!");
-                    metroButton2.Enabled = true;
+                    if (!metroLabel14.Text.Contains("Clean"))
+                    {
+                        metroButton2.Enabled = true;
+                    }
+                    AddTextLog("Restored Addons");
+                    RestoreAddons();
                 }
             }
             //End Check
@@ -1562,7 +2209,12 @@ namespace Revamped_BnS_Buddy
         private void metroLabel11_TextChanged(object sender, EventArgs e)
         {
             // Ping Status
-            int pinger = Convert.ToInt32(ping);
+            int pinger = 0;
+            try
+            {
+                pinger = Convert.ToInt32(ping);
+            }
+            catch { }
             if (pinger >= bad)
             {
                 metroLabel12.Text = "Bad";
@@ -1813,6 +2465,11 @@ namespace Revamped_BnS_Buddy
 
         private void metroButton2_Click(object sender, EventArgs e)
         {
+            RestoreConfigFiles();
+        }
+
+        public void RestoreConfigFiles()
+        {
             // Restore!
             metroButton2.Enabled = false;
             DirectoryInfo configfolder = new DirectoryInfo(DataPath + "\\backup\\");
@@ -1843,19 +2500,30 @@ namespace Revamped_BnS_Buddy
 
         private void metroButton1_Click(object sender, EventArgs e)
         {
-            // Patch & Play!
-            AddTextLog("Using vars...");
-            metroButton1.Enabled = false;
-            // Patch client launcher!
-            if (metroLabel14.Text == "Clean")
+            if (GameStarted)
             {
-                AddTextLog("Patching...");
-                patchConfigDat(e);
+                foreach(var process in Process.GetProcessesByName("Client"))
+                {
+                    process.Kill();
+                    AddTextLog("Killed Game Process");
+                }
             }
             else
             {
-                AddTextLog("Skipped Patching!");
-                LaunchGame(e);
+                // Patch & Play!
+                AddTextLog("Using vars...");
+                metroButton1.Enabled = false;
+                // Patch client launcher!
+                if (metroLabel14.Text == "Clean" && metroComboBox1.SelectedIndex != metroComboBox1.FindStringExact("North America") && metroComboBox1.SelectedIndex != metroComboBox1.FindStringExact("Europe"))
+                {
+                    AddTextLog("Patching...");
+                    patchConfigDat(e);
+                }
+                else
+                {
+                    AddTextLog("Skipped Patching!");
+                    LaunchGame(e);
+                }
             }
         }
 
@@ -1897,8 +2565,10 @@ namespace Revamped_BnS_Buddy
                     File.WriteAllText(DataPath + "\\" + datverifier + ".files\\system.config2.xml", filecontent);
                     AddTextLog("Replaced");
                     RepackPatchedConfig();
-                } catch { AddTextLog("Could not modify & save system.config2.xml"); }
-            } catch { AddTextLog("Could not open system.config2.xml"); }
+                }
+                catch { AddTextLog("Could not modify & save system.config2.xml"); }
+            }
+            catch { AddTextLog("Could not open system.config2.xml"); }
         }
 
         string datverifier = "";
@@ -1920,7 +2590,8 @@ namespace Revamped_BnS_Buddy
                         Extractor(usedfile);
                         DoPatchingProcess();
                     }
-                } catch(Exception e) { Prompt.Popup(e.ToString()); }
+                }
+                catch (Exception e) { Prompt.Popup(e.ToString()); }
             }
         }
 
@@ -1945,7 +2616,8 @@ namespace Revamped_BnS_Buddy
                 usedfilepathonly = PathtoDat + "\\" + datverifier + ".files";
                 Compiler(usedfile);
                 DoRepackProcess();
-            } catch(Exception e) { Prompt.Popup(e.ToString()); }
+            }
+            catch (Exception e) { Prompt.Popup(e.ToString()); }
         }
 
         private void patchDownloaded(EventArgs e)
@@ -1957,8 +2629,11 @@ namespace Revamped_BnS_Buddy
             metroProgressSpinner1.Refresh();
             try
             {
-                InternalPatcherAndVerifier();
-                CleanOtherMess();
+                if (UseToken == false)
+                {
+                    InternalPatcherAndVerifier();
+                }
+                /* CleanOtherMess(); */ // Skip Cleaning
                 LaunchGame(e);
             }
             catch
@@ -1969,7 +2644,7 @@ namespace Revamped_BnS_Buddy
             metroProgressSpinner1.Visible = false;
             metroProgressSpinner1.Refresh();
         }
-
+        
         private void LaunchGame(EventArgs e)
         {
             // Disable mod window
@@ -2010,15 +2685,15 @@ namespace Revamped_BnS_Buddy
             }
             else if (i > 1)
             {
-                DialogResult dialogResult = Prompt.MultipleClient(); 
+                DialogResult dialogResult = Prompt.MultipleClient();
                 if (dialogResult == DialogResult.Yes)
                 {
                     LaunchPath = RegPath + LauncherPath + ".\\Client.exe";
                     AddTextLog("Using 32bit Client.exe");
                     SaveDefaultClient("32bit");
                 }
-                else 
-                if (dialogResult == DialogResult.No )
+                else
+                if (dialogResult == DialogResult.No)
                 {
                     LaunchPath = RegPath + LauncherPath64 + ".\\Client.exe";
                     AddTextLog("Using 64bit Client.exe");
@@ -2029,43 +2704,81 @@ namespace Revamped_BnS_Buddy
                     AddTextLog("Skipping default launcher!");
                 }
             }
+            AddTextLog("Applying Addons...");
+            StartGameAddons();
             AddTextLog("Starting Client...");
-            Process proc = new Process();
-            proc.StartInfo.FileName = LaunchPath;
             // Default values
+            // /GarenaToken:token --publisher:garena /GameRegion:thailand /TextLang:th // Thailand
+            // /LaunchByLauncher /Sesskey /SessKey:"" /CompanyID:"14" /ChannelGroupIndex:"-1" // Japanese
             // /launchbylauncher -lang:english /CompanyID:"12" /ChannelGroupIndex:"-1" -lang:English -lite:2 -region:0 /* NA VARS */
             // -lite:2 /sesskey /LaunchByLauncher /ServiceRegion:"15" /AuthProviderCode:"np" /ServiceNetwork:"live" /NPServerAddr:"210.64.136.126:6600" /PresenceId:"TWBNS22" /* TAIWAN VARS */
-            proc.StartInfo.Arguments = "-lang:" + languageID + " -lite:2 -region:" + regionID + " /sesskey /launchbylauncher  /CompanyID:12 /ChannelGroupIndex:-1 " + UseAllCores + " " + Unattended + " " + NoTextureStreaming + " " + metroTextBox5.Text;
-            proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.RedirectStandardError = true;
-            try
+            // AuthnToken:"mytoken" 
+
+            if (metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("North America") || metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("Europe"))
             {
-                proc.Start();
-                AddTextLog("Started Client.exe!");
-                GameStarted = true;
-                this.WindowState = FormWindowState.Minimized;
-            }
-            catch
-            {
-                Show();
-                notifyIcon1.Visible = false;
-                metroButton1.Enabled = true;
-                // Verify mod manager
-                foreach (TreeNode nodes in treeView2.Nodes)
+                if (metroLabel14.Text != "Clean")
                 {
-                    RealModPath = FullModPathMan + "\\" + nodes.FullPath.ToString();
-                    if (Directory.Exists(RealModPath))
-                    {
-                        checkButtons(true);
-                    }
-                    else
-                    {
-                        nodes.Remove();
-                    }
+                    RestoreConfigFiles();
                 }
-                //
-                AddTextLog("Error: Could Not Start Client.exe!");
+                GetLogin();
+                GrabToken();
             }
+            else
+            {
+                Process proc = new Process();
+                proc.StartInfo.FileName = LaunchPath;
+                proc.StartInfo.Arguments = "-lang:" + languageID + " -lite:2 -region:" + regionID + " /sesskey /launchbylauncher  /CompanyID:12 /ChannelGroupIndex:-1 " + UseAllCores + " " + Unattended + " " + NoTextureStreaming + " " + metroTextBox5.Text;
+                proc.StartInfo.UseShellExecute = false;
+                proc.StartInfo.RedirectStandardError = true;
+                try
+                {
+                    proc.Start();
+                    AddTextLog("Started Client.exe!");
+                    GameStarted = true;
+                    this.WindowState = FormWindowState.Minimized;
+                }
+                catch
+                {
+                    Show();
+                    notifyIcon1.Visible = false;
+                    metroButton1.Enabled = true;
+                    // Verify mod manager
+                    foreach (TreeNode nodes in treeView2.Nodes)
+                    {
+                        if (nodes != null)
+                        {
+                            RealModPath = FullModPathMan + "\\" + nodes.FullPath.ToString();
+                            if (Directory.Exists(RealModPath))
+                            {
+                                checkButtons(true);
+                            }
+                            else
+                            {
+                                nodes.Remove();
+                            }
+                        }
+                    }
+                    //
+                    AddTextLog("Error: Could Not Start Client.exe!");
+                }
+            }
+        }
+
+        private void GetLogin()
+        {
+            Hide();
+            Splash1 s1 = new Splash1();
+            s1.Visible = false;
+            s1.ShowDialog();
+            username = @s1.username.ToString().ToLower();
+            password = @s1.password.ToString();
+            //
+            if (Debugging)
+                Prompt.Popup("Username used: " + username + Environment.NewLine + "Password used: " + password);
+            //
+            UseToken = true;
+            Show();
+            this.WindowState = FormWindowState.Normal; // Undoes the minimized state of the form
         }
 
         private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -2085,11 +2798,11 @@ namespace Revamped_BnS_Buddy
                     //this.Visible = false;//
                     this.Hide();//hides the program on the taskbar
                     notifyIcon1.Visible = true;
-                    notifyIcon1.ShowBalloonTip(50, "BnS Launcher", "Minimized to tray.", ToolTipIcon.Info);
-                } 
+                    notifyIcon1.ShowBalloonTip(50, "BnS Buddy", "Minimized to tray.", ToolTipIcon.Info);
+                }
             }
         }
-        
+
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // Seperator!
         ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -2194,8 +2907,16 @@ namespace Revamped_BnS_Buddy
             if (PathFound == true)
             {
                 RegPathSplash = RegPath;
-                ExtensionSplash = "\\contents\\Local\\" + autofinder;
-                FullPathSplash = RegPathSplash + ExtensionSplash + "\\" + autocook + "\\Splash";
+                if (Korean == false)
+                {
+                    ExtensionSplash = "\\contents\\Local\\" + autofinder;
+                    FullPathSplash = RegPathSplash + ExtensionSplash + "\\" + autocook + "\\Splash";
+                }
+                else
+                {
+                    ExtensionSplash = "\\contents\\bns";
+                    FullPathSplash = RegPathSplash + ExtensionSplash + "\\Splash";
+                }
                 workingPathSplash = FullPathSplash;
                 // Get Backup Path & Mods Path then create if missing
                 FullBackupPathSplash = FullPathSplash + "\\backup";
@@ -2359,7 +3080,7 @@ namespace Revamped_BnS_Buddy
         string FullSettingsPathMan = "";
         string RealModPath = "";
 
-        
+
 
         public void InitializeManager()
         {
@@ -2373,19 +3094,25 @@ namespace Revamped_BnS_Buddy
 
         private void VerifyUsage()
         {
-            isBnsFolderSet();
+            try
+            {
+                isBnsFolderSet();
+            }
+            catch (Exception ex) { Prompt.Popup("Error: " + ex.ToString()); }
             foreach (TreeNode nodes in treeView2.Nodes)
             {
-                RealModPath = FullModPathMan + "\\" + nodes.FullPath.ToString();
-                if (Directory.Exists(RealModPath))
+                if (nodes != null)
                 {
-                    checkButtons(true);
+                    RealModPath = FullModPathMan + "\\" + nodes.FullPath.ToString();
+                    if (Directory.Exists(RealModPath))
+                    {
+                        checkButtons(true);
+                    }
+                    else
+                    {
+                        nodes.Remove();
+                    }
                 }
-                else
-                {
-                    nodes.Remove();
-                }
-                
             }
         }
 
@@ -2426,9 +3153,12 @@ namespace Revamped_BnS_Buddy
                     {
                         // No .upk files anywhere, start panicking!
                         AddTextBoxLog(Environment.NewLine);
-                        if (!RealModPath.Contains("(Installed)")) { 
+                        if (!RealModPath.Contains("(Installed)"))
+                        {
                             AddTextBoxLog("[Notice] " + "No modded files detected in the \"" + Path.GetFileName(RealModPath) + "\" folder. Press Mod Folder" + "Then drag the upk's in there then press Refresh button.");
-                        } else {
+                        }
+                        else
+                        {
                             AddTextBoxLog("[Notice] " + Path.GetFileName(RealModPath) + " mod is already installed");
                         }
                     }
@@ -2452,10 +3182,10 @@ namespace Revamped_BnS_Buddy
                 }
             }
             // Determine whether the install or deinstall button should be enabled
-                metroButton9.Enabled = true;
-                metroButton11.Enabled = true;
-            
-                // Check if the BnS directory is set
+            metroButton9.Enabled = true;
+            metroButton11.Enabled = true;
+
+            // Check if the BnS directory is set
             if (!bnsFolderIsSet)
             {
                 metroButton11.Enabled = false;
@@ -2467,24 +3197,24 @@ namespace Revamped_BnS_Buddy
         {
             // If we are indeed running it for the first time (firstEverRun was not set
             // to false by the imported JSON, or it didn't exist in the first place)
-            
-                // Check how many upk files there are in the mods folder.
-                int i = 0;
-                int j = 0;
-                DirectoryInfo dirInfo = new DirectoryInfo(RealModPath);
-                foreach (var file in dirInfo.GetFiles("*.upk"))
-                {
-                    i++;
-                }
-                // Check how many upk files there are in the backup folder
-                dirInfo = new DirectoryInfo(backupFolderPath);
-                foreach (var file in dirInfo.GetFiles("*.upk"))
-                {
-                    j++;
-                }
+
+            // Check how many upk files there are in the mods folder.
+            int i = 0;
+            int j = 0;
+            DirectoryInfo dirInfo = new DirectoryInfo(RealModPath);
+            foreach (var file in dirInfo.GetFiles("*.upk"))
+            {
+                i++;
+            }
+            // Check how many upk files there are in the backup folder
+            dirInfo = new DirectoryInfo(backupFolderPath);
+            foreach (var file in dirInfo.GetFiles("*.upk"))
+            {
+                j++;
+            }
         }
 
-       
+
 
         public void JsonManager()
         {
@@ -2493,8 +3223,11 @@ namespace Revamped_BnS_Buddy
 
             foreach (TreeNode nodes in treeView2.Nodes)
             {
-                RealModPath = FullModPathMan + "\\" + nodes.FullPath.ToString();
-                checkLegacy();
+                if (nodes != null)
+                {
+                    RealModPath = FullModPathMan + "\\" + nodes.FullPath.ToString();
+                    checkLegacy();
+                }
             }
             bw = new BackgroundWorker();
             isBnsFolderSet(true);
@@ -2506,10 +3239,18 @@ namespace Revamped_BnS_Buddy
             {
                 FullModsPathMan = FullPath + "\\mod";
                 if (!Directory.Exists(FullModsPathMan)) { CreatePaths(FullModsPathMan); }
-                FullBackupPath = NewPath + "\\CookedPC_Backup";
-                if (!Directory.Exists(FullBackupPath)) { CreatePaths(FullBackupPath); }
-                FullModPathMan = NewPath + "\\CookedPC_Mod";
-                if (!Directory.Exists(FullModPathMan)) { CreatePaths(FullModPathMan); }
+                if (CustomModSet == true)
+                {
+                    if (!Directory.Exists(FullBackupPath)) { CreatePaths(FullBackupPath); }
+                    if (!Directory.Exists(FullModPathMan)) { CreatePaths(FullModPathMan); }
+                }
+                else
+                {
+                    FullBackupPath = NewPath + "\\CookedPC_Backup";
+                    if (!Directory.Exists(FullBackupPath)) { CreatePaths(FullBackupPath); }
+                    FullModPathMan = NewPath + "\\CookedPC_Mod";
+                    if (!Directory.Exists(FullModPathMan)) { CreatePaths(FullModPathMan); }
+                }
                 FullSettingsPathMan = NewPath + "\\CookedPC_Settings";
                 if (Directory.Exists(FullSettingsPathMan)) { if (Directory.GetFiles(FullSettingsPathMan).Length == 0) { Directory.Delete(FullSettingsPathMan); } else { File.Delete(FullSettingsPathMan + "\\database.json"); Directory.Delete(FullSettingsPathMan); ; } }
             }
@@ -2572,159 +3313,162 @@ namespace Revamped_BnS_Buddy
         }
 
         public string newbackuppath = "";
-        public string tmpnode = ""; 
+        public string tmpnode = "";
         private void bw_DoWork(object sender, DoWorkEventArgs e)
         {
             foreach (TreeNode nodes in treeView2.Nodes)
             {
                 if (_workerCompleted.Set() == true)
-                if ((nodes.Checked) && (installFlag == true) && (!nodes.FullPath.ToString().Contains("(Installed)"))) //catcher
-                {
-                    RealModPath = @FullModPathMan + "\\" + nodes.FullPath.ToString();
-                    tmpnode = nodes.FullPath.ToString();
-                    newbackuppath = @backupFolderPath + "\\" + tmpnode;
-                    DirectoryInfo dirInfo = new DirectoryInfo(RealModPath);
-                    BackgroundWorker worker = sender as BackgroundWorker;
-                    dirInfo = new DirectoryInfo(RealModPath);
-                    string message = string.Empty;
-                    int fileCounter = 0;
-                    int i = 0;
-                    int max = dirInfo.GetFiles("*.upk").Count();
-                    int curPercent = 0;
-
-                    if (max != 0)
+                    if ((nodes.Checked) && (installFlag == true) && (!nodes.FullPath.ToString().Contains("(Installed)"))) //catcher
                     {
+                        RealModPath = @FullModPathMan + "\\" + nodes.FullPath.ToString();
+                        tmpnode = nodes.FullPath.ToString();
+                        newbackuppath = @backupFolderPath + "\\" + tmpnode;
+                        DirectoryInfo dirInfo = new DirectoryInfo(RealModPath);
+                        BackgroundWorker worker = sender as BackgroundWorker;
+                        dirInfo = new DirectoryInfo(RealModPath);
+                        string message = string.Empty;
+                        int fileCounter = 0;
+                        int i = 0;
+                        int max = dirInfo.GetFiles("*.upk").Count();
+                        int curPercent = 0;
 
-                        foreach (string fileName in Directory.GetFiles(RealModPath))
+                        if (max != 0)
                         {
-                            string realfileName = fileName.Split(Path.DirectorySeparatorChar).Last();
-                            if (realfileName != "description.txt")
+
+                            foreach (string fileName in Directory.GetFiles(RealModPath))
                             {
-                                CheckForIllegalCrossThreadCalls = false;
-                                AddTextBoxLog(Environment.NewLine);
-
-                                try
+                                string realfileName = fileName.Split(Path.DirectorySeparatorChar).Last();
+                                if (realfileName != "description.txt")
                                 {
-                                    // Create original files backup directory of the mod applied
-                                    if (!Directory.Exists(backupFolderPath + "\\" + tmpnode))
-                                    {
-                                        CreatePaths(backupFolderPath + "\\" + tmpnode);
-                                        newbackuppath = backupFolderPath + "\\" + tmpnode;
-                                    }
-                                    // Set folder path for the original files to go to
+                                    CheckForIllegalCrossThreadCalls = false;
+                                    AddTextBoxLog(Environment.NewLine);
 
-                                    // Check if the file we're about to install, exists in CookedPC or not.
-                                    // If yes, move it away
-                                    if (File.Exists(originalFolderPath + "\\" + realfileName))
+                                    try
                                     {
-                                        AddTextBoxLog(Environment.NewLine + "[Copying] " + realfileName + " [original] to CookedPC_Backup");
-                                        File.Copy(originalFolderPath + "\\" + realfileName, newbackuppath + "\\" + realfileName, true);
-                                        AddTextBoxLog(Environment.NewLine + "[Copied] " + realfileName + " [original] to CookedPC_Backup" + "/" + tmpnode);
-                                        AddTextBoxLog(Environment.NewLine + "[Deleting] " + realfileName + " [original] from CookedPC");
-                                        File.Delete(originalFolderPath + "\\" + realfileName);
-                                        AddTextBoxLog(Environment.NewLine + "[Deleted] " + realfileName + " [original] from CookedPC");
-                                    }
-                                    else
-                                    {
+                                        // Create original files backup directory of the mod applied
+                                        if (!Directory.Exists(backupFolderPath + "\\" + tmpnode))
+                                        {
+                                            CreatePaths(backupFolderPath + "\\" + tmpnode);
+                                            newbackuppath = backupFolderPath + "\\" + tmpnode;
+                                        }
+                                        // Set folder path for the original files to go to
+
+                                        // Check if the file we're about to install, exists in CookedPC or not.
+                                        // If yes, move it away
+                                        if (File.Exists(originalFolderPath + "\\" + realfileName))
+                                        {
+                                            AddTextBoxLog(Environment.NewLine + "[Copying] " + realfileName + " [original] to CookedPC_Backup");
+                                            File.Copy(originalFolderPath + "\\" + realfileName, newbackuppath + "\\" + realfileName, true);
+                                            AddTextBoxLog(Environment.NewLine + "[Copied] " + realfileName + " [original] to CookedPC_Backup" + "/" + tmpnode);
+                                            AddTextBoxLog(Environment.NewLine + "[Deleting] " + realfileName + " [original] from CookedPC");
+                                            File.Delete(originalFolderPath + "\\" + realfileName);
+                                            AddTextBoxLog(Environment.NewLine + "[Deleted] " + realfileName + " [original] from CookedPC");
+                                        }
+                                        else
+                                        {
                                             try
                                             {
                                                 AddTextBoxLog(Environment.NewLine + "[Copying] " + realfileName + " (unique) [modded] to CookedPC_Mod");
-                                                File.Copy(RealModPath + "\\" + realfileName, RealModPath + "\\" + realfileName + " (unique)", true);
+                                                string val = realfileName;
+                                                string tmp = val.Replace(".upk", " (unique).upk");
+                                                File.Copy(RealModPath + "\\" + realfileName, newbackuppath + "\\" + tmp, true);
                                                 AddTextBoxLog(Environment.NewLine + "[Copied] " + realfileName + " (unique) [modded] to CookedPC_Mod");
-                                            } 
+                                            }
                                             catch
                                             {
                                                 AddTextBoxLog(Environment.NewLine + "[Error] " + realfileName + " (unique) couldn't be copied to CookedPC_Mod");
                                             }
+                                        }
                                     }
-                                }
-                                catch
-                                {
-                                    // Message error
-                                    AddTextBoxLog(Environment.NewLine + "[Error] " + realfileName + " could not be touched!");
-                                }
-                                try
-                                {
-                                    // Now move over the mod to the CookedPC folder
-                                    if (File.Exists(RealModPath + "\\" + realfileName))
+                                    catch
                                     {
-                                        AddTextBoxLog(Environment.NewLine + "[Copying] " + realfileName + " [modded] to CookedPC/mod");
-                                        File.Copy(RealModPath + "\\" + realfileName, modsFolderPath + "\\" + realfileName, true);
-                                        AddTextBoxLog(Environment.NewLine + "[Copied] " + realfileName + " [modded] to CookedPC/mod");
-                                        AddTextBoxLog(Environment.NewLine + "[Deleting] " + realfileName + " [modded] from CookedPC_Mod");
-                                        File.Delete(RealModPath + "\\" + realfileName);
-                                        AddTextBoxLog(Environment.NewLine + "[Deleted] " + realfileName + " [modded] from CookedPC_Mod");
+                                        // Message error
+                                        AddTextBoxLog(Environment.NewLine + "[Error] " + realfileName + " could not be touched!");
                                     }
-                                }
-                                catch
-                                {
-                                    // Message error
-                                    AddTextBoxLog(Environment.NewLine + "[Error] " + realfileName + " could not be touched!");
-                                }
-                                fileCounter++;
-                                // Increment & update stats as well as progress bar
-                                i++;
-                                // This operating will only get to 50%, and the file transfer will be the other 50%
-                                curPercent = ((i * 100) / max);
+                                    try
+                                    {
+                                        // Now move over the mod to the CookedPC folder
+                                        if (File.Exists(RealModPath + "\\" + realfileName))
+                                        {
+                                            AddTextBoxLog(Environment.NewLine + "[Copying] " + realfileName + " [modded] to CookedPC/mod");
+                                            File.Copy(RealModPath + "\\" + realfileName, modsFolderPath + "\\" + realfileName, true);
+                                            AddTextBoxLog(Environment.NewLine + "[Copied] " + realfileName + " [modded] to CookedPC/mod");
+                                            AddTextBoxLog(Environment.NewLine + "[Deleting] " + realfileName + " [modded] from CookedPC_Mod");
+                                            File.Delete(RealModPath + "\\" + realfileName);
+                                            AddTextBoxLog(Environment.NewLine + "[Deleted] " + realfileName + " [modded] from CookedPC_Mod");
+                                        }
+                                    }
+                                    catch
+                                    {
+                                        // Message error
+                                        AddTextBoxLog(Environment.NewLine + "[Error] " + realfileName + " could not be touched!");
+                                    }
+                                    fileCounter++;
+                                    // Increment & update stats as well as progress bar
+                                    i++;
+                                    // This operating will only get to 50%, and the file transfer will be the other 50%
+                                    curPercent = ((i * 100) / max);
 
-                                // Update the UI
-                                if ((worker.CancellationPending == true))
-                                {
-                                    e.Cancel = true;
-                                    break;
-                                }
-                                else
-                                {
-                                    // Perform a time consuming operation and report progress.
-                                    Thread.Sleep(50);
-                                    worker.ReportProgress(curPercent);
+                                    // Update the UI
+                                    if ((worker.CancellationPending == true))
+                                    {
+                                        e.Cancel = true;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        // Perform a time consuming operation and report progress.
+                                        Thread.Sleep(50);
+                                        worker.ReportProgress(curPercent);
+                                    }
                                 }
                             }
-                        }
 
-                        // Show how many files we moved
-                        if (fileCounter > 0)
-                        {
-                            AddTextBoxLog(Environment.NewLine);
-                            AddTextBoxLog("[Log] Done! " + fileCounter + " files were moved.");
+                            // Show how many files we moved
+                            if (fileCounter > 0)
+                            {
+                                AddTextBoxLog(Environment.NewLine);
+                                AddTextBoxLog("[Log] Done! " + fileCounter + " files were moved.");
+                            }
+                            else
+                            {
+                                AddTextBoxLog(Environment.NewLine);
+                                AddTextBoxLog("[Log] Done! No files were moved.");
+                            }
+                            try
+                            {
+                                // Rename folder to installed
+                                string originalcopy = FullModPathMan + "\\" + tmpnode;
+                                string altererdcopy = FullModPathMan + "\\" + tmpnode + " (Installed)";
+                                Directory.Move(originalcopy, altererdcopy);
+                            }
+                            catch (Exception a) { Prompt.Popup(a.Message); }
                         }
-                        else
-                        {
-                            AddTextBoxLog(Environment.NewLine);
-                            AddTextBoxLog("[Log] Done! No files were moved.");
-                        }
-                        try
-                        {
-                            // Rename folder to installed
-                            string originalcopy = FullModPathMan + "\\" + tmpnode;
-                            string altererdcopy = FullModPathMan + "\\" + tmpnode + " (Installed)";
-                            Directory.Move(originalcopy, altererdcopy);
-                        }
-                        catch (Exception a) { Prompt.Popup(a.Message); }
-                    } else { AddTextBoxLog(Environment.NewLine);  AddTextBoxLog("[Notice] Can't install an empty mod folder"); }
-                }
-                else if ((nodes.Checked) && (installFlag == false) && (nodes.FullPath.ToString().Contains("(Installed)"))) //catcher
-                {
-                    RealModPath = FullModPathMan + "\\" + nodes.FullPath.ToString();
-                    tmpnode = nodes.FullPath.ToString();
-                    newbackuppath = @backupFolderPath + "\\" + tmpnode.Replace(" (Installed)", "");
-                    DirectoryInfo dirInfo = new DirectoryInfo(newbackuppath);
-                    BackgroundWorker worker = sender as BackgroundWorker;
-                    dirInfo = new DirectoryInfo(newbackuppath);
-                    string message = string.Empty;
-                    int fileCounter = 0;
-                    int i = 0;
-                    int max = dirInfo.GetFiles("*.upk").Count();
-                    int curPercent = 0;
-                    
-
-                    foreach (string fileName in Directory.GetFiles(newbackuppath))
+                        else { AddTextBoxLog(Environment.NewLine); AddTextBoxLog("[Notice] Can't install an empty mod folder"); }
+                    }
+                    else if ((nodes.Checked) && (installFlag == false) && (nodes.FullPath.ToString().Contains("(Installed)"))) //catcher
                     {
-                        string realfileName = fileName.Split(Path.DirectorySeparatorChar).Last();
-                        CheckForIllegalCrossThreadCalls = false;
-                        AddTextBoxLog(Environment.NewLine);
-                        
-                        
+                        RealModPath = FullModPathMan + "\\" + nodes.FullPath.ToString();
+                        tmpnode = nodes.FullPath.ToString();
+                        newbackuppath = @backupFolderPath + "\\" + tmpnode.Replace(" (Installed)", "");
+                        DirectoryInfo dirInfo = new DirectoryInfo(newbackuppath);
+                        BackgroundWorker worker = sender as BackgroundWorker;
+                        dirInfo = new DirectoryInfo(newbackuppath);
+                        string message = string.Empty;
+                        int fileCounter = 0;
+                        int i = 0;
+                        int max = dirInfo.GetFiles("*.upk").Count();
+                        int curPercent = 0;
+
+
+                        foreach (string fileName in Directory.GetFiles(newbackuppath))
+                        {
+                            string realfileName = fileName.Split(Path.DirectorySeparatorChar).Last();
+                            CheckForIllegalCrossThreadCalls = false;
+                            AddTextBoxLog(Environment.NewLine);
+
+
                             try
                             {
                                 // Move the mod file back into the mods folder
@@ -2746,7 +3490,7 @@ namespace Revamped_BnS_Buddy
                             {
                                 // Check if the mod file we just uninstalled has a backup in the backup folder.
                                 // If yes, move that back as the original
-                                if (File.Exists(newbackuppath + "\\" + realfileName))
+                                if (File.Exists(newbackuppath + "\\" + realfileName) && !realfileName.Contains("(unique)"))
                                 {
                                     AddTextBoxLog(Environment.NewLine + "[Copying] " + realfileName + " [original] to CookedPC"); //
                                     File.Copy(newbackuppath + "\\" + realfileName, originalFolderPath + "\\" + realfileName, true);
@@ -2759,9 +3503,12 @@ namespace Revamped_BnS_Buddy
                                 {
                                     try
                                     {
+                                        string val = realfileName;
+                                        string tmp = val.Replace(" (unique)", "");
                                         AddTextBoxLog(Environment.NewLine + "[Deleting] " + realfileName + " [modded] from CookedPC_Mod");
-                                        File.Copy(RealModPath + "\\" + realfileName + " (unique)", RealModPath + "\\" + realfileName, true);
-                                        File.Delete(RealModPath + "\\" + realfileName + " (unique)");
+                                        File.Copy(newbackuppath + "\\" + realfileName, RealModPath + "\\" + tmp, true);
+                                        File.Delete(newbackuppath + "\\" + realfileName);
+                                        File.Delete(modsFolderPath + "\\" + tmp);
                                         AddTextBoxLog(Environment.NewLine + "[Deleted] " + realfileName + " [modded] from CookedPC_Mod");
                                     }
                                     catch
@@ -2774,56 +3521,60 @@ namespace Revamped_BnS_Buddy
                             {
                                 AddTextBoxLog(Environment.NewLine + "[Error] " + realfileName + " could not be touched!");
                             }
-                        
 
-                        fileCounter++;
 
-                        // Increment & update stats as well as progress bar
-                        i++;
-                        // This operating will only get to 50%, and the file transfer will be the other 50%
-                        curPercent = ((i * 100) / max);
+                            fileCounter++;
 
-                        // Update the UI
-                        if ((worker.CancellationPending == true))
+                            // Increment & update stats as well as progress bar
+                            i++;
+                            // This operating will only get to 50%, and the file transfer will be the other 50%
+                            curPercent = ((i * 100) / max);
+
+                            // Update the UI
+                            if ((worker.CancellationPending == true))
+                            {
+                                e.Cancel = true;
+                                break;
+                            }
+                            else
+                            {
+                                // Perform a time consuming operation and report progress.
+                                Thread.Sleep(50);
+                                worker.ReportProgress(curPercent);
+                            }
+                        }
+
+                        if (Directory.Exists(newbackuppath) && Directory.GetFiles(newbackuppath).Length == 0)
                         {
-                            e.Cancel = true;
-                            break;
+                            Directory.Delete(newbackuppath);
                         }
                         else
                         {
-                            // Perform a time consuming operation and report progress.
-                            Thread.Sleep(50);
-                            worker.ReportProgress(curPercent);
+                            AddTextBoxLog(Environment.NewLine);
+                            AddTextBoxLog("[Log] Error: Restoring did not complete.");
                         }
-                    }
 
-                    if (Directory.Exists(newbackuppath) && Directory.GetFiles(newbackuppath).Length == 0)
-                    {
-                        Directory.Delete(newbackuppath);
-                    } else {
-                        AddTextBoxLog(Environment.NewLine);
-                        AddTextBoxLog("[Log] Error: Restoring did not complete.");
-                    }
+                        // Show how many files we moved
+                        if (fileCounter > 0)
+                        {
+                            AddTextBoxLog(Environment.NewLine);
+                            AddTextBoxLog("[Log] Done! " + fileCounter + " files were moved.");
+                        }
+                        else
+                        {
+                            AddTextBoxLog(Environment.NewLine);
+                            AddTextBoxLog("[Log] Done! No files were moved.");
+                        }
+                        // Rename folder to uninstalled
+                        try
+                        {
+                            string originalcopy = FullModPathMan + "\\" + tmpnode;
+                            string altererdcopy = FullModPathMan + "\\" + tmpnode.Replace(" (Installed)", "");
+                            Directory.Move(originalcopy, altererdcopy);
+                        }
+                        catch (Exception a) { Prompt.Popup(a.Message); }
 
-                    // Show how many files we moved
-                    if (fileCounter > 0)
-                    {
-                        AddTextBoxLog(Environment.NewLine);
-                        AddTextBoxLog("[Log] Done! " + fileCounter + " files were moved.");
                     }
-                    else
-                    {
-                        AddTextBoxLog(Environment.NewLine);
-                        AddTextBoxLog("[Log] Done! No files were moved.");
-                    }
-                    // Rename folder to uninstalled
-                    try { 
-                        string originalcopy = FullModPathMan + "\\" + tmpnode;
-                        string altererdcopy = FullModPathMan + "\\" + tmpnode.Replace(" (Installed)", "");
-                        Directory.Move(originalcopy, altererdcopy);
-                    } catch (Exception a) { Prompt.Popup(a.Message); }
-
-                }
             }
         }
 
@@ -2875,7 +3626,7 @@ namespace Revamped_BnS_Buddy
             // Check Folder, add new ones and check for clones
             AddTextBoxLog(Environment.NewLine);
             AddTextBoxLog("[Log] Checking Mods Folder...");
-            
+
             foreach (string directories in Directory.GetDirectories(FullModPathMan))
             {
                 string directory = directories.Split(Path.DirectorySeparatorChar).Last();
@@ -2890,7 +3641,7 @@ namespace Revamped_BnS_Buddy
 
 
             // Validate Paths and remove bad ones
-            
+
             foreach (TreeNode nodes in treeView2.Nodes)
             {
                 if (nodes != null)
@@ -2910,30 +3661,6 @@ namespace Revamped_BnS_Buddy
 
             AddTextBoxLog(Environment.NewLine);
             AddTextBoxLog("[Log] Done Checking");
-
-            // Original
-            /*foreach (TreeNode nodes in treeView2.Nodes)
-            {
-                if (nodes != null)
-                {
-                    RealModPath = FullModPathMan + "\\" + nodes.FullPath.ToString();
-                    if (Directory.Exists(RealModPath))
-                    {
-                        checkButtons(true);
-                    }
-                    else
-                    {
-                        nodes.Remove();
-                    }
-                }
-                else
-                {
-                    treeView2.Nodes.Clear();
-                    treeView2 = new TreeView();
-                    Directory.GetFiles(FullModPathMan);
-                    PopulateTreeView(FullModPathMan);
-                }
-            }*/
         }
 
         public string catcher = "";
@@ -2948,33 +3675,36 @@ namespace Revamped_BnS_Buddy
             {
                 foreach (TreeNode nodes in treeView2.Nodes)
                 {
-                    catcher = nodes.FullPath.ToString();
-                    if ((nodes.Checked) && (catcher.Contains("(Installed)")))
+                    if (nodes != null)
                     {
-                        tmpnode = "";
-                        doFileSwap(FullModPathMan + "\\" + nodes.FullPath.ToString());
-                        _workerCompleted.WaitOne();
-                        // Remove old and put new
-                        Directory.GetFiles(FullModPathMan);
-                        Thread.Sleep(50);
-                        if (catcher == tmpnode)
+                        catcher = nodes.FullPath.ToString();
+                        if ((nodes.Checked) && (catcher.Contains("(Installed)")))
                         {
+                            tmpnode = "";
+                            doFileSwap(FullModPathMan + "\\" + nodes.FullPath.ToString());
+                            _workerCompleted.WaitOne();
+                            // Remove old and put new
                             Directory.GetFiles(FullModPathMan);
                             Thread.Sleep(50);
-                            treeView2.Nodes.Remove(new TreeNode(tmpnode));
-                            treeView2.Refresh();
-                            Directory.GetFiles(FullModPathMan);
-                            Thread.Sleep(50);
-                            treeView2.Nodes.Add(tmpnode.Replace(" (Installed)", ""));
-                            treeView2.Refresh();
-                            Directory.GetFiles(FullModPathMan);
-                            Thread.Sleep(50);
+                            if (catcher == tmpnode)
+                            {
+                                Directory.GetFiles(FullModPathMan);
+                                Thread.Sleep(50);
+                                treeView2.Nodes.Remove(new TreeNode(tmpnode));
+                                treeView2.Refresh();
+                                Directory.GetFiles(FullModPathMan);
+                                Thread.Sleep(50);
+                                treeView2.Nodes.Add(tmpnode.Replace(" (Installed)", ""));
+                                treeView2.Refresh();
+                                Directory.GetFiles(FullModPathMan);
+                                Thread.Sleep(50);
+                            }
+                            _workerCompleted.Reset();
                         }
-                        _workerCompleted.Reset();
-                    }
-                    if ((nodes.Checked) && (!catcher.Contains("(Installed)")))
-                    {
-                        AddTextBoxLog(Environment.NewLine + "Skipping: " + catcher + " (Not Installed)");
+                        if ((nodes.Checked) && (!catcher.Contains("(Installed)")))
+                        {
+                            AddTextBoxLog(Environment.NewLine + "Skipping: " + catcher + " (Not Installed)");
+                        }
                     }
                 }
             }
@@ -2997,33 +3727,36 @@ namespace Revamped_BnS_Buddy
             {
                 foreach (TreeNode nodes in treeView2.Nodes)
                 {
-                    catcher = nodes.FullPath.ToString();
-                    if ((nodes.Checked) && (!catcher.Contains("(Installed)")))
+                    if (nodes != null)
                     {
-                        tmpnode = "";
-                        doFileSwap(FullModPathMan + "\\" + nodes.FullPath.ToString());
-                        _workerCompleted.WaitOne();
-                        // Remove old and put new
-                        Directory.GetFiles(FullModPathMan);
-                        Thread.Sleep(50);
-                        if (catcher == tmpnode)
+                        catcher = nodes.FullPath.ToString();
+                        if ((nodes.Checked) && (!catcher.Contains("(Installed)")))
                         {
+                            tmpnode = "";
+                            doFileSwap(FullModPathMan + "\\" + nodes.FullPath.ToString());
+                            _workerCompleted.WaitOne();
+                            // Remove old and put new
                             Directory.GetFiles(FullModPathMan);
                             Thread.Sleep(50);
-                            treeView2.Nodes.Remove(new TreeNode(tmpnode));
-                            treeView2.Refresh();
-                            Directory.GetFiles(FullModPathMan);
-                            Thread.Sleep(50);
-                            treeView2.Nodes.Add(tmpnode + " (Installed)");
-                            treeView2.Refresh();
-                            Directory.GetFiles(FullModPathMan);
-                            Thread.Sleep(50);
+                            if (catcher == tmpnode)
+                            {
+                                Directory.GetFiles(FullModPathMan);
+                                Thread.Sleep(50);
+                                treeView2.Nodes.Remove(new TreeNode(tmpnode));
+                                treeView2.Refresh();
+                                Directory.GetFiles(FullModPathMan);
+                                Thread.Sleep(50);
+                                treeView2.Nodes.Add(tmpnode + " (Installed)");
+                                treeView2.Refresh();
+                                Directory.GetFiles(FullModPathMan);
+                                Thread.Sleep(50);
+                            }
+                            _workerCompleted.Reset();
                         }
-                        _workerCompleted.Reset();
-                    }
-                    if ((nodes.Checked) && (catcher.Contains("(Installed)")))
-                    {
-                        AddTextBoxLog(Environment.NewLine + "Skipping: " + catcher + " (Already Installed)");
+                        if ((nodes.Checked) && (catcher.Contains("(Installed)")))
+                        {
+                            AddTextBoxLog(Environment.NewLine + "Skipping: " + catcher + " (Already Installed)");
+                        }
                     }
                 }
             }
@@ -3041,7 +3774,8 @@ namespace Revamped_BnS_Buddy
             {
                 string description = File.ReadAllText(FullModPathMan + "\\" + e.Node.FullPath.ToString() + "\\description.txt").ToString();
                 metroLabel40.Text = description;
-            } catch { metroLabel40.Text = "No description provided!"; }
+            }
+            catch { metroLabel40.Text = "No description provided!"; }
         }
 
         private void PopulateTreeView(string dir)
@@ -3060,7 +3794,7 @@ namespace Revamped_BnS_Buddy
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Prompt.Popup(e.ToString());
             }
@@ -3069,7 +3803,7 @@ namespace Revamped_BnS_Buddy
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // Seperator!
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        
+
         private void metroButton10_Click(object sender, EventArgs e)
         {
             Process.Start("explorer.exe", FullModPathMan);
@@ -3085,6 +3819,8 @@ namespace Revamped_BnS_Buddy
             }
             else
             {
+                CleanMess();
+                CleanOtherMess();
                 KillApp();
             }
         }
@@ -3662,7 +4398,7 @@ namespace Revamped_BnS_Buddy
 
         private void metroButton24_Click(object sender, EventArgs e)
         {
-            lineChanger("arguements = " + metroTextBox5.Text , @AppPath + "\\Settings.ini", 21);
+            lineChanger("arguements = " + metroTextBox5.Text, @AppPath + "\\Settings.ini", 21);
         }
 
         static void lineChanger(string newText, string fileName, int line_to_edit)
@@ -3690,6 +4426,84 @@ namespace Revamped_BnS_Buddy
             PathFound = true;
             metroToggle1.Enabled = true;
             Prompt.Popup("Please Restart App If Done Configurating");
+        }
+
+        bool CustomModSet = false;
+        private void metroButton33_Click(object sender, EventArgs e)
+        {
+            if (metroTextBox7.Text.Length < 1)
+            {
+                Prompt.Popup("Path is incorrect");
+            }
+            else
+            {
+                CustomModSet = true;
+                // Replace current line with new one
+                lineChanger("modfolder = " + metroTextBox3.Text, @AppPath + "\\Settings.ini", 29);
+                // Write Setting to ini
+                var fileContents2 = System.IO.File.ReadAllText(@AppPath + "\\Settings.ini");
+                fileContents2 = fileContents2.Replace("modfolderset = false", "modfolderset = true");
+                System.IO.File.WriteAllText(@AppPath + "\\Settings.ini", fileContents2);
+                // Set new path
+                FullBackupPath = metroTextBox7.Text + "\\CookedPC_Backup";
+                FullModPathMan = metroTextBox7.Text + "\\CookedPC_Mod";
+                // Reset found paths
+                GetPath();
+                Prompt.Popup("Please Restart App If Done Configurating");
+            }
+        }
+
+        private void metroButton31_Click(object sender, EventArgs e)
+        {
+            metroToggle19.Checked = false;
+            metroTextBox7.Text = "";
+            CustomModSet = false;
+            GetPath();
+            // restore settings.ini
+            // Write Setting to ini
+            var fileContents2 = System.IO.File.ReadAllText(@AppPath + "\\Settings.ini");
+            fileContents2 = fileContents2.Replace("modfolderset = true", "modfolderset = false");
+            System.IO.File.WriteAllText(@AppPath + "\\Settings.ini", fileContents2);
+        }
+
+        private void metroToggle19_CheckedChanged(object sender, EventArgs e)
+        {
+            if (metroToggle19.Checked == true)
+            {
+                metroButton33.Enabled = true;
+                metroButton31.Enabled = true;
+                metroTextBox7.Enabled = true;
+                metroButton29.Enabled = true;
+            }
+            else
+            {
+                metroButton33.Enabled = false;
+                metroButton31.Enabled = false;
+                metroTextBox7.Enabled = false;
+                metroButton29.Enabled = false;
+            }
+        }
+
+        private void metroButton29_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog fbd = new FolderBrowserDialog();
+            DialogResult result = fbd.ShowDialog();
+            if (result.ToString() == "OK")
+            {
+                if (Directory.Exists(fbd.SelectedPath + "\\"))
+                {
+                    metroTextBox7.Text = fbd.SelectedPath;
+                }
+                else
+                {
+                    Prompt.Popup("Error: Invalid Path! Browse for a custom Mods folder." + " | Path: " + fbd.SelectedPath);
+                }
+            }
+            else
+            {
+                Prompt.Popup("Error: Cancelled operation!");
+                KillApp();
+            }
         }
 
         private void RestoreGamePath()
@@ -3741,7 +4555,8 @@ namespace Revamped_BnS_Buddy
                 {
                     Prompt.Popup("Error: Invalid Path! Browse for BnS Folder." + " | Path: " + fbd.SelectedPath);
                 }
-            } else
+            }
+            else
             {
                 Prompt.Popup("Error: Cancelled operation!");
                 KillApp();
@@ -3761,23 +4576,34 @@ namespace Revamped_BnS_Buddy
             RegPathlol = metroTextBox4.Text;
             try
             {
-                if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("Game_Region=North America"))
+                if (File.Exists(RegPathlol + "\\NCLauncher.ini"))
                 {
-                    metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("North America");
-                }
-                else if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("Game_Region=Europe"))
-                {
-                    metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Europe");
-                } 
-                else // that's for now
-                {
-                    metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Taiwan");
+                    if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("Game_Region=North America"))
+                    {
+                        metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("North America");
+                    }
+                    else if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("Game_Region=Europe"))
+                    {
+                        metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Europe");
+                    }
+                    else if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("Game_Locale=ja"))
+                    {
+                        metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Japanese");
+                    }
+                    else if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("up4svr.plaync.com.tw"))
+                    {
+                        metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Taiwan");
+                    }
+                    else if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("up4web.plaync.co.kr"))
+                    {
+                        metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Korean");
+                    }
                 }
                 Prompt.Popup("Please Restart App If Done Configurating");
             }
-            catch
+            catch (Exception a)
             {
-                AddTextLog("Error: Could Not Find NCLauncher.ini");
+                AddTextLog("Error: Could Not Find NCLauncher.ini" + Environment.NewLine + a.ToString());
             }
         }
 
@@ -3941,7 +4767,29 @@ namespace Revamped_BnS_Buddy
         private void metroComboBox4_SelectedIndexChanged(object sender, EventArgs e)
         {
             defaultclient = metroComboBox4.SelectedItem.ToString();
-            lineChanger("defaultclient = " + defaultclient, @AppPath + "\\Settings.ini", 27);
+            if ((defaultclient == "64bit" && Directory.Exists(RegPath + LauncherPath64)) || (defaultclient == "32bit" && Directory.Exists(RegPath + LauncherPath)))
+            {
+                lineChanger("defaultclient = " + defaultclient, @AppPath + "\\Settings.ini", 27);
+            }
+            else
+            {
+                if (AppStarted)
+                {
+                    Prompt.Popup("Error: Path to " + defaultclient + " does not exist.");
+                }
+                if (defaultclient == "32bit")
+                {
+                    metroComboBox4.SelectedIndex = metroComboBox4.FindStringExact("64bit");
+                    metroComboBox4.Items.Remove("32bit");
+                    defaultclient = "";
+                }
+                else
+                {
+                    metroComboBox4.SelectedIndex = metroComboBox4.FindStringExact("32bit");
+                    metroComboBox4.Items.Remove("64bit");
+                    defaultclient = "";
+                }
+            }
         }
 
         public void RestoreDefault()
@@ -3969,6 +4817,272 @@ namespace Revamped_BnS_Buddy
         {
             if (metroLabel48.Text != "None")
                 RestoreDefault();
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+        // Seperator!
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+
+        string FullAddonPath = "";
+
+        public void InitializeAddons()
+        {
+            RestoreAddons();
+            AddonPaths();
+            GenerateAddons();
+        }
+
+        public void RestoreAddons()
+        {
+            // HEY! UNTESTED
+            foreach (string files in Directory.GetFiles(DataPath + "\\editing\\backup"))
+            {
+                File.Copy(files, DataPath + "\\" + Path.GetFileName(files), true);
+            }
+        }
+
+        public void AddonPaths()
+        {
+            FullAddonPath = DataPath + "\\addons\\";
+            if (!Directory.Exists(FullAddonPath)) { CreatePaths(FullAddonPath); }
+        }
+
+        public void GenerateAddons()
+        {
+            foreach (string files in Directory.GetFiles(FullAddonPath))
+            {
+                string directory = files.Split(Path.DirectorySeparatorChar).Last();
+                if (files.Length != 0)
+                {
+                    if (directory.Contains(".patch"))
+                    {
+                        string tmp = directory.Replace(".patch", "");
+                        if (checkNode3(tmp) == true)
+                        {
+                            TreeNode tmpadder = new TreeNode(tmp);
+                            treeView3.Nodes.Add(tmpadder);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void BackupConfigs()
+        {
+            // HEY! UNTESTED
+            foreach (string files in Directory.GetFiles(DataPath))
+            {
+                if (files.Contains(".dat"))
+                {
+                    File.Copy(files, DataPath + "\\editing\\backup\\" + Path.GetFileName(files), true);
+                }
+            }
+        }
+
+        public void StartGameAddons()
+        {
+            BackupConfigs();
+            foreach (TreeNode addons in treeView3.Nodes)
+            {
+                if (addons != null)
+                {
+                    if (addons.Checked)
+                    {
+                        StartPatching(addons.FullPath + ".patch");
+                    }
+                }
+            }
+        }
+
+        public bool checkNode3(string s)
+        {
+            foreach (TreeNode nodes in treeView3.Nodes)
+            {
+                if (nodes != null)
+                {
+                    if (nodes.FullPath.ToString() == s)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        private void metroButton27_Click(object sender, EventArgs e)
+        {
+            Prompt.Popup("Feature not added yet."); // HEY!
+        }
+        
+        private void metroButton28_Click(object sender, EventArgs e)
+        {
+            RestoreAddons();
+        }
+
+        Dictionary<int, string> Search = new Dictionary<int, string>();
+        Dictionary<int, string> Replace = new Dictionary<int, string>();
+        public void StartPatching(string filename)
+        {
+            // Reset Search and Replace Dictionarys
+            Search = new Dictionary<int, string>();
+            Replace = new Dictionary<int, string>();
+            // Go on...
+            int linecount = File.ReadAllLines(FullAddonPath + "\\" + filename).Count();
+            if (Debugging)
+                Prompt.Popup(linecount.ToString());
+            if (linecount == 4)
+            {
+                string ToFile = File.ReadLines(FullAddonPath + "\\" + filename).Skip(0).Take(1).First().Replace("FileName = ", "");
+                if (Debugging)
+                    Prompt.Popup("File to patch: " + ToFile);
+                // Proceed to unpacking
+                Extractor(DataPath + "\\" + ToFile);
+                string Searcher = File.ReadLines(FullAddonPath + "\\" + filename).Skip(1).Take(1).First().Replace("Search = ", "");
+                if (Debugging)
+                    Prompt.Popup("String to search: " + Searcher);
+                string Replacer = File.ReadLines(FullAddonPath + "\\" + filename).Skip(2).Take(1).First().Replace("Replace = ", "");
+                if (Debugging)
+                    Prompt.Popup("String to replace: " + Replacer);
+                string ToText = File.ReadAllText(DataPath + "\\" + ToFile);
+                if (Debugging)
+                    Prompt.Popup(ToText.ToString());
+                if (ToText.ToString().Contains(Searcher.ToString()))
+                {
+                    ToText = ToText.Replace(Searcher, Replacer);
+                    File.WriteAllText(DataPath + "\\" + ToFile, ToText);
+                    // Compile modified file
+                    Compiler(DataPath + "\\" + ToFile + ".files");
+                    AddTextLog("Applied Addon: " + filename.Replace(".patch", ""));
+                }
+                else
+                {
+                    AddTextLog("Addon: " + filename.Replace(".patch", "") + " couldn't be applied!");
+                }
+            }
+            else if (linecount > 4)
+            {
+                string ToFile = File.ReadLines(FullAddonPath + "\\" + filename).Skip(0).Take(1).First().Replace("FileName = ", "");
+                Extractor(DataPath + "\\" + ToFile);
+                int i = 0;
+                int o = 0;
+                IEnumerable<string> WholeText = File.ReadLines(FullAddonPath + "\\" + filename);
+
+                foreach (string text in WholeText)
+                {
+                    if (text.Contains("Search = "))
+                    {
+                        i++;
+                        string line = text;
+                        string inline = line.Replace("Search = ", "");
+                        Search.Add(i, inline);
+                    }
+                }
+                foreach (string text in WholeText)
+                {
+                    if (text.Contains("Replace = "))
+                    {
+                        o++;
+                        string line = text;
+                        string inline = line.Replace("Replace = ", "");
+                        Replace.Add(o, inline);
+                    }
+                }
+                if (i == o)
+                {
+                    string ToText = File.ReadAllText(DataPath + "\\" + ToFile);
+                    if (Debugging)
+                        Prompt.Popup("Full Text: " + ToText);
+                    for (int io = 0; i > io; io++)
+                    {
+                        if (Debugging)
+                            Prompt.Popup("Before: " + ToText);
+                        if (ToText.Contains(Search[io]))
+                        {
+                            ToText = ToText.Replace(Search[io], Replace[io]);
+                            if (Debugging)
+                                Prompt.Popup("After: " + ToText);
+                        }
+                        else
+                        {
+                            AddTextLog("Error: Could not find " + Search[io]);
+                        }
+                    }
+                    File.WriteAllText(DataPath + "\\" + ToFile, ToText);
+                    Compiler(DataPath + "\\" + ToFile + ".files");
+                    AddTextLog("Applied Addon: " + filename.Replace(".patch", ""));
+                }
+                else if (i > o)
+                {
+                    Prompt.Popup("Missing Replacements found. Please check your patches");
+                }
+                else if (i < o)
+                {
+                    Prompt.Popup("Missing Finds found. Please check your patches");
+                }
+            }
+            else
+            {
+                Prompt.Popup("Error: The following patch " + filename + " does not meet the requirements.");
+            }
+        }
+
+        public void RefreshAddons()
+        {
+            GenerateAddons();
+            CheckAddonsPaths();
+        }
+
+        public void CheckAddonsPaths()
+        {
+            foreach (TreeNode names in treeView3.Nodes)
+            {
+                if (names != null)
+                {
+                    string file = names.FullPath + ".patch";
+                    if (!File.Exists(FullAddonPath + "\\" + file))
+                    {
+                        treeView3.SelectedNode = null;
+                        names.Remove();
+                    }
+                }
+            }
+        }
+
+        private void metroButton25_Click(object sender, EventArgs e)
+        {
+            Process.Start("explorer.exe", FullAddonPath);
+        }
+
+        private void metroButton26_Click(object sender, EventArgs e)
+        {
+            RefreshAddons();
+        }
+
+        private void treeView3_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            try
+            {
+                string description = "";
+                string filename = e.Node.FullPath.ToString() + ".patch";
+                IEnumerable<string> WholeText = File.ReadLines(FullAddonPath + "\\" + filename);
+                foreach (string text in WholeText)
+                {
+                    if (text.Contains("Description = "))
+                    {
+                        string line = text;
+                        description = line.Replace("Description = ", "");
+                    }
+                }
+                if (description.Length > 0)
+                {
+                    metroLabel53.Text = description;
+                }
+                else
+                {
+                    metroLabel53.Text = "No description provided!";
+                }
+            }
+            catch { metroLabel53.Text = "No description provided!"; }
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -4108,34 +5222,37 @@ namespace Revamped_BnS_Buddy
 
         private void toolStripButton6_Click(object sender, EventArgs e)
         {
-                // Save Edited File
-                bw2 = new BackgroundWorker();
-                bw2.WorkerSupportsCancellation = true;
-                bw2.WorkerReportsProgress = true;
-                bw2.DoWork += new DoWorkEventHandler(bw2_Save);
+            // Save Edited File
+            bw2 = new BackgroundWorker();
+            bw2.WorkerSupportsCancellation = true;
+            bw2.WorkerReportsProgress = true;
+            bw2.DoWork += new DoWorkEventHandler(bw2_Save);
             if (!bw2.IsBusy)
             {
                 bw2.RunWorkerAsync();
-            } else { Prompt.Popup("Please wait until saving is finished."); }
+            }
+            else { Prompt.Popup("Please wait until saving is finished."); }
         }
 
         private void toolStripButton1_Click(object sender, EventArgs e)
         {
-                try
+            try
+            {
+                // Backup the data files
+                DirectoryInfo configfolder = new DirectoryInfo(DataPath);
+                FileInfo[] configfiles = configfolder.GetFiles("*.dat");
+                foreach (FileInfo configfile in configfiles)
                 {
-                    // Backup the data files
-                    DirectoryInfo configfolder = new DirectoryInfo(DataPath);
-                    FileInfo[] configfiles = configfolder.GetFiles("*.dat");
-                    foreach (FileInfo configfile in configfiles)
+                    if ((configfile.ToString().EndsWith(".dat")) && (myDictionary[configfile.ToString()].Length > 0))
                     {
-                        if ((configfile.ToString().EndsWith(".dat")) && (myDictionary[configfile.ToString()].Length > 0)) {
-                            string tobackup = configfile.ToString();
-                            string topath = myDictionary[tobackup];
-                            File.Copy(topath + "\\" + tobackup, topath + "\\editing\\backup\\" + tobackup, true);
-                            metroLabel39.Text = "Backed Up Data Files";
-                        }
+                        string tobackup = configfile.ToString();
+                        string topath = myDictionary[tobackup];
+                        File.Copy(topath + "\\" + tobackup, topath + "\\editing\\backup\\" + tobackup, true);
+                        metroLabel39.Text = "Backed Up Data Files";
                     }
-                } catch { Prompt.Popup("Error: Could not backup!"); }
+                }
+            }
+            catch { Prompt.Popup("Error: Could not backup!"); }
         }
 
         private void toolStripButton2_Click(object sender, EventArgs e)
@@ -4150,7 +5267,8 @@ namespace Revamped_BnS_Buddy
                 // SortOutputHandler -> updates text for progress
                 treeView1.Nodes.Clear();
                 // Seperator
-                if (Directory.Exists(PathtoDat + "\\" + ActiveDataFile + ".files")) {
+                if (Directory.Exists(PathtoDat + "\\" + ActiveDataFile + ".files"))
+                {
                     if (!Directory.Exists(PathtoDat + "\\editing\\" + ActiveDataFile + ".files"))
                     {
                         Directory.Move(PathtoDat + "\\" + ActiveDataFile + ".files", PathtoDat + "\\editing\\" + ActiveDataFile + ".files");
@@ -4178,8 +5296,10 @@ namespace Revamped_BnS_Buddy
                         treeView1.AfterSelect += treeView1_AfterSelect;
                         BuildTree(directoryInfo, treeView1.Nodes);
                         treeView1.Nodes[0].Expand();
-                    } else { metroLabel39.Text = "Error: could not move folder!"; }
-                } else { metroLabel39.Text = "Error: " + ActiveDataFile + " could not be extracted!"; }
+                    }
+                    else { metroLabel39.Text = "Error: could not move folder!"; }
+                }
+                else { metroLabel39.Text = "Error: " + ActiveDataFile + " could not be extracted!"; }
             }
         }
 
@@ -4202,7 +5322,7 @@ namespace Revamped_BnS_Buddy
                 string PathtoDat = myDictionary[ActiveDataFile];
                 if (File.Exists(PathtoDat + "\\editing\\" + ActiveDataFile + ""))
                 {
-                    NewDat = PathtoDat + "\\editing\\" + ActiveDataFile + ""; 
+                    NewDat = PathtoDat + "\\editing\\" + ActiveDataFile + "";
                     try
                     {
                         File.Copy(NewDat, PathtoDat + "\\" + ActiveDataFile + "", true);
@@ -4212,7 +5332,8 @@ namespace Revamped_BnS_Buddy
                     {
                         Prompt.Popup("Error: Could not apply patch!");
                     }
-                } else { Prompt.Popup("Please Compile"); }
+                }
+                else { Prompt.Popup("Please Compile"); }
             }
         }
 
@@ -4232,7 +5353,7 @@ namespace Revamped_BnS_Buddy
                 }
             }
         }
-        
+
         Dictionary<string, string> myDictionary = new Dictionary<string, string>();
         private void DefaultDatValues()
         {
@@ -4249,9 +5370,10 @@ namespace Revamped_BnS_Buddy
                 metroComboBox3.Items.Add(filesource);
             }
             // Select default after compiling
-            metroComboBox3.SelectedIndex = 0;
-            // Extract Dat Tool
-            //bnsdat();
+            if (metroComboBox3.Items.Count > 0)
+            {
+                metroComboBox3.SelectedIndex = 0;
+            }
             // Activate Keyboard shortcuts for dat editor
             KeyPreview = true;
         }
@@ -4284,11 +5406,889 @@ namespace Revamped_BnS_Buddy
                         AddTextLog("Cleaned " + localvar);
                     }
                 }
-            } catch { AddTextLog("Could not remove folder -> " + DataPath + "\\editing\\" + localvar + "\\"); } 
+            }
+            catch { AddTextLog("Could not remove folder -> " + DataPath + "\\editing\\" + localvar + "\\"); }
         }
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+        // Seperator!     ||     TokenGrabber
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+
+        bool Debugging = false;
+        BackgroundWorker worker;
+        string username, password, epoch, pid, localIP;
+        string args = "{0}", token;
+        string LoginIp, LoginProgramid;
+        int LoginPort, counter;
+        BNSXorEncryption xor;
+        List<region> regions = new List<region>();
+        string currentAppId, currentValue;
+
+        public static BigInteger N = new BigInteger("E306EBC02F1DC69F5B437683FE3851FD9AAA6E97F4CBD42FC06C72053CBCED68EC570E6666F529C58518CF7B299B5582495DB169ADF48ECEB6D65461B4D7C75DD1DA89601D5C498EE48BB950E2D8D5E0E0C692D613483B38D381EA9674DF74D67665259C4C31A29E0B3CFF7587617260E8C58FFA0AF8339CD68DB3ADB90AAFEE");
+        public static BigInteger P = new BigInteger("7A39FF57BCBFAA521DCE9C7DEFAB520640AC493E1B6024B95A28390E8F05787D");
+        public static byte[] staticKey = Conversions.HexStr2Bytes("AC34F3070DC0E52302C2E8DA0E3F7B3E63223697555DF54E7122A14DBC99A3E8");
+        public static BigInteger Two = new BigInteger(2);
+
+        BigInteger privateKey;
+        BigInteger exchangeKey = Two;
+        BigInteger exchangeKeyServer, session, validate;
+
+        SHA256 sha = SHA256.Create();
+        byte[] key;
+        TcpClient LoginServer;
+
+        public void GrabToken() // Login action
+        {
+            // Change Region based
+            if (metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("North America"))
+            {
+                RegionCB.SelectedIndex = RegionCB.FindStringExact("North America");
+                if (Debugging)
+                    Prompt.Popup("Using North America");
+            }
+            else
+            {
+                RegionCB.SelectedIndex = RegionCB.FindStringExact("Europe");
+                if (Debugging)
+                    Prompt.Popup("Using Europe");
+            }
+            // End region based
+
+            if (worker != null && worker.IsBusy)
+            {
+                LoginServer.Close();
+                worker.CancelAsync();
+            }
+
+            currentAppId = ((region)RegionCB.SelectedValue).appId;
+            currentValue = ((region)RegionCB.SelectedValue).value;
+
+            //Set some variables that are going to be used
+            epoch = ((long)(DateTime.UtcNow - new DateTime(2001, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds).ToString();
+            //username = metroTextBox1.Text;
+            //password = metroTextBox2.Text;
+            pid = System.Diagnostics.Process.GetCurrentProcess().Id.ToString();
+            privateKey = new BigInteger(sha.ComputeHash(BigInteger.genRandom(6).getBytes()));
+            exchangeKey = Two;
+            counter = 0;
+
+            worker = new BackgroundWorker();
+            worker.WorkerSupportsCancellation = true;
+            worker.DoWork += Try_Connection;
+            worker.RunWorkerAsync();
+        }
+
+
+        private bool LauncherInfo()
+        {
+            //Get login server for BNS Info
+            try
+            {
+                #region Get Login Server Info
+                string patch_server = "updater.nclauncher.ncsoft.com";
+                string game_id = "BnS";
+                int port = 27500;
+                MemoryStream ms = new MemoryStream();
+                BinaryWriter bw = new BinaryWriter(ms);
+                bw.Write((short)0);//place holder for length
+                bw.Write((short)8);//packet identifer, in this case login server information
+                bw.Write((byte)10);//seperator character
+                bw.Write((byte)game_id.Length);//write length of string
+                bw.Write(Encoding.ASCII.GetBytes(game_id));//write string
+                bw.BaseStream.Position = 0;//go back to start to update length
+                bw.Write((short)ms.Length);
+
+                TcpClient client = new TcpClient(patch_server, port);
+
+                localIP = ((IPEndPoint)client.Client.LocalEndPoint).Address.ToString();
+                NetworkStream ns = client.GetStream();
+                ns.Write(ms.ToArray(), 0, (int)ms.Length);
+                bw.Close();
+                ms.Close();
+                bw = null;
+
+                ms = new MemoryStream();
+                BinaryReader br = new BinaryReader(ms);
+                byte[] buffer = new byte[1024];
+                int bytesRec = 0;
+
+                //Read data sent back from patch server;
+                do
+                {
+                    bytesRec = ns.Read(buffer, 0, buffer.Length);
+
+                    if (bytesRec > 0)
+                    {
+                        ms.Write(buffer, 0, bytesRec);
+                    }
+                }
+                while (bytesRec == buffer.Length);
+
+                //Read Login Info
+                ms.Position = 9; //skip to length of string sent back
+                br.ReadBytes(br.ReadByte() + 1); //read string + next byte
+                string xml = Encoding.UTF8.GetString(br.ReadBytes(br.ReadByte() + (128 * (br.ReadByte() - 1))));
+                ns.Close();
+                br.Close();
+                ms.Close();
+                #endregion
+                xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<Settings>" + xml.Replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "").Replace("  ", "\r\n") + "\r\n</Settings>";
+                LoginIp = Regex.Match(xml, "ip=\"([^\"]*)\"", RegexOptions.IgnoreCase).Groups[1].Value;
+                LoginPort = Int32.Parse(Regex.Match(xml, "port=\"([^\"]*)\"", RegexOptions.IgnoreCase).Groups[1].Value);
+                LoginProgramid = Regex.Match(xml, "programid=\"([^\"]*)\"", RegexOptions.IgnoreCase).Groups[1].Value;
+                //LoginAppid = Regex.Match(xml, "appid=\"([^\"]*)\"", RegexOptions.IgnoreCase).Groups[1].Value;
+
+                XmlDocument xmldoc = new XmlDocument();
+                xmldoc.LoadXml(xml);
+
+                foreach (XmlElement regionEle in xmldoc.SelectNodes("//region"))
+                {
+                    regions.Add(new region(regionEle.Attributes["name"].Value, regionEle.Attributes["value"].Value, regionEle.Attributes["appid"].Value));
+                }
+
+                //Prompt.Popup(String.Format("IP: {0}\nPort: {1}\nProgramID: {2}\nAppID: {3}", LoginIp, LoginPort, LoginProgramid/*, LoginAppid */));
+            }
+            catch (Exception ex)
+            {
+                Prompt.Popup("There was an error connecting to the Login Server, please make sure there isn't a maintenance.");
+                if (Debugging)
+                    Prompt.Popup(ex.ToString());
+                return false;
+            }
+            return true;
+        }
+
+        public class BNSXorEncryption
+        {
+            byte[] encKey, decKey;
+            int encCounter, decCounter, encSum, decSum;
+            byte[] key;
+            public BNSXorEncryption(byte[] keyInt)
+            {
+                key = keyInt;
+            }
+
+            public byte[] Encrypt(byte[] src, int offset, int len)
+            {
+                if (encKey == null)
+                {
+                    if (key != null)
+                    {
+                        encKey = new byte[key.Length];
+                        key.CopyTo(encKey, 0);
+                        encCounter = 0;
+                    }
+                    else
+                        return null;
+                }
+                return BlockEncrypt(src, encKey, ref encCounter, ref encSum);
+            }
+
+            public byte[] Decrypt(byte[] src, int offset, int len)
+            {
+                if (decKey == null)
+                {
+                    if (key != null)
+                    {
+                        decKey = new byte[key.Length];
+                        key.CopyTo(decKey, 0);
+                        decCounter = 0;
+                    }
+                    else
+                        return null;
+                }
+                return BlockEncrypt(src, decKey, ref decCounter, ref decSum);
+            }
+
+            byte[] BlockEncrypt(byte[] src, byte[] key, ref int counter, ref int sum)
+            {
+                for (int i = 0; i < src.Length; i++)
+                {
+                    int index = (counter + 1) & 0xFF;
+                    counter = index;
+                    int v11 = (sum + key[index]) & 0xFF;
+                    sum = v11;
+                    int v12 = key[index];
+                    key[index] = key[v11];
+                    key[v11] = (byte)v12;
+                    src[i] = (byte)(src[i] ^ key[(key[sum] + key[counter]) & 0xFF]);
+                }
+                return src;
+            }
+        }
+
+        class region
+        {
+            public string name;
+            public string value;
+            public string appId;
+
+            public region(string n, string v, string a)
+            {
+                name = n;
+                value = v;
+                appId = a;
+            }
+
+            public override string ToString()
+            {
+                return name;
+            }
+        }
+
+        private void Form1_Load_1(object sender, EventArgs e)
+        {
+            // Continue
+            if (!LauncherInfo())
+                this.Close();
+
+            RegionCB.DataSource = regions;
+        }
+
+        BigInteger GetKeyExchange()
+        {
+            if (exchangeKey == Two)
+                exchangeKey = Two.modPow(privateKey, N);
+            return exchangeKey;
+        }
+
+        BigInteger SHA256Hash2ArrayInverse(byte[] tmp1, byte[] tmp2)
+        {
+            BigInteger hash;
+            byte[] combine = new byte[tmp1.Length + tmp2.Length];
+            tmp1.CopyTo(combine, 0);
+            tmp2.CopyTo(combine, tmp1.Length);
+            byte[] buf = sha.ComputeHash(combine);
+            byte[] res = IntegerReverse(buf);
+            hash = new BigInteger(res);
+            return hash;
+        }
+
+        byte[] IntegerReverse(byte[] buf)
+        {
+            byte[] res = new byte[buf.Length];
+            for (int i = 0; i < res.Length / 4; i++)
+            {
+                fixed (byte* ptr = buf)
+                {
+                    fixed (byte* ptr2 = res)
+                    {
+                        int* src = (int*)ptr;
+                        int* dst = (int*)ptr2;
+                        dst[i] = src[res.Length / 4 - 1 - i];
+                    }
+                }
+            }
+
+            return res;
+        }
+
+        byte[] GenerateEncryptionKeyRoot(byte[] src)
+        {
+            int firstSize = src.Length;
+            int startIndex = 0;
+            byte[] half;
+            byte[] dst = new byte[64];
+            if (src.Length > 4)
+            {
+                do
+                {
+                    if (src[startIndex] == 0)
+                        break;
+                    firstSize--;
+                    startIndex++;
+                } while (firstSize > 4);
+
+            }
+            int size = firstSize >> 1;
+            half = new byte[size];
+            if (size > 0)
+            {
+                int index = startIndex + firstSize - 1;
+                for (int i = 0; i < size; i++)
+                {
+                    half[i] = src[index];
+                    index -= 2;
+                }
+            }
+            byte[] hash = sha.ComputeHash(half, 0, size);
+            for (int i = 0; i < 32; i++)
+            {
+                dst[2 * i] = hash[i];
+            }
+            if (size > 0)
+            {
+                int index = startIndex + firstSize - 2;
+                for (int i = 0; i < size; i++)
+                {
+                    half[i] = src[index];
+                    index -= 2;
+                }
+            }
+            hash = sha.ComputeHash(half, 0, size);
+            for (int i = 0; i < 32; i++)
+            {
+                dst[2 * i + 1] = hash[i];
+            }
+            return dst;
+        }
+
+        byte[] CombineBuffers(params byte[][] buffers)
+        {
+            int len = 0;
+            foreach (byte[] i in buffers)
+            {
+                len += i.Length;
+            }
+            byte[] res = new byte[len];
+            int index = 0;
+            foreach (byte[] i in buffers)
+            {
+                i.CopyTo(res, index);
+                index += i.Length;
+            }
+            return res;
+        }
+
+        byte[] Generate256BytesKey(byte[] src)
+        {
+            int v7 = 1;
+            byte[] res = new byte[256];
+            for (int i = 0; i < 256; i++)
+                res[i] = (byte)i;
+            int v6 = 0;
+            int counter = 0;
+            for (int i = 64; i > 0; i--)
+            {
+                int v9 = (v6 + src[counter] + res[v7 - 1]) & 0xFF;
+                int v10 = res[v7 - 1];
+                res[v7 - 1] = res[v9];
+                int v8 = counter + 1;
+                res[v9] = (byte)v10;
+                if (v8 == src.Length)
+                    v8 = 0;
+                int v13 = v9 + src[v8];
+                int v11 = v8 + 1;
+                int v14 = v13 + res[v7];
+                v13 = res[v7];
+                int v12 = (byte)v14;
+                res[v7] = res[v12];
+                res[v12] = (byte)v13;
+                if (v11 == src.Length)
+                    v11 = 0;
+                int v16 = (v12 + src[v11] + res[v7 + 1]) & 0xFF;
+                int v17 = res[v7 + 1];
+                res[v7 + 1] = res[v16];
+                int v15 = v11 + 1;
+                res[v16] = (byte)v17;
+                if (v15 == src.Length)
+                    v15 = 0;
+                int v18 = v16 + src[v15];
+                int v19 = res[v7 + 2];
+                v6 = (v18 + res[v7 + 2]) & 0xFF;
+                counter = v15 + 1;
+                res[v7 + 2] = res[v6];
+                res[v6] = (byte)v19;
+                if (counter == src.Length)
+                    counter = 0;
+                v7 += 4;
+            }
+            return res;
+        }
+
+        private string Builder(string nameSpace, string function)
+        {
+            counter++;
+            switch (nameSpace)
+            {
+                case "Sts":
+                    {
+                        switch (function)
+                        {
+                            case "Connect":
+                                {
+                                    string data = String.Format(
+                                        "<Connect>\n" +
+                                        "<ConnType>400</ConnType>\n" +
+                                        "<Address>{0}</Address>\n" +
+                                        "<ProductType>0</ProductType>\n" +
+                                        "<AppIndex>1</AppIndex>\n" +
+                                        "<Epoch>{1}</Epoch>\n" +
+                                        "<Program>{2}</Program>\n" +
+                                        "<Build>1001</Build>\n" +
+                                        "<Process>{3}</Process>\n" +
+                                        "</Connect>\n",
+                                        localIP,
+                                        epoch,
+                                        LoginProgramid,
+                                        pid);
+                                    return string.Format("POST /Sts/Connect STS/1.0\r\nl:{0}\r\n\r\n{1}", data.Length, data);
+                                }
+                                break;
+                            case "Ping":
+                                {
+                                    return "POST /Sts/Ping STS/1.0\r\nl:0\r\n\r\n";
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    break;
+                case "Auth":
+                    {
+                        switch (function)
+                        {
+                            case "LoginStart":
+                                {
+                                    string data = String.Format(
+                                        "<Request>\n" +
+                                        "<LoginName>{0}</LoginName>\n" +
+                                        "</Request>\n",
+                                        username
+                                        );
+
+                                    return string.Format("POST /Auth/LoginStart STS/1.0\r\ns:{4}\r\np:*{0} 0 1 0 {1}\r\nl:{2}\r\n\r\n{3}", localIP, epoch, data.Length, data, counter);
+                                }
+                                break;
+                            case "KeyData":
+                                {
+                                    byte[][] values = GenerateKeyClient(exchangeKeyServer);
+                                    MemoryStream ms = new MemoryStream();
+                                    BinaryWriter bw = new BinaryWriter(ms);
+
+                                    bw.Write(exchangeKey.getBytes().Length);
+                                    bw.Write(exchangeKey.getBytes());
+                                    bw.Write(values[0].Length);
+                                    bw.Write(values[0]);
+
+                                    validate = new BigInteger(values[1]);
+
+                                    string data = String.Format(
+                                        "<Request>\n" +
+                                        "<KeyData>{0}</KeyData>\n" +
+                                        "</Request>\n",
+                                        Convert.ToBase64String(ms.ToArray())
+                                        );
+
+                                    bw.Close();
+                                    ms.Close();
+
+                                    return string.Format("POST /Auth/KeyData STS/1.0\r\ns:{4}\r\np:*{0} 0 1 0 {1}\r\nl:{2}\r\n\r\n{3}", localIP, epoch, data.Length, data, counter);
+                                }
+                                break;
+                            case "LoginFinish":
+                                {
+                                    string data = "<Request>\n<Language>1</Language>\n</Request>\n";
+                                    return string.Format("POST /Auth/LoginFinish STS/1.0\r\ns:{2}\r\nl:{0}\r\n\r\n{1}", data.Length, data, counter);
+                                }
+                                break;
+                            case "RequestToken":
+                                {
+                                    string data = String.Format(
+                                        "<Request>\n" +
+                                        "<AppId>{0}</AppId>\n" +
+                                        "</Request>\n",
+                                         currentAppId);
+                                    return string.Format("POST /Auth/RequestToken STS/1.0\r\ns:{2}\r\nl:{0}\r\n\r\n{1}", data.Length, data, counter);
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            return null;
+        }
+
+        public void Try_Connection(object sender, DoWorkEventArgs e)
+        {
+
+            try
+            {
+                LoginServer = new TcpClient(LoginIp, LoginPort);
+                LoginServer.ReceiveBufferSize = 1024;
+                NetworkStream ns = LoginServer.GetStream();
+                ns.ReadTimeout = 60000;
+                ns.ReadTimeout = 60000;
+
+                DateTime lastSent = DateTime.Now;
+                int pingInterval = 30;
+                
+                string packet = Builder("Sts", "Connect");
+                ns.Write(Encoding.ASCII.GetBytes(packet), 0, packet.Length);
+
+                if (Debugging)
+                    Prompt.Popup("Sent Sts request to connect");
+
+                packet = Builder("Auth", "LoginStart");
+                ns.Write(Encoding.ASCII.GetBytes(packet), 0, packet.Length);
+
+                if (Debugging)
+                    Prompt.Popup("Sent Auth request to start login");
+
+                MemoryStream ms = new MemoryStream();
+                byte[] buffer = new byte[1024];
+                int bytesRec = 0;
+
+                //Read data sent back from login server
+                do
+                {
+                    bytesRec = ns.Read(buffer, 0, buffer.Length);
+
+                    if (bytesRec > 0)
+                    {
+                        ms.Write(buffer, 0, bytesRec);
+                    }
+                }
+                while (bytesRec == buffer.Length);
+                string reply = Encoding.ASCII.GetString(ms.ToArray());
+                reply = reply.Split('\r')[0].Split(' ')[2];
+
+                if (Debugging)
+                    Prompt.Popup("Server Reply: " + reply);
+
+                switch (reply)
+                {
+                    case "OK":
+                        break;
+                    case "ErrAccountNotFound":
+                        Prompt.Popup("The provided email address wasn't found");
+                        metroButton1.Enabled = true;
+                        Show(); // Shows the program on taskbar
+                        this.WindowState = FormWindowState.Normal; // Undoes the minimized state of the form
+                        return;
+                    default:
+                        Prompt.Popup("Invalidly formated email");
+                        metroButton1.Enabled = true;
+                        Show(); // Shows the program on taskbar
+                        this.WindowState = FormWindowState.Normal; // Undoes the minimized state of the form
+                        return;
+                }
+                ms.Close();
+
+                // crash occurs here
+                try
+                {
+                    ms = new MemoryStream();
+                    do
+                    {
+                        bytesRec = ns.Read(buffer, 0, buffer.Length);
+
+                        if (bytesRec > 0)
+                        {
+                            ms.Write(buffer, 0, bytesRec);
+                        }
+                    }
+                    while (bytesRec == buffer.Length);
+                }
+                catch
+                {
+                    Prompt.Popup("Please verify your new ip to NCSoft's website(whitelist via security settings) or NCSoft Launcher via pin confirmation.");
+                    foreach (var process in Process.GetProcessesByName("Client"))
+                    {
+                        process.Kill();
+                    }
+                    metroButton1.Enabled = true;
+                    Show(); // Shows the program on taskbar
+                    this.WindowState = FormWindowState.Normal; // Undoes the minimized state of the form
+                    return;
+                }
+
+                reply = Encoding.ASCII.GetString(ms.ToArray());
+                ms.Close();
+                reply = Regex.Match(reply, "<KeyData>([^<]*)</KeyData>", RegexOptions.IgnoreCase).Groups[1].Value;
+                ms = new MemoryStream(Convert.FromBase64String(reply));
+                
+                BinaryReader br = new BinaryReader(ms);
+                session = new BigInteger(br.ReadBytes(br.ReadInt32()));
+                exchangeKeyServer = new BigInteger(br.ReadBytes(br.ReadInt32()));
+                br.Close();
+                ms.Close();
+
+                if (Debugging)
+                    Prompt.Popup("Server Reply 1: " + session);
+                if (Debugging)
+                    Prompt.Popup("Server Reply 2: " + exchangeKeyServer);
+
+                packet = Builder("Auth", "KeyData");
+                ns.Write(Encoding.ASCII.GetBytes(packet), 0, packet.Length);
+
+                //Read data sent back from login server
+                ms = new MemoryStream();
+                do
+                {
+                    bytesRec = ns.Read(buffer, 0, buffer.Length);
+
+                    if (bytesRec > 0)
+                    {
+                        ms.Write(buffer, 0, bytesRec);
+                    }
+                }
+                while (bytesRec == buffer.Length);
+                reply = Encoding.ASCII.GetString(ms.ToArray());
+                reply = reply.Split('\r')[0].Split(' ')[2];
+                switch (reply)
+                {
+                    case "OK":
+                        break;
+                    case "ErrBadPasswd":
+                        Prompt.Popup("Wrong Password or Email");
+                        metroButton1.Enabled = true;
+                        Show(); // Shows the program on taskbar
+                        this.WindowState = FormWindowState.Normal; // Undoes the minimized state of the form
+                        return;
+                    case "ErrRiskMgmtDeclined":
+                        Prompt.Popup("You have exceeded the number of attempts allowed.\r\nFor security reasons, login is temporarily disabled.\r\nPlease try again later.");
+                        metroButton1.Enabled = true;
+                        Show(); // Shows the program on taskbar
+                        this.WindowState = FormWindowState.Normal; // Undoes the minimized state of the form
+                        return;
+                    default:
+                        Prompt.Popup("Unknown Error: " + reply);
+                        metroButton1.Enabled = true;
+                        Show(); // Shows the program on taskbar
+                        this.WindowState = FormWindowState.Normal; // Undoes the minimized state of the form
+                        return;
+                }
+                ms.Close();
+                ms = new MemoryStream();
+                do
+                {
+                    bytesRec = ns.Read(buffer, 0, buffer.Length);
+
+                    if (bytesRec > 0)
+                    {
+                        ms.Write(buffer, 0, bytesRec);
+                    }
+                }
+                while (bytesRec == buffer.Length);
+
+                reply = Encoding.ASCII.GetString(ms.ToArray());
+                ms.Close();
+                reply = Regex.Match(reply, "<KeyData>([^<]*)</KeyData>", RegexOptions.IgnoreCase).Groups[1].Value;
+                ms = new MemoryStream(Convert.FromBase64String(reply));
+                br = new BinaryReader(ms);
+                buffer = br.ReadBytes(br.ReadInt32());
+
+                if (new BigInteger(buffer) == validate)
+                {
+                    var xor = new BNSXorEncryption(key);
+
+                    packet = Builder("Auth", "LoginFinish");
+                    buffer = Encoding.ASCII.GetBytes(packet);
+                    buffer = xor.Encrypt(buffer, 0, buffer.Length);
+                    ns.Write(buffer, 0, buffer.Length);
+
+                    buffer = new byte[1024];
+                    ms = new MemoryStream();
+                    do
+                    {
+                        bytesRec = ns.Read(buffer, 0, buffer.Length);
+
+                        if (bytesRec > 0)
+                        {
+                            ms.Write(buffer, 0, bytesRec);
+                        }
+                    }
+                    while (bytesRec == buffer.Length);
+                    buffer = ms.ToArray();
+                    buffer = xor.Decrypt(buffer, 0, buffer.Length);
+                    ms.Close();
+
+                    buffer = new byte[1024];
+                    ms = new MemoryStream();
+                    try
+                    {
+                        do
+                        {
+                            bytesRec = ns.Read(buffer, 0, buffer.Length);
+
+                            if (bytesRec > 0)
+                            {
+                                ms.Write(buffer, 0, bytesRec);
+                            }
+                        }
+                        while (bytesRec == buffer.Length);
+                    }
+                    catch
+                    {
+                        Prompt.Popup("Please verify your new ip to NCSoft's website(whitelist via security settings) or NCSoft Launcher via pin confirmation.");
+                        foreach (var process in Process.GetProcessesByName("Client"))
+                        {
+                            process.Kill();
+                        }
+                        metroButton1.Enabled = true;
+                        Show(); // Shows the program on taskbar
+                        this.WindowState = FormWindowState.Normal; // Undoes the minimized state of the form
+                        return;
+                    }
+                    buffer = ms.ToArray();
+                    buffer = xor.Decrypt(buffer, 0, buffer.Length);
+                    packet = Encoding.ASCII.GetString(buffer);
+
+                    if (Debugging)
+                        Prompt.Popup("Debug: 0" + packet.ToString());
+
+                    if (packet.Contains("<AuthType>8</AuthType>"))
+                    {
+                        Prompt.Popup("This launcher doesn't support IP Verification, please do so on the website or official launcher then try again");
+                        Show();
+                        metroButton1.Enabled = true;
+                        this.WindowState = FormWindowState.Normal; // Undoes the minimized state of the form
+                        return;
+                    }
+                    ms.Close();
+
+                    packet = Builder("Auth", "RequestToken");
+                    buffer = Encoding.ASCII.GetBytes(packet);
+                    buffer = xor.Encrypt(buffer, 0, buffer.Length);
+                    ns.Write(buffer, 0, buffer.Length);
+
+                    buffer = new byte[1024];
+                    ms = new MemoryStream();
+                    do
+                    {
+                        bytesRec = ns.Read(buffer, 0, buffer.Length);
+
+                        if (bytesRec > 0)
+                        {
+                            ms.Write(buffer, 0, bytesRec);
+                        }
+                    }
+                    while (bytesRec == buffer.Length);
+                    buffer = ms.ToArray();
+                    buffer = xor.Decrypt(buffer, 0, buffer.Length);
+                    if (Debugging)
+                        Prompt.Popup(Encoding.ASCII.GetString(buffer));
+                    ms.Close();
+
+                    reply = Encoding.ASCII.GetString(buffer);
+                    token = Regex.Match(reply, "<AuthnToken>([^<]*)</AuthnToken>", RegexOptions.IgnoreCase).Groups[1].Value;
+                    Action<bool> update = login_enable;
+                    Invoke(update, true);
+                }
+                else
+                {
+                    Prompt.Popup("Negotiation Failed, please try again.");
+                    key = null;
+                }
+
+                while (LoginServer.Connected)
+                {
+                    if (DateTime.Now >= lastSent.AddSeconds(pingInterval))
+                    {
+                        packet = Builder("Sts", "Ping");
+                        buffer = Encoding.ASCII.GetBytes(packet);
+                        if (key != null)
+                        {
+                            buffer = xor.Encrypt(buffer, 0, buffer.Length);
+                        }
+                        ns.Write(buffer, 0, buffer.Length);
+                        lastSent = DateTime.Now;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (GameStarted == false)
+                {
+                    //Prompt.Popup("Unknown Network Error");
+                    if (Debugging)
+                        Prompt.Popup(ex.ToString());
+                }
+            }
+        }
+
+        void login_enable(bool yes)
+        {
+            if (!metroLabel14.Text.Contains("Clean"))
+            {
+                RestoreConfigFiles();
+            }
+            // Return token
+            string tmp = String.Format(args, token);
+            FinalToken = tmp;
+            Process proc = new Process();
+            proc.StartInfo.FileName = LaunchPath;
+            proc.StartInfo.Arguments = "-lang:" + languageID + " -lite:2 -region:" + regionID + " /AuthnToken:\"" + FinalToken + "\" /AuthProviderCode:\"np\" /sesskey /launchbylauncher  /CompanyID:12 /ChannelGroupIndex:-1 " + UseAllCores + " " + Unattended + " " + NoTextureStreaming + " " + metroTextBox5.Text;
+            proc.StartInfo.UseShellExecute = false;
+            proc.StartInfo.RedirectStandardError = true;
+            try
+            {
+                proc.Start();
+                AddTextLog("Started Client.exe!");
+                GameStarted = true;
+                this.WindowState = FormWindowState.Minimized;
+            }
+            catch
+            {
+                Show();
+                notifyIcon1.Visible = false;
+                metroButton1.Enabled = true;
+                // Verify mod manager
+                foreach (TreeNode nodes in treeView2.Nodes)
+                {
+                    if (nodes != null)
+                    {
+                        RealModPath = FullModPathMan + "\\" + nodes.FullPath.ToString();
+                        if (Directory.Exists(RealModPath))
+                        {
+                            checkButtons(true);
+                        }
+                        else
+                        {
+                            nodes.Remove();
+                        }
+                    }
+                }
+                //
+                AddTextLog("Error: Could Not Start Client.exe!");
+            }
+        }
+
+        public byte[][] GenerateKeyClient(BigInteger exchangeKey)
+        {
+            byte[] passwordHash = sha.ComputeHash(Encoding.ASCII.GetBytes(username + ":" + password)); // ASCII
+
+            BigInteger hash1 = SHA256Hash2ArrayInverse(this.GetKeyExchange().getBytes(), exchangeKey.getBytes());
+
+            BigInteger hash2 = SHA256Hash2ArrayInverse(session.getBytes(), passwordHash);
+
+            BigInteger v27 = new BigInteger(exchangeKey.getBytes());
+            BigInteger v25 = Two.modPow(hash2, N);
+            v25 = (v25 * P) % N;
+            while (v27 < v25)
+                v27 += N;
+            v27 -= v25;
+
+            BigInteger v24 = ((hash1 * hash2) + privateKey) % N;
+            BigInteger v21 = v27.modPow(v24, N);
+
+            key = GenerateEncryptionKeyRoot(v21.getBytes());
+            byte[] chash1 = sha.ComputeHash(CombineBuffers(staticKey, sha.ComputeHash(Encoding.ASCII.GetBytes(username)), session.getBytes(), this.GetKeyExchange().getBytes(), exchangeKey.getBytes(), key));
+            byte[] chash2 = sha.ComputeHash(CombineBuffers(this.GetKeyExchange().getBytes(), chash1, key));
+            key = Generate256BytesKey(key);
+
+            return new byte[][] { chash1, chash2 };
+        }
+
+
     }
-   
 }
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+// Seperator!     ||     Dat Decrypter/Encrypter
+///////////////////////////////////////////////////////////////////////////////////////////////
+
 
 namespace BNSDat
 {
@@ -5114,4 +7114,3 @@ namespace BNSDat
         }
     }
 }
-

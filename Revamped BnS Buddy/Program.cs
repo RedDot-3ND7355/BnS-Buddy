@@ -27,6 +27,8 @@ namespace Revamped_BnS_Buddy
             EmbeddedAssembly.Load(resource4, "FastColoredTextBox.dll");
             string resource5 = "Revamped_BnS_Buddy.Ionic.Zlib.dll";
             EmbeddedAssembly.Load(resource5, "Ionic.Zlib.dll");
+            string resource6 = "Revamped_BnS_Buddy.BigInteger.dll";
+            EmbeddedAssembly.Load(resource6, "BigInteger.dll");
             /*string resource6 = "Revamped_BnS_Buddy.BNSDat.dll";
             EmbeddedAssembly.Load(resource6, "BNSDat.dll");*/
             //string resource2 = "WindowsFormsApplication3.cscompmgd.dll";

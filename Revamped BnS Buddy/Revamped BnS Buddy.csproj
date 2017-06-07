@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Revamped_BnS_Buddy</RootNamespace>
     <AssemblyName>BnS Buddy</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile>
@@ -39,6 +39,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -49,6 +50,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>p1_2134088_1e7a9a64.ico</ApplicationIcon>
@@ -60,7 +63,7 @@
     <TargetZone>LocalIntranet</TargetZone>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -81,6 +84,10 @@
     <StartupObject>Revamped_BnS_Buddy.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BigInteger">
+      <HintPath>C:\Users\Endless\Desktop\Replacement Launcher\BigInteger.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="FastColoredTextBox">
       <HintPath>..\..\..\..\..\Desktop\BnSArk-master\BnSLauncher\FastColoredTextBox.dll</HintPath>
       <Private>False</Private>
@@ -110,6 +117,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -184,6 +193,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="BigInteger.dll" />
     <Content Include="BnSClient.ico" />
     <None Include="Resources\BnS Buddy Updater.exe" />
     <EmbeddedResource Include="SharpCompress.dll" />
