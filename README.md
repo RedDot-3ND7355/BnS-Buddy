@@ -28,6 +28,18 @@ Requirements:
 
 
 Change Log:
+
+Version 5.8.7.1
++ Added: Auto Memory Cleaner at game start and Memory Cleaner Button
++ Added: Multiple Account Remember me
++ Fixed Bug: Packet Buffer empty due to lost connection crashes BnS Buddy
++ Fixed Bug: Restoring addons automatically on startup prevented users to open game
++ Fixed Bug: Backup and restore for addons weren't implemented properly
++ Fixed Bug: Applying any addons would hang app.
++ Fixed Bug: Fixed popup in Login form weren't proper style
++ Fixed Bug: Password encryption weren't enough suffisticated 
++ Fixed Bug: Ok button on help window for login wasn't positioned properly
+
 Version 5.8.7 (TESTING PHASE)
 + Server: Unblocked all countries that could not download BnS Buddy, online version check and updater 
 + Added: Custom paths for mods (General use) 
