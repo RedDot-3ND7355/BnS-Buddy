@@ -65,7 +65,7 @@ namespace Revamped_BnS_Buddy
         // End Taiwan
         public string CustomGamePath = "";
         public string CustomClientPath = "";
-        public string DefaultValues = "unattended = false" + Environment.NewLine + "notexturestreaming = false" + Environment.NewLine + "savelogs = false" + Environment.NewLine + "showlogs = true" + Environment.NewLine + "variables = false" + Environment.NewLine + "tooltips = true" + Environment.NewLine + "customgame = false" + Environment.NewLine + "customclient = false" + Environment.NewLine + "admincheck = true" + Environment.NewLine + "ncsoftlogin = false" + Environment.NewLine + "showdonate = true" + Environment.NewLine + "minimize = true" + Environment.NewLine + "launcherlogs = false" + Environment.NewLine + "modmanlogs = false" + Environment.NewLine + "customclientpath = " + Environment.NewLine + "customgamepath = " + Environment.NewLine + "updatechecker = true" + Environment.NewLine + "pingchecker = true" + Environment.NewLine + "gamekiller = true" + Environment.NewLine + "useallcores = false" + Environment.NewLine + "arguements = " + Environment.NewLine + "prtime = 500" + Environment.NewLine + "autoupdate = true" + Environment.NewLine + "firsttime = true" + Environment.NewLine + "default = " + Environment.NewLine + "defaultset = false" + Environment.NewLine + "defaultclient = " + Environment.NewLine + "priority = Normal" + Environment.NewLine + "modfolder = " + Environment.NewLine + "modfolderset = false" + Environment.NewLine + "customlangset = false" + Environment.NewLine + "customlang = " + Environment.NewLine + "rememberme = false";
+        public string DefaultValues = "unattended = false" + Environment.NewLine + "notexturestreaming = false" + Environment.NewLine + "savelogs = false" + Environment.NewLine + "showlogs = true" + Environment.NewLine + "variables = false" + Environment.NewLine + "tooltips = true" + Environment.NewLine + "customgame = false" + Environment.NewLine + "customclient = false" + Environment.NewLine + "admincheck = true" + Environment.NewLine + "ncsoftlogin = false" + Environment.NewLine + "showdonate = true" + Environment.NewLine + "minimize = true" + Environment.NewLine + "launcherlogs = false" + Environment.NewLine + "modmanlogs = false" + Environment.NewLine + "customclientpath = " + Environment.NewLine + "customgamepath = " + Environment.NewLine + "updatechecker = true" + Environment.NewLine + "pingchecker = true" + Environment.NewLine + "gamekiller = true" + Environment.NewLine + "useallcores = false" + Environment.NewLine + "arguements = " + Environment.NewLine + "prtime = 500" + Environment.NewLine + "autoupdate = true" + Environment.NewLine + "firsttime = true" + Environment.NewLine + "default = " + Environment.NewLine + "defaultset = false" + Environment.NewLine + "defaultclient = " + Environment.NewLine + "priority = Normal" + Environment.NewLine + "modfolder = " + Environment.NewLine + "modfolderset = false" + Environment.NewLine + "rememberme = false" + Environment.NewLine + "automemorycleanup = false";
         public string ActiveDataFile = "";
         public string XmlSavePath = "";
         public string NewDat = "";
@@ -92,6 +92,7 @@ namespace Revamped_BnS_Buddy
         public bool FirstTime = true;
         public bool readyclient = false;
         public bool MultipleInstallationFound = false;
+        public bool AutoClean = false;
         public string online = "";
         public string offline = "";
         public int bad = Convert.ToInt32("120");
@@ -686,7 +687,7 @@ namespace Revamped_BnS_Buddy
                                     if (MultipleLangFound == false)
                                     {
                                         // Add Lang to Dictionary
-                                        if (!LangDictionary.ContainsValue(subdir2.ToString()))
+                                        if (!LangDictionary.ContainsValue(subdir2.ToString()) && !LangDictionary.ContainsKey(ild))
                                         {
                                             LangDictionary.Add(ild, subdir2.ToString());
                                             // Increase int
@@ -743,7 +744,11 @@ namespace Revamped_BnS_Buddy
                     if (!orig.ToString().Contains("korean"))
                     {
                         tmp = Path.GetFileName(orig.Replace("\\CookedPC", "")).ToString();
-                    } else { tmp = Path.GetFileName(orig.ToString()); }
+                    }
+                    else
+                    {
+                        tmp = Path.GetFileName(orig.ToString());
+                    }
                     langpath = tmp;
                     //////////////////////////
                     AddTextLog("Lang Found!");
@@ -883,7 +888,11 @@ namespace Revamped_BnS_Buddy
                 if (!autocook.Contains("korean"))
                 {
                     DataPath = FullPath.Replace("\\" + autocook + "\\CookedPC", "\\data");
-                } else { DataPath = FullPath.Replace("\\bns\\CookedPC", "\\local\\NCSoft\\data"); }
+                }
+                else
+                {
+                    DataPath = FullPath.Replace("\\bns\\CookedPC", "\\local\\NCSoft\\data");
+                }
                 if (!Directory.Exists(DataPath)) { Prompt.Popup("Error: Invalid Data Path!" + Environment.NewLine + "Path: " + DataPath); }
             }
             else
@@ -1134,7 +1143,7 @@ namespace Revamped_BnS_Buddy
                 // Create if missing
                 if (!File.Exists(AppPath + "\\Settings.ini")) { File.WriteAllText(AppPath + "\\Settings.ini", DefaultValues); }
                 // Check if updated.
-                if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("rememberme"))
+                if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("automemorycleanup"))
                 {
                     // Save current settigns
                     string[] currentsettings = File.ReadAllLines(AppPath + "\\Settings.ini");
@@ -1181,10 +1190,6 @@ namespace Revamped_BnS_Buddy
                     metroToggle8.Checked = false;
                     AdminCheck = false;
                 }
-                //if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("ncsoftlogin = true"))
-                //{
-                //    metroToggle9.Checked = true;
-                //}
                 if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("showdonate = false"))
                 {
                     metroToggle10.Checked = false;
@@ -1247,6 +1252,12 @@ namespace Revamped_BnS_Buddy
                 {
                     string line = File.ReadLines(@AppPath + "\\Settings.ini").Skip(20).Take(1).First().Replace("arguements = ", "");
                     metroTextBox5.Text = line;
+                }
+                if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("automemorycleanup = true"))
+                {
+                    metroToggle18.Checked = true;
+                    AutoClean = true;
+                    metroButton30.Visible = false;
                 }
                 if (File.ReadAllText(AppPath + "\\Settings.ini").Contains(@"prtime = "))
                 {
@@ -1461,7 +1472,6 @@ namespace Revamped_BnS_Buddy
                 metroLabel11.Text = ping + ms;
                 AddTextLog("Changed RegionID to Japanese!");
                 regionID = "0";
-
                 metroButton1.Text = "Patch!";
             }
             else if (metroComboBox1.SelectedItem.ToString() == "Korean")
@@ -2024,6 +2034,7 @@ namespace Revamped_BnS_Buddy
             if (ShowLogs == true)
             {
                 metroTextBox1.AppendText(text + Environment.NewLine);
+                metroTextBox1.Refresh();
             }
             // Settings log checker
             if (SaveLogs == true)
@@ -2199,8 +2210,6 @@ namespace Revamped_BnS_Buddy
                     {
                         metroButton2.Enabled = true;
                     }
-                    AddTextLog("Restored Addons");
-                    RestoreAddons();
                 }
             }
             //End Check
@@ -2212,6 +2221,8 @@ namespace Revamped_BnS_Buddy
             int pinger = 0;
             try
             {
+                if (ping == null || ping == "")
+                    ping = "0";
                 pinger = Convert.ToInt32(ping);
             }
             catch { }
@@ -2498,6 +2509,17 @@ namespace Revamped_BnS_Buddy
             }
         }
 
+        private void metroButton30_Click(object sender, EventArgs e)
+        {
+            CleanMem();
+            AddTextLog("Memory Cleaned");
+        }
+
+        public void CleanMem()
+        {
+            GC.Collect();
+        }
+
         private void metroButton1_Click(object sender, EventArgs e)
         {
             if (GameStarted)
@@ -2732,6 +2754,11 @@ namespace Revamped_BnS_Buddy
                 proc.StartInfo.RedirectStandardError = true;
                 try
                 {
+                    // Clean memory if true
+                    if (AutoClean == true)
+                    {
+                        CleanMem();
+                    }
                     proc.Start();
                     AddTextLog("Started Client.exe!");
                     GameStarted = true;
@@ -3989,6 +4016,43 @@ namespace Revamped_BnS_Buddy
             }
         }
 
+        private void metroToggle18_CheckedChanged(object sender, EventArgs e)
+        {
+            if (PathFound == true)
+            {
+                if (metroToggle18.Checked == true)
+                {
+                    metroButton30.Visible = false;
+                    try
+                    {
+                        // Check Settings
+                        var fileContents = System.IO.File.ReadAllText(@AppPath + "\\Settings.ini");
+                        fileContents = fileContents.Replace("automemorycleanup = false", "automemorycleanup = true");
+                        System.IO.File.WriteAllText(@AppPath + "\\Settings.ini", fileContents);
+                    }
+                    catch
+                    {
+                        AddTextLog("Could not save option!");
+                    }
+                }
+                else
+                {
+                    metroButton30.Visible = true;
+                    try
+                    {
+                        // Check Settings
+                        var fileContents = System.IO.File.ReadAllText(@AppPath + "\\Settings.ini");
+                        fileContents = fileContents.Replace("automemorycleanup = true", "automemorycleanup = false");
+                        System.IO.File.WriteAllText(@AppPath + "\\Settings.ini", fileContents);
+                    }
+                    catch
+                    {
+                        AddTextLog("Could not save option!");
+                    }
+                }
+            }
+        }
+
         private void metroToggle6_CheckedChanged(object sender, EventArgs e)
         {
             if (PathFound == true)
@@ -4827,18 +4891,21 @@ namespace Revamped_BnS_Buddy
 
         public void InitializeAddons()
         {
-            RestoreAddons();
             AddonPaths();
             GenerateAddons();
         }
 
+        bool AddonsBackedUp = false;
         public void RestoreAddons()
         {
-            // HEY! UNTESTED
-            foreach (string files in Directory.GetFiles(DataPath + "\\editing\\backup"))
+            if (AddonsBackedUp == true)
             {
-                File.Copy(files, DataPath + "\\" + Path.GetFileName(files), true);
-            }
+                foreach (string files in Directory.GetFiles(DataPath + "\\editing\\backup"))
+                {
+                    File.Copy(files, DataPath + "\\" + Path.GetFileName(files), true);
+                }
+                AddTextLog("Restored Addons");
+            } else { AddTextLog("No new Addons to restore"); }
         }
 
         public void AddonPaths()
@@ -4869,7 +4936,6 @@ namespace Revamped_BnS_Buddy
 
         public void BackupConfigs()
         {
-            // HEY! UNTESTED
             foreach (string files in Directory.GetFiles(DataPath))
             {
                 if (files.Contains(".dat"))
@@ -4877,11 +4943,18 @@ namespace Revamped_BnS_Buddy
                     File.Copy(files, DataPath + "\\editing\\backup\\" + Path.GetFileName(files), true);
                 }
             }
+            AddonsBackedUp = true;
+            AddTextLog("Backed up Addons");
         }
 
+        Dictionary<int, string> AddonFiles = new Dictionary<int, string>();
         public void StartGameAddons()
         {
+            // Backup actual files
             BackupConfigs();
+            // Reset Dictionary
+            AddonFiles = new Dictionary<int, string>();
+            // Do modifications
             foreach (TreeNode addons in treeView3.Nodes)
             {
                 if (addons != null)
@@ -4890,6 +4963,21 @@ namespace Revamped_BnS_Buddy
                     {
                         StartPatching(addons.FullPath + ".patch");
                     }
+                }
+            }
+            // Compile completed work.
+            int afdef = AddonFiles.Count + 1;
+            for (int af = 1; afdef > af; af++)
+            {
+                if (AddonFiles.ContainsKey(af))
+                {
+                    //
+                    string tmp = AddonFiles[af].Replace(".files", "");
+                    AddTextLog("Compiling " + tmp);
+                    File.Delete(DataPath + "\\" + tmp);
+                    usedfilepathonly = DataPath + "\\" + AddonFiles[af];
+                    Compiler(tmp);
+                    AddTextLog("Compiled.");
                 }
             }
         }
@@ -4935,8 +5023,35 @@ namespace Revamped_BnS_Buddy
                 string ToFile = File.ReadLines(FullAddonPath + "\\" + filename).Skip(0).Take(1).First().Replace("FileName = ", "");
                 if (Debugging)
                     Prompt.Popup("File to patch: " + ToFile);
-                // Proceed to unpacking
-                Extractor(DataPath + "\\" + ToFile);
+                // Proceed to unpacking if not existing already
+                if (!Directory.Exists(DataPath + "\\" + ToFile + ".files"))
+                {
+                    // Add to dictionary
+                    int tmpaf = AddonFiles.Count + 1;
+                    string ToFileFolder = Path.GetDirectoryName(ToFile);
+                    Prompt.Popup("folder of file : " + ToFileFolder); // here
+                    if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFile))
+                    {
+                        AddonFiles.Add(tmpaf, ToFileFolder);
+                    }
+                    // Continue...
+                    AddTextLog("Decompiling " + ToFile);
+                    Extractor(DataPath + "\\" + ToFile);
+                    AddTextLog("Decompiled.");
+                }
+                else
+                {
+                    // Add to dictionary
+                    int tmpaf = AddonFiles.Count + 1;
+                    string ToFileFolder = Path.GetDirectoryName(ToFile);
+                    //Prompt.Popup("folder of file : " + ToFileFolder); // here
+                    if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFile))
+                    {
+                        AddonFiles.Add(tmpaf, ToFileFolder);
+                    }
+                    AddTextLog("File: " + ToFile + " already decompiled");
+                }
+                // Continue work
                 string Searcher = File.ReadLines(FullAddonPath + "\\" + filename).Skip(1).Take(1).First().Replace("Search = ", "");
                 if (Debugging)
                     Prompt.Popup("String to search: " + Searcher);
@@ -4950,13 +5065,12 @@ namespace Revamped_BnS_Buddy
                 {
                     ToText = ToText.Replace(Searcher, Replacer);
                     File.WriteAllText(DataPath + "\\" + ToFile, ToText);
-                    // Compile modified file
-                    Compiler(DataPath + "\\" + ToFile + ".files");
                     AddTextLog("Applied Addon: " + filename.Replace(".patch", ""));
                 }
                 else
                 {
                     AddTextLog("Addon: " + filename.Replace(".patch", "") + " couldn't be applied!");
+                    AddTextLog("Maybe already patched?");
                 }
             }
             else if (linecount > 4)
@@ -5005,10 +5119,10 @@ namespace Revamped_BnS_Buddy
                         else
                         {
                             AddTextLog("Error: Could not find " + Search[io]);
+                            AddTextLog("Maybe already done?");
                         }
                     }
                     File.WriteAllText(DataPath + "\\" + ToFile, ToText);
-                    Compiler(DataPath + "\\" + ToFile + ".files");
                     AddTextLog("Applied Addon: " + filename.Replace(".patch", ""));
                 }
                 else if (i > o)
@@ -6185,7 +6299,7 @@ namespace Revamped_BnS_Buddy
                     {
                         packet = Builder("Sts", "Ping");
                         buffer = Encoding.ASCII.GetBytes(packet);
-                        if (key != null)
+                        if (key != null && buffer != null && xor != null)
                         {
                             buffer = xor.Encrypt(buffer, 0, buffer.Length);
                         }
@@ -6198,7 +6312,6 @@ namespace Revamped_BnS_Buddy
             {
                 if (GameStarted == false)
                 {
-                    //Prompt.Popup("Unknown Network Error");
                     if (Debugging)
                         Prompt.Popup(ex.ToString());
                 }
@@ -6221,6 +6334,11 @@ namespace Revamped_BnS_Buddy
             proc.StartInfo.RedirectStandardError = true;
             try
             {
+                // Clean memory if true
+                if (AutoClean == true)
+                {
+                    CleanMem();
+                }
                 proc.Start();
                 AddTextLog("Started Client.exe!");
                 GameStarted = true;

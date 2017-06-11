@@ -39,6 +39,7 @@
             this.metroToolTip1 = new MetroFramework.Components.MetroToolTip();
             this.metroLabel4 = new MetroFramework.Controls.MetroLabel();
             this.metroCheckBox1 = new MetroFramework.Controls.MetroCheckBox();
+            this.metroComboBox1 = new MetroFramework.Controls.MetroComboBox();
             this.SuspendLayout();
             // 
             // metroLabel1
@@ -88,9 +89,9 @@
             // 
             // metroButton1
             // 
-            this.metroButton1.Location = new System.Drawing.Point(23, 169);
+            this.metroButton1.Location = new System.Drawing.Point(179, 169);
             this.metroButton1.Name = "metroButton1";
-            this.metroButton1.Size = new System.Drawing.Size(312, 25);
+            this.metroButton1.Size = new System.Drawing.Size(156, 29);
             this.metroButton1.TabIndex = 8;
             this.metroButton1.Text = "Sign in";
             this.metroButton1.Theme = MetroFramework.MetroThemeStyle.Dark;
@@ -149,11 +150,25 @@
             this.metroCheckBox1.Theme = MetroFramework.MetroThemeStyle.Dark;
             this.metroCheckBox1.UseVisualStyleBackColor = true;
             // 
+            // metroComboBox1
+            // 
+            this.metroComboBox1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.metroComboBox1.FormattingEnabled = true;
+            this.metroComboBox1.ItemHeight = 23;
+            this.metroComboBox1.Location = new System.Drawing.Point(23, 169);
+            this.metroComboBox1.Name = "metroComboBox1";
+            this.metroComboBox1.Size = new System.Drawing.Size(150, 29);
+            this.metroComboBox1.TabIndex = 13;
+            this.metroComboBox1.Theme = MetroFramework.MetroThemeStyle.Dark;
+            this.metroToolTip1.SetToolTip(this.metroComboBox1, "Select other accounts");
+            this.metroComboBox1.SelectedIndexChanged += new System.EventHandler(this.metroComboBox1_SelectedIndexChanged);
+            // 
             // Splash1
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.ClientSize = new System.Drawing.Size(358, 213);
             this.ControlBox = false;
+            this.Controls.Add(this.metroComboBox1);
             this.Controls.Add(this.metroCheckBox1);
             this.Controls.Add(this.metroLabel4);
             this.Controls.Add(this.metroLabel3);
@@ -190,5 +205,6 @@
         private MetroFramework.Components.MetroToolTip metroToolTip1;
         private MetroFramework.Controls.MetroLabel metroLabel4;
         private MetroFramework.Controls.MetroCheckBox metroCheckBox1;
+        private MetroFramework.Controls.MetroComboBox metroComboBox1;
     }
 }

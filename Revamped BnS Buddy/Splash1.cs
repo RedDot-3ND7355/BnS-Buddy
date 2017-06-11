@@ -9,6 +9,8 @@ using System.Security.Cryptography;
 using System.Security;
 using System.Collections;
 using Microsoft.Win32;
+using System.ComponentModel;
+using System.Drawing;
 
 namespace Revamped_BnS_Buddy
 {
@@ -21,40 +23,96 @@ namespace Revamped_BnS_Buddy
         public unsafe string password = @"";
         public unsafe string Protect;
         public unsafe string result;
+        public unsafe string SALT = "";
         public bool remembered = false;
+        public bool INTRUDER = false;
 
         public Splash1()
         {
             // Initialize Form
             InitializeComponent();
+            // Get Unique SALT
+            SALT = Security.FingerPrint.Value();
+            SALT = StringToHex(SALT);
             // Check if not already remembered
             if (File.ReadAllText(@AppPath + "\\Settings.ini").Contains("rememberme = true"))
             {
                 RegistryKey regKey = Registry.LocalMachine;
                 regKey = regKey.OpenSubKey(@"SOFTWARE\BnS Buddy\");
-                string tmp_user = string.Empty;
-                string tmp_pass = string.Empty;
-                if (regKey != null)
+
+                // foreach account login saved, add to dropbox
+                foreach (string InReg in regKey.GetSubKeyNames())
                 {
-                    tmp_user = regKey.GetValue("username").ToString();
-                    tmp_pass = regKey.GetValue("password").ToString();
-                    metroTextBox1.Text = Dec(tmp_user);
-                    metroTextBox2.Text = Dec(tmp_pass);
-                    metroCheckBox1.CheckState = CheckState.Checked;
+                    metroComboBox1.Items.Add(InReg.ToString());
+                }
+
+                if (metroComboBox1.Items.Count >= 1)
+                {
+                    metroComboBox1.SelectedIndex = 0;
+
+                    string tmp_user = string.Empty;
+                    string tmp_pass = string.Empty;
+                    if (regKey != null)
+                    {
+                        tmp_user = regKey.OpenSubKey(metroComboBox1.SelectedItem.ToString()).GetValue("username").ToString();
+                        tmp_pass = regKey.OpenSubKey(metroComboBox1.SelectedItem.ToString()).GetValue("password").ToString();
+                        metroTextBox1.Text = Dec(tmp_user);
+                        metroTextBox2.Text = Dec(tmp_pass);
+                        metroCheckBox1.CheckState = CheckState.Checked;
+                    }
                 }
             }
             // Check caps lock
             CheckLock();
         }
 
+        private string StringToHex(string s)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (char t in s)
+            {
+                sb.Append(Convert.ToInt32(t).ToString("x"));
+            }
+            return sb.ToString();
+        }
+
         string Enc(string s)
         {
-            return Convert.ToBase64String(MachineKey.Protect(Encoding.UTF8.GetBytes(s), "Basic Enc"));
+            s = String.Concat(s, SALT);
+            s = Convert.ToBase64String(MachineKey.Protect(Encoding.UTF8.GetBytes(s), "Basic Enc"));
+            return s;
         }
 
         string Dec(string s)
         {
-            return Encoding.UTF8.GetString(MachineKey.Unprotect(Convert.FromBase64String(s), "Basic Enc"));
+            s = Encoding.UTF8.GetString(MachineKey.Unprotect(Convert.FromBase64String(s), "Basic Enc"));
+            if (s.Contains(SALT))
+            {
+                s = s.Replace(SALT, "");
+            }
+            else
+            {
+                s = "";
+                if (INTRUDER == false)
+                {
+                    Prompt.Popup("Did you changed hardware? Because I don't recognize you.");
+                    metroComboBox1.Enabled = false;
+                    ClearRegistry();
+                    INTRUDER = true;
+                }
+            }
+            return s;
+        }
+
+        public void ClearRegistry()
+        {
+            RegistryKey regKey = Registry.LocalMachine;
+            regKey = regKey.OpenSubKey(@"SOFTWARE\BnS Buddy\");
+            foreach (string InReg in regKey.GetSubKeyNames())
+            {
+                Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).DeleteSubKeyTree(InReg.ToString());
+            }
+            
         }
 
         public void Perform()
@@ -73,9 +131,14 @@ namespace Revamped_BnS_Buddy
                     {
                         try
                         {
-                            Registry.LocalMachine.CreateSubKey("SOFTWARE\\BnS Buddy\\");
-                            Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).SetValue("username", Enc(@metroTextBox1.Text), Microsoft.Win32.RegistryValueKind.String);
-                            Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).SetValue("password", Enc(@metroTextBox2.Text), Microsoft.Win32.RegistryValueKind.String);
+                            string input = metroTextBox1.Text;
+                            int inputclear = input.IndexOf("@");
+                            if (inputclear > 0)
+                                input = input.Substring(0, inputclear);
+
+                            Registry.LocalMachine.CreateSubKey("SOFTWARE\\BnS Buddy\\" + input);
+                            Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy\\" + input, true).SetValue("username", Enc(@metroTextBox1.Text), Microsoft.Win32.RegistryValueKind.String);
+                            Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy\\" + input, true).SetValue("password", Enc(@metroTextBox2.Text), Microsoft.Win32.RegistryValueKind.String);
                             if (File.ReadAllText(@AppPath + "\\Settings.ini").Contains("rememberme = false"))
                             {
                                 string tmp = File.ReadAllText(@AppPath + "\\Settings.ini");
@@ -92,14 +155,18 @@ namespace Revamped_BnS_Buddy
                     {
                         try
                         {
+                            string input = metroTextBox1.Text;
+                            int inputclear = input.IndexOf("@");
+                            if (inputclear > 0)
+                                input = input.Substring(0, inputclear);
+
                             RegistryKey regKey = Registry.LocalMachine;
-                            regKey = regKey.OpenSubKey(@"SOFTWARE\BnS Buddy\");
+                            regKey = regKey.OpenSubKey(@"SOFTWARE\BnS Buddy\" + input + @"\");
                             string tmp_user = string.Empty;
                             string tmp_pass = string.Empty;
                             if (regKey != null)
                             {
-                                Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).SetValue("username", "", Microsoft.Win32.RegistryValueKind.String);
-                                Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).SetValue("password", "", Microsoft.Win32.RegistryValueKind.String);
+                                Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).DeleteSubKeyTree(input);
                                 if (File.ReadAllText(@AppPath + "\\Settings.ini").Contains("rememberme = true"))
                                 {
                                     string tmp = File.ReadAllText(@AppPath + "\\Settings.ini");
@@ -129,18 +196,18 @@ namespace Revamped_BnS_Buddy
             {
                 if ((metroTextBox1.Text == "") && (metroTextBox2.Text == ""))
                 {
-                    MessageBox.Show("Fields are empty!");
+                    Prompt.Popup("Fields are empty!");
                     metroButton1.Visible = true;
                 }
                 else
                 {
-                    MessageBox.Show("One of the fields are empty!");
+                    Prompt.Popup("One of the fields are empty!");
                     metroButton1.Visible = true;
                 }
             }
             else
             {
-                MessageBox.Show("Error!");
+                Prompt.Popup("Error!");
                 metroButton1.Visible = true;
             }
         }
@@ -164,8 +231,7 @@ namespace Revamped_BnS_Buddy
 
         private void metroLabel3_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(
-                "Getting 'Wrong Password...' error?" + Environment.NewLine + "Password has to be the following." + Environment.NewLine + "Must be 8 - 16 characters long." + Environment.NewLine + "Must not be similar to your email address or date of birth." + Environment.NewLine + "Must contain at least one number." + Environment.NewLine + "Must contain at least one alphabetic character(A - Z)." + Environment.NewLine + "No more than 4 of the continuous number or letter in a row." + Environment.NewLine + "No more than 4 of the same number or letter in a row." + Environment.NewLine + Environment.NewLine + "If your password does not respect the following," + Environment.NewLine + "please change it.");
+            Prompt.Popup("Getting 'Wrong Password...' error?" + Environment.NewLine + "Password has to be the following." + Environment.NewLine + "Must be 8 - 16 characters long." + Environment.NewLine + "Must not be similar to your email address or date of birth." + Environment.NewLine + "Must contain at least one number." + Environment.NewLine + "Must contain at least one alphabetic character(A - Z)." + Environment.NewLine + "No more than 4 of the continuous number or letter in a row." + Environment.NewLine + "No more than 4 of the same number or letter in a row." + Environment.NewLine + Environment.NewLine + "If your password does not respect the following," + Environment.NewLine + "please change it." + Environment.NewLine + Environment.NewLine);
         }
 
         private void metroTextBox2_KeyDown(object sender, KeyEventArgs e)
@@ -202,7 +268,60 @@ namespace Revamped_BnS_Buddy
         {
             CheckLock();
         }
-        
+
+        private void metroComboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                string user = metroComboBox1.SelectedItem.ToString();
+                RegistryKey regKey = Registry.LocalMachine;
+                regKey = regKey.OpenSubKey(@"SOFTWARE\BnS Buddy\");
+                string tmp_user = string.Empty;
+                string tmp_pass = string.Empty;
+                if (regKey != null)
+                {
+                    tmp_user = regKey.OpenSubKey(user).GetValue("username").ToString();
+                    tmp_pass = regKey.OpenSubKey(user).GetValue("password").ToString();
+                    metroTextBox1.Text = Dec(tmp_user);
+                    metroTextBox2.Text = Dec(tmp_pass);
+                }
+            }
+            catch
+            {
+                // nothing here
+            }
+        }
+
+        public static class Prompt
+        {
+            public static void Popup(string Message)
+            {
+                ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+                MetroFramework.Forms.MetroForm prompt = new MetroFramework.Forms.MetroForm()
+                {
+                    Width = 280,
+                    Height = 135,
+                    FormBorderStyle = FormBorderStyle.None,
+                    Resizable = false,
+                    AutoSize = true,
+                    AutoSizeMode = AutoSizeMode.GrowOnly,
+                    Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon"))),
+                    ControlBox = false,
+                    Theme = MetroFramework.MetroThemeStyle.Dark,
+                    DisplayHeader = false,
+                    TopMost = true,
+                    Text = "",
+                    StartPosition = FormStartPosition.CenterScreen
+                };
+                MetroFramework.Controls.MetroLabel textLabel = new MetroFramework.Controls.MetroLabel() { Dock = DockStyle.Fill, AutoSize = true, Left = 5, Top = 0, Text = Message, Width = 270, Height = 40, TextAlign = ContentAlignment.MiddleCenter, Theme = MetroFramework.MetroThemeStyle.Dark };
+                MetroFramework.Controls.MetroButton confirmation = new MetroFramework.Controls.MetroButton() {Dock = DockStyle.Bottom, Text = "Ok", Left = 5, Width = 100, Top = (prompt.Height - 20), DialogResult = DialogResult.OK, Theme = MetroFramework.MetroThemeStyle.Dark };
+                prompt.Controls.Add(confirmation);
+                prompt.Controls.Add(textLabel);
+                prompt.AcceptButton = confirmation;
+                prompt.ShowDialog();
+            }
+        }
+
     }
 }
 
