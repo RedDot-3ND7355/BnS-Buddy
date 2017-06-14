@@ -29,6 +29,14 @@ Requirements:
 
 Change Log:
 
+Version 5.8.7.2
++ Fixed Bug: Description Text for Addons overflowed out of app.
++ Fixed Bug: Users not remembered caused by old version of buddy
++ Fixed Bug: Files not clearing upon exit in login form
++ Fixed Bug: Addons tab not working(not decompiling or compiling)
++ Fixed Bug: Server setting not recognized when reading nclauncher.ini
++ Fixed Bug: Addons Triggered without wanting it to
+
 Version 5.8.7.1
 + Added: Auto Memory Cleaner at game start and Memory Cleaner Button
 + Added: Multiple Account Remember me
