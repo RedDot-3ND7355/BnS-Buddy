@@ -26,7 +26,7 @@ namespace Revamped_BnS_Buddy
         public unsafe string SALT = "";
         public bool remembered = false;
         public bool INTRUDER = false;
-
+        
         public Splash1()
         {
             // Initialize Form
@@ -37,6 +37,7 @@ namespace Revamped_BnS_Buddy
             // Check if not already remembered
             if (File.ReadAllText(@AppPath + "\\Settings.ini").Contains("rememberme = true"))
             {
+                metroComboBox1.Enabled = true;
                 RegistryKey regKey = Registry.LocalMachine;
                 regKey = regKey.OpenSubKey(@"SOFTWARE\BnS Buddy\");
 
@@ -217,10 +218,51 @@ namespace Revamped_BnS_Buddy
             Perform();
         }
 
+        string DataPath = Revamped_BnS_Buddy.Form1.CurrentForm.DataPath;
         private void metroButton2_Click(object sender, EventArgs e)
         {
             // Close login window
+            CleanMess();
+            CleanOtherMess();
             KillApp();
+        }
+
+        public void CleanOtherMess()
+        {
+            string localvar = "";
+            try
+            {
+                DirectoryInfo path = new DirectoryInfo(DataPath);
+                foreach (DirectoryInfo subdir in path.GetDirectories())
+                {
+                    if (subdir.ToString().EndsWith(".dat.files"))
+                    {
+                        localvar = subdir.ToString();
+                        Array.ForEach(Directory.GetFiles(@DataPath + "\\" + localvar + "\\"), File.Delete);
+                        Directory.Delete(DataPath + "\\" + localvar + "\\", true);
+                    }
+                }
+            }
+            catch { /* nothing */ }
+        }
+
+        public void CleanMess()
+        {
+            string localvar = "";
+            try
+            {
+                DirectoryInfo path = new DirectoryInfo(DataPath + "\\editing");
+                foreach (DirectoryInfo subdir in path.GetDirectories())
+                {
+                    if (subdir.ToString().EndsWith(".dat.files"))
+                    {
+                        localvar = subdir.ToString();
+                        Array.ForEach(Directory.GetFiles(@DataPath + "\\editing\\" + localvar + "\\"), File.Delete);
+                        Directory.Delete(DataPath + "\\editing\\" + localvar + "\\", true);
+                    }
+                }
+            }
+            catch { /* nothing */ }
         }
 
         public void KillApp()
@@ -231,7 +273,7 @@ namespace Revamped_BnS_Buddy
 
         private void metroLabel3_Click(object sender, EventArgs e)
         {
-            Prompt.Popup("Getting 'Wrong Password...' error?" + Environment.NewLine + "Password has to be the following." + Environment.NewLine + "Must be 8 - 16 characters long." + Environment.NewLine + "Must not be similar to your email address or date of birth." + Environment.NewLine + "Must contain at least one number." + Environment.NewLine + "Must contain at least one alphabetic character(A - Z)." + Environment.NewLine + "No more than 4 of the continuous number or letter in a row." + Environment.NewLine + "No more than 4 of the same number or letter in a row." + Environment.NewLine + Environment.NewLine + "If your password does not respect the following," + Environment.NewLine + "please change it." + Environment.NewLine + Environment.NewLine);
+            Prompt.Popup("Getting 'Wrong Password...' error?" + Environment.NewLine + "Password has to be the following." + Environment.NewLine + "Must be 8 - 16 characters long." + Environment.NewLine + "Must not be similar to your email address or date of birth." + Environment.NewLine + "Must contain at least one number." + Environment.NewLine + "Must contain at least one alphabetic character(A - Z)." + Environment.NewLine + "No more than 4 of the continuous number or letter in a row." + Environment.NewLine + "No more than 4 of the same number or letter in a row." + Environment.NewLine + Environment.NewLine + "If your password does not respect the following," + Environment.NewLine + "please change it.");
         }
 
         private void metroTextBox2_KeyDown(object sender, KeyEventArgs e)
@@ -313,7 +355,7 @@ namespace Revamped_BnS_Buddy
                     Text = "",
                     StartPosition = FormStartPosition.CenterScreen
                 };
-                MetroFramework.Controls.MetroLabel textLabel = new MetroFramework.Controls.MetroLabel() { Dock = DockStyle.Fill, AutoSize = true, Left = 5, Top = 0, Text = Message, Width = 270, Height = 40, TextAlign = ContentAlignment.MiddleCenter, Theme = MetroFramework.MetroThemeStyle.Dark };
+                MetroFramework.Controls.MetroLabel textLabel = new MetroFramework.Controls.MetroLabel() { Dock = DockStyle.Fill, AutoSize = true, Left = 5, Top = 0, Text = Message + Environment.NewLine + Environment.NewLine, Width = 270, Height = 40, TextAlign = ContentAlignment.MiddleCenter, Theme = MetroFramework.MetroThemeStyle.Dark };
                 MetroFramework.Controls.MetroButton confirmation = new MetroFramework.Controls.MetroButton() {Dock = DockStyle.Bottom, Text = "Ok", Left = 5, Width = 100, Top = (prompt.Height - 20), DialogResult = DialogResult.OK, Theme = MetroFramework.MetroThemeStyle.Dark };
                 prompt.Controls.Add(confirmation);
                 prompt.Controls.Add(textLabel);

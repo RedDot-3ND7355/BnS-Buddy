@@ -1,0 +1,21 @@
+Reading Registry...
+E:\Program Files (x86)\NCSoft\BnS
+Reg Key Valid!
+E:\Program Files (x86)\NCSOFT\BNS_TW\
+Reg Key Valid!
+E:\Program Files (x86)\NCSOFT\BNS_KR\BnS
+Reg Key Valid!
+Path Found!
+Lang Found!
+languageID = English
+Path Validated!
+Path Found!
+Lang Found!
+Path Validated!
+Checking For Backups
+Loading Screen Backup Not Found!
+Extracting config.dat for verification
+Extracted
+Checking system.config2.xml if modded
+config.dat is Clean
+No Config Backup

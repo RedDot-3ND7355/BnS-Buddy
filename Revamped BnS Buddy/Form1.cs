@@ -1008,6 +1008,8 @@ namespace Revamped_BnS_Buddy
                     metroTabControl2.TabPages.Insert(2, tmp);
                     o2 = true;
                 }
+                // Fix cursor of metrotextbox6
+                metroTextBox6.Cursor = Cursors.Arrow;
             }
             
             // Switch tab to Launcher
@@ -1145,17 +1147,26 @@ namespace Revamped_BnS_Buddy
                 // Check if updated.
                 if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("automemorycleanup"))
                 {
-                    // Save current settigns
-                    string[] currentsettings = File.ReadAllLines(AppPath + "\\Settings.ini");
-                    // Create new file
-                    File.Delete(AppPath + "\\Settings.ini");
-                    File.WriteAllText(AppPath + "\\Settings.ini", DefaultValues);
-                    // Start saving old settings
-                    int i = 0;
-                    foreach (string line in currentsettings)
+                    // Save current settings
+                    if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("customlang"))
                     {
-                        i++;
-                        lineChanger(line, AppPath + "\\Settings.ini", i);
+                        string[] currentsettings = File.ReadAllLines(AppPath + "\\Settings.ini");
+                        // Create new file
+                        File.Delete(AppPath + "\\Settings.ini");
+                        File.WriteAllText(AppPath + "\\Settings.ini", DefaultValues);
+                        // Start saving old settings
+                        int i = 0;
+                        foreach (string line in currentsettings)
+                        {
+                            i++;
+                            Prompt.Popup(line);
+                            lineChanger(line, AppPath + "\\Settings.ini", i);
+                        }
+                    }
+                    else /* Fix Bug caused by previous versions */
+                    {
+                        File.Delete(AppPath + "\\Settings.ini");
+                        File.WriteAllText(AppPath + "\\Settings.ini", DefaultValues);
                     }
                 }
                 if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("savelogs = true"))
@@ -1325,8 +1336,8 @@ namespace Revamped_BnS_Buddy
                     CustomModSet = true;
                     // Grab value
                     string line = File.ReadLines(@AppPath + "\\Settings.ini").Skip(28).Take(1).First().Replace("modfolder = ", "");
-                    metroTextBox7.Text = line;
                     metroToggle19.Checked = true;
+                    metroTextBox7.Text = line;
                     // set custom values
                     FullBackupPath = metroTextBox7.Text + "\\CookedPC_Backup";
                     FullModPathMan = metroTextBox7.Text + "\\CookedPC_Mod";
@@ -1672,23 +1683,24 @@ namespace Revamped_BnS_Buddy
                 {
                     if (File.Exists(RegPathlol + "\\NCLauncher.ini"))
                     {
-                        if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("Game_Region=North America"))
+                        string nc_content = File.ReadAllText(RegPathlol + "\\NCLauncher.ini");
+                        if (nc_content.Contains("Game_Region=North America") || nc_content.Contains("Game_Region=Nordamerika") || nc_content.Contains("Game_Region=Amérique du Nord"))
                         {
                             metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("North America");
                         }
-                        else if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("Game_Region=Europe"))
+                        else if (nc_content.Contains("Game_Region=Europe") || nc_content.Contains("Game_Region=Europa")|| nc_content.Contains("Game_Region=L'Europe"))
                         {
                             metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Europe");
                         }
-                        else if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("Game_Locale=ja"))
+                        else if (nc_content.Contains("Game_Locale=ja"))
                         {
                             metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Japanese");
                         }
-                        else if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("up4svr.plaync.com.tw"))
+                        else if (nc_content.Contains("up4svr.plaync.com.tw"))
                         {
                             metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Taiwan");
                         }
-                        else if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("up4web.plaync.co.kr"))
+                        else if (nc_content.Contains("up4web.plaync.co.kr"))
                         {
                             metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Korean");
                         }
@@ -2726,8 +2738,20 @@ namespace Revamped_BnS_Buddy
                     AddTextLog("Skipping default launcher!");
                 }
             }
-            AddTextLog("Applying Addons...");
-            StartGameAddons();
+            // Check if any addons are enabled
+            bool AEDetected = false;
+            foreach (TreeNode node in treeView3.Nodes)
+            {
+                if (node.Checked)
+                {
+                    AEDetected = true;
+                }    
+            }
+            if (AEDetected == true)
+            {
+                AddTextLog("Applying Addons...");
+                StartGameAddons();
+            }
             AddTextLog("Starting Client...");
             // Default values
             // /GarenaToken:token --publisher:garena /GameRegion:thailand /TextLang:th // Thailand
@@ -4642,23 +4666,24 @@ namespace Revamped_BnS_Buddy
             {
                 if (File.Exists(RegPathlol + "\\NCLauncher.ini"))
                 {
-                    if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("Game_Region=North America"))
+                    string nc_content = File.ReadAllText(RegPathlol + "\\NCLauncher.ini");
+                    if (nc_content.Contains("Game_Region=North America") || nc_content.Contains("Game_Region=Nordamerika") || nc_content.Contains("Game_Region=Amérique du Nord"))
                     {
                         metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("North America");
                     }
-                    else if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("Game_Region=Europe"))
+                    else if (nc_content.Contains("Game_Region=Europe") || nc_content.Contains("Game_Region=Europa") || nc_content.Contains("Game_Region=L'Europe"))
                     {
                         metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Europe");
                     }
-                    else if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("Game_Locale=ja"))
+                    else if (nc_content.Contains("Game_Locale=ja"))
                     {
                         metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Japanese");
                     }
-                    else if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("up4svr.plaync.com.tw"))
+                    else if (nc_content.Contains("up4svr.plaync.com.tw"))
                     {
                         metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Taiwan");
                     }
-                    else if (File.ReadAllText(RegPathlol + "\\NCLauncher.ini").Contains("up4web.plaync.co.kr"))
+                    else if (nc_content.Contains("up4web.plaync.co.kr"))
                     {
                         metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Korean");
                     }
@@ -5023,20 +5048,24 @@ namespace Revamped_BnS_Buddy
                 string ToFile = File.ReadLines(FullAddonPath + "\\" + filename).Skip(0).Take(1).First().Replace("FileName = ", "");
                 if (Debugging)
                     Prompt.Popup("File to patch: " + ToFile);
+                // Fix file name for unpacking
+                string prev_ToFile = Path.GetDirectoryName(ToFile);
+                string to_ToFile = prev_ToFile.Replace(".files", "");
                 // Proceed to unpacking if not existing already
-                if (!Directory.Exists(DataPath + "\\" + ToFile + ".files"))
+                if (!Directory.Exists(DataPath + "\\" + prev_ToFile))
                 {
                     // Add to dictionary
                     int tmpaf = AddonFiles.Count + 1;
+                    // Cut String to get filename
                     string ToFileFolder = Path.GetDirectoryName(ToFile);
-                    Prompt.Popup("folder of file : " + ToFileFolder); // here
                     if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFile))
                     {
                         AddonFiles.Add(tmpaf, ToFileFolder);
                     }
                     // Continue...
-                    AddTextLog("Decompiling " + ToFile);
-                    Extractor(DataPath + "\\" + ToFile);
+                    AddTextLog("Decompiling " + to_ToFile);
+                    usedfilepath = DataPath + "\\" + to_ToFile;
+                    Extractor(to_ToFile);
                     AddTextLog("Decompiled.");
                 }
                 else
@@ -5044,7 +5073,6 @@ namespace Revamped_BnS_Buddy
                     // Add to dictionary
                     int tmpaf = AddonFiles.Count + 1;
                     string ToFileFolder = Path.GetDirectoryName(ToFile);
-                    //Prompt.Popup("folder of file : " + ToFileFolder); // here
                     if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFile))
                     {
                         AddonFiles.Add(tmpaf, ToFileFolder);
@@ -5076,7 +5104,37 @@ namespace Revamped_BnS_Buddy
             else if (linecount > 4)
             {
                 string ToFile = File.ReadLines(FullAddonPath + "\\" + filename).Skip(0).Take(1).First().Replace("FileName = ", "");
-                Extractor(DataPath + "\\" + ToFile);
+                // Fix file name for unpacking
+                string prev_ToFile = Path.GetDirectoryName(ToFile);
+                string to_ToFile = prev_ToFile.Replace(".files", "");
+                // Proceed to unpacking if not existing already
+                if (!Directory.Exists(DataPath + "\\" + prev_ToFile))
+                { // HERE!
+                    // Add to dictionary
+                    int tmpaf = AddonFiles.Count + 1;
+                    string ToFileFolder = Path.GetDirectoryName(ToFile);
+                    if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFile))
+                    {
+                        AddonFiles.Add(tmpaf, ToFileFolder);
+                    }
+                    // Continue...
+                    AddTextLog("Decompiling " + to_ToFile);
+                    usedfilepath = DataPath + "\\" + to_ToFile;
+                    Extractor(to_ToFile);
+                    AddTextLog("Decompiled.");
+                }
+                else
+                {
+                    // Add to dictionary
+                    int tmpaf = AddonFiles.Count + 1;
+                    string ToFileFolder = Path.GetDirectoryName(ToFile);
+                    if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFile))
+                    {
+                        AddonFiles.Add(tmpaf, ToFileFolder);
+                    }
+                    AddTextLog("File: " + ToFile + " already decompiled");
+                }
+                // Continue work
                 int i = 0;
                 int o = 0;
                 IEnumerable<string> WholeText = File.ReadLines(FullAddonPath + "\\" + filename);
@@ -5085,20 +5143,20 @@ namespace Revamped_BnS_Buddy
                 {
                     if (text.Contains("Search = "))
                     {
-                        i++;
                         string line = text;
                         string inline = line.Replace("Search = ", "");
                         Search.Add(i, inline);
+                        i++;
                     }
                 }
                 foreach (string text in WholeText)
                 {
                     if (text.Contains("Replace = "))
                     {
-                        o++;
                         string line = text;
                         string inline = line.Replace("Replace = ", "");
                         Replace.Add(o, inline);
+                        o++;
                     }
                 }
                 if (i == o)
@@ -5110,16 +5168,20 @@ namespace Revamped_BnS_Buddy
                     {
                         if (Debugging)
                             Prompt.Popup("Before: " + ToText);
-                        if (ToText.Contains(Search[io]))
+                        if (Search.ContainsKey(io))
                         {
-                            ToText = ToText.Replace(Search[io], Replace[io]);
-                            if (Debugging)
-                                Prompt.Popup("After: " + ToText);
-                        }
-                        else
-                        {
-                            AddTextLog("Error: Could not find " + Search[io]);
-                            AddTextLog("Maybe already done?");
+                            if (ToText.Contains(Search[io]))
+                            {
+                                ToText = ToText.Replace(Search[io], Replace[io]);
+                                AddTextLog("Patched: " + (io + 1) + "/" + Replace.Count);
+                                if (Debugging)
+                                    Prompt.Popup("After: " + ToText);
+                            }
+                            else
+                            {
+                                AddTextLog("Error: Could not find " + (io + 1) + "/" + Replace.Count);
+                                AddTextLog("Maybe already done?");
+                            }
                         }
                     }
                     File.WriteAllText(DataPath + "\\" + ToFile, ToText);
@@ -5189,14 +5251,14 @@ namespace Revamped_BnS_Buddy
                 }
                 if (description.Length > 0)
                 {
-                    metroLabel53.Text = description;
+                    metroTextBox6.Text = description;
                 }
                 else
                 {
-                    metroLabel53.Text = "No description provided!";
+                    metroTextBox6.Text = "No description provided!";
                 }
             }
-            catch { metroLabel53.Text = "No description provided!"; }
+            catch { metroTextBox6.Text = "No description provided!"; }
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////

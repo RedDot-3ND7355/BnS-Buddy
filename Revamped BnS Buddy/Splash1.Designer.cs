@@ -37,9 +37,9 @@
             this.metroButton2 = new MetroFramework.Controls.MetroButton();
             this.metroLabel3 = new MetroFramework.Controls.MetroLabel();
             this.metroToolTip1 = new MetroFramework.Components.MetroToolTip();
+            this.metroComboBox1 = new MetroFramework.Controls.MetroComboBox();
             this.metroLabel4 = new MetroFramework.Controls.MetroLabel();
             this.metroCheckBox1 = new MetroFramework.Controls.MetroCheckBox();
-            this.metroComboBox1 = new MetroFramework.Controls.MetroComboBox();
             this.SuspendLayout();
             // 
             // metroLabel1
@@ -127,6 +127,20 @@
             this.metroToolTip1.ReshowDelay = 100;
             this.metroToolTip1.Theme = MetroFramework.MetroThemeStyle.Dark;
             // 
+            // metroComboBox1
+            // 
+            this.metroComboBox1.Enabled = false;
+            this.metroComboBox1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.metroComboBox1.FormattingEnabled = true;
+            this.metroComboBox1.ItemHeight = 23;
+            this.metroComboBox1.Location = new System.Drawing.Point(23, 169);
+            this.metroComboBox1.Name = "metroComboBox1";
+            this.metroComboBox1.Size = new System.Drawing.Size(150, 29);
+            this.metroComboBox1.TabIndex = 13;
+            this.metroComboBox1.Theme = MetroFramework.MetroThemeStyle.Dark;
+            this.metroToolTip1.SetToolTip(this.metroComboBox1, "Select other accounts");
+            this.metroComboBox1.SelectedIndexChanged += new System.EventHandler(this.metroComboBox1_SelectedIndexChanged);
+            // 
             // metroLabel4
             // 
             this.metroLabel4.CustomForeColor = true;
@@ -149,19 +163,6 @@
             this.metroCheckBox1.Text = "Remember me";
             this.metroCheckBox1.Theme = MetroFramework.MetroThemeStyle.Dark;
             this.metroCheckBox1.UseVisualStyleBackColor = true;
-            // 
-            // metroComboBox1
-            // 
-            this.metroComboBox1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.metroComboBox1.FormattingEnabled = true;
-            this.metroComboBox1.ItemHeight = 23;
-            this.metroComboBox1.Location = new System.Drawing.Point(23, 169);
-            this.metroComboBox1.Name = "metroComboBox1";
-            this.metroComboBox1.Size = new System.Drawing.Size(150, 29);
-            this.metroComboBox1.TabIndex = 13;
-            this.metroComboBox1.Theme = MetroFramework.MetroThemeStyle.Dark;
-            this.metroToolTip1.SetToolTip(this.metroComboBox1, "Select other accounts");
-            this.metroComboBox1.SelectedIndexChanged += new System.EventHandler(this.metroComboBox1_SelectedIndexChanged);
             // 
             // Splash1
             // 
