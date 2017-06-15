@@ -49,7 +49,25 @@ namespace Revamped_BnS_Buddy
 
                 if (metroComboBox1.Items.Count >= 1)
                 {
+                    // Select first found
                     metroComboBox1.SelectedIndex = 0;
+
+                    // Select last used
+                    if (regKey != null)
+                    {
+                        if (regKey.GetValue("lastused") != null)
+                        {
+                            string tmp_last = string.Empty;
+                            tmp_last = regKey.GetValue("lastused").ToString();
+                            if (tmp_last != null)
+                            {
+                                if (tmp_last.Length > 1)
+                                {
+                                    metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact(tmp_last);
+                                }
+                            }
+                        }
+                    }
 
                     string tmp_user = string.Empty;
                     string tmp_pass = string.Empty;
@@ -108,13 +126,35 @@ namespace Revamped_BnS_Buddy
         public void ClearRegistry()
         {
             RegistryKey regKey = Registry.LocalMachine;
-            regKey = regKey.OpenSubKey(@"SOFTWARE\BnS Buddy\");
+            regKey = regKey.OpenSubKey(@"SOFTWARE\BnS Buddy\", true);
             foreach (string InReg in regKey.GetSubKeyNames())
             {
                 Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).DeleteSubKeyTree(InReg.ToString());
             }
-            
+            regKey.DeleteValue("lastused");
         }
+
+        public bool CheckIfAny()
+        {
+            // ini
+            bool bool_data = false;
+            int IfAny = 0;
+            // reg
+            RegistryKey regKey = Registry.LocalMachine;
+            regKey = regKey.OpenSubKey(@"SOFTWARE\BnS Buddy\", true);
+            // count
+            foreach (string InReg in regKey.GetSubKeyNames())
+            {
+                IfAny++;
+            }
+            // check
+            if (IfAny > 0)
+            {
+                bool_data = true;
+            }
+            // return
+            return bool_data;
+        } 
 
         public void Perform()
         {
@@ -137,6 +177,9 @@ namespace Revamped_BnS_Buddy
                             if (inputclear > 0)
                                 input = input.Substring(0, inputclear);
 
+                            // Create lastused
+                            Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).SetValue("lastused", input, Microsoft.Win32.RegistryValueKind.String);
+                            // Create entries
                             Registry.LocalMachine.CreateSubKey("SOFTWARE\\BnS Buddy\\" + input);
                             Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy\\" + input, true).SetValue("username", Enc(@metroTextBox1.Text), Microsoft.Win32.RegistryValueKind.String);
                             Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy\\" + input, true).SetValue("password", Enc(@metroTextBox2.Text), Microsoft.Win32.RegistryValueKind.String);
@@ -147,8 +190,9 @@ namespace Revamped_BnS_Buddy
                                 File.WriteAllText(@AppPath + "\\Settings.ini", tmp);
                             }
                         }
-                        catch
+                        catch(Exception e)
                         {
+                            Prompt.Popup(e.ToString());
                             // nothing here
                         }
                     }
@@ -168,11 +212,15 @@ namespace Revamped_BnS_Buddy
                             if (regKey != null)
                             {
                                 Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).DeleteSubKeyTree(input);
-                                if (File.ReadAllText(@AppPath + "\\Settings.ini").Contains("rememberme = true"))
+                                Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).DeleteValue("lastused");
+                                if (CheckIfAny() == false)
                                 {
-                                    string tmp = File.ReadAllText(@AppPath + "\\Settings.ini");
-                                    tmp = tmp.Replace("rememberme = true", "rememberme = false");
-                                    File.WriteAllText(@AppPath + "\\Settings.ini", tmp);
+                                    if (File.ReadAllText(@AppPath + "\\Settings.ini").Contains("rememberme = true"))
+                                    {
+                                        string tmp = File.ReadAllText(@AppPath + "\\Settings.ini");
+                                        tmp = tmp.Replace("rememberme = true", "rememberme = false");
+                                        File.WriteAllText(@AppPath + "\\Settings.ini", tmp);
+                                    }
                                 }
                             }
                         }
@@ -184,9 +232,10 @@ namespace Revamped_BnS_Buddy
 
 
                     this.Hide();
-                    ShowDialog();
-                    Show(ActiveForm); // Shows the program on taskbar
-                    WindowState = FormWindowState.Normal; // Undoes the minimized state of the form
+                    this.Close();
+                    //ShowDialog();
+                    //Show(ActiveForm); // Shows the program on taskbar
+                    //WindowState = FormWindowState.Normal; // Undoes the minimized state of the form
                 }
                 catch
                 {
@@ -222,9 +271,14 @@ namespace Revamped_BnS_Buddy
         private void metroButton2_Click(object sender, EventArgs e)
         {
             // Close login window
-            CleanMess();
-            CleanOtherMess();
-            KillApp();
+            //CleanMess();
+            //CleanOtherMess();
+            //KillApp();
+            this.Hide();
+            this.Close();
+            //ShowDialog();
+            //Show(ActiveForm); // Shows the program on taskbar
+            //WindowState = FormWindowState.Normal; // Undoes the minimized state of the form
         }
 
         public void CleanOtherMess()
@@ -429,7 +483,8 @@ namespace Security
                 {
                     try
                     {
-                        result = mo[wmiProperty].ToString();
+                        if (mo[wmiProperty] != null) 
+                            result = mo[wmiProperty].ToString();
                         break;
                     }
                     catch

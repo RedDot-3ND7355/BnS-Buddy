@@ -2495,30 +2495,34 @@ namespace Revamped_BnS_Buddy
         {
             // Restore!
             metroButton2.Enabled = false;
-            DirectoryInfo configfolder = new DirectoryInfo(DataPath + "\\backup\\");
-            FileInfo[] configfiles = configfolder.GetFiles("*.dat");
-            foreach (FileInfo configfile in configfiles)
+            if (Directory.Exists(DataPath + "\\backup\\"))
             {
-                string nameoffile = configfile.Name;
-                string PathtoFull = configfile.FullName;
-                if (File.Exists(DataPath + "\\backup\\" + nameoffile))
+                DirectoryInfo configfolder = new DirectoryInfo(DataPath + "\\backup\\");
+                FileInfo[] configfiles = configfolder.GetFiles("*.dat");
+                
+                foreach (FileInfo configfile in configfiles)
                 {
-                    try
+                    string nameoffile = configfile.Name;
+                    string PathtoFull = configfile.FullName;
+                    if (File.Exists(DataPath + "\\backup\\" + nameoffile))
                     {
-                        AddTextLog("Restoring " + nameoffile + "!");
-                        File.Copy(DataPath + "\\backup\\" + nameoffile, DataPath + "\\" + nameoffile, true);
-                        metroLabel14.Text = "Clean";
-                        AddTextLog("Restored!");
-                        metroButton1.Enabled = true;
-                        metroButton1.Text = "Patch!";
-                    }
-                    catch
-                    {
-                        AddTextLog("Error: Could Not Restore " + nameoffile + "!");
-                        metroButton2.Enabled = true;
+                        try
+                        {
+                            AddTextLog("Restoring " + nameoffile + "!");
+                            File.Copy(DataPath + "\\backup\\" + nameoffile, DataPath + "\\" + nameoffile, true);
+                            metroLabel14.Text = "Clean";
+                            AddTextLog("Restored!");
+                            metroButton1.Enabled = true;
+                            metroButton1.Text = "Patch!";
+                        }
+                        catch
+                        {
+                            AddTextLog("Error: Could Not Restore " + nameoffile + "!");
+                            metroButton2.Enabled = true;
+                        }
                     }
                 }
-            }
+            } else { AddTextLog("Error: No Backup Found!"); }
         }
 
         private void metroButton30_Click(object sender, EventArgs e)
@@ -5003,6 +5007,18 @@ namespace Revamped_BnS_Buddy
                     usedfilepathonly = DataPath + "\\" + AddonFiles[af];
                     Compiler(tmp);
                     AddTextLog("Compiled.");
+                    AddonFiles.Remove(af);
+                }
+            }
+            // Untick tasks in addons
+            foreach (TreeNode node in treeView3.Nodes)
+            {
+                if (node != null)
+                {
+                    if (node.Checked)
+                    {
+                        node.Checked = false;
+                    }
                 }
             }
         }
@@ -5058,7 +5074,7 @@ namespace Revamped_BnS_Buddy
                     int tmpaf = AddonFiles.Count + 1;
                     // Cut String to get filename
                     string ToFileFolder = Path.GetDirectoryName(ToFile);
-                    if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFile))
+                    if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFileFolder))
                     {
                         AddonFiles.Add(tmpaf, ToFileFolder);
                     }
@@ -5073,7 +5089,7 @@ namespace Revamped_BnS_Buddy
                     // Add to dictionary
                     int tmpaf = AddonFiles.Count + 1;
                     string ToFileFolder = Path.GetDirectoryName(ToFile);
-                    if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFile))
+                    if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFileFolder))
                     {
                         AddonFiles.Add(tmpaf, ToFileFolder);
                     }
@@ -5109,11 +5125,11 @@ namespace Revamped_BnS_Buddy
                 string to_ToFile = prev_ToFile.Replace(".files", "");
                 // Proceed to unpacking if not existing already
                 if (!Directory.Exists(DataPath + "\\" + prev_ToFile))
-                { // HERE!
+                {
                     // Add to dictionary
                     int tmpaf = AddonFiles.Count + 1;
                     string ToFileFolder = Path.GetDirectoryName(ToFile);
-                    if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFile))
+                    if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFileFolder))
                     {
                         AddonFiles.Add(tmpaf, ToFileFolder);
                     }
@@ -5128,7 +5144,7 @@ namespace Revamped_BnS_Buddy
                     // Add to dictionary
                     int tmpaf = AddonFiles.Count + 1;
                     string ToFileFolder = Path.GetDirectoryName(ToFile);
-                    if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFile))
+                    if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFileFolder))
                     {
                         AddonFiles.Add(tmpaf, ToFileFolder);
                     }
@@ -6140,10 +6156,15 @@ namespace Revamped_BnS_Buddy
                         this.WindowState = FormWindowState.Normal; // Undoes the minimized state of the form
                         return;
                     default:
-                        Prompt.Popup("Invalidly formated email");
+                        if (username.Length > 0 && password.Length > 0) // HERE!
+                        {
+                            Prompt.Popup("Invalidly formated email");
+                        } else { AddTextLog("Cancelled"); }
                         metroButton1.Enabled = true;
                         Show(); // Shows the program on taskbar
                         this.WindowState = FormWindowState.Normal; // Undoes the minimized state of the form
+                        this.TopMost = true;
+                        this.TopMost = false;
                         return;
                 }
                 ms.Close();
