@@ -29,6 +29,15 @@ Requirements:
 
 Change Log:
 
+Version 5.8.7.3
++ Fixed Bug: Compiling the same xml multiple times
++ Fixed Bug: Remember last signed in user
++ Fixed Bug: Untick addons after done patching/compiling
++ Fixed Bug: Closing Login form returns to Buddy
++ Fixed Bug: Restore in launcher tab not finding path if backup did not exist
++ Fixed Bug: Login Form won't remember previous entered login if a second user was forgotten
+
+
 Version 5.8.7.2
 + Fixed Bug: Description Text for Addons overflowed out of app.
 + Fixed Bug: Users not remembered caused by old version of buddy
