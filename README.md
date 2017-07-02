@@ -29,6 +29,25 @@ Requirements:
 
 Change Log:
 
+Version 5.8.7.4
++ Added: Create addon function
++ Added: Login for Taiwan and Korean now supported
++ Added: Warning when restoring files in dat editor
++ Added: Remember me function for language path used if multiple
++ Removed: Backup feature for addons
++ Reworked: Restore button in launcher tab edits and restores the option to default
++ Reworked: Undo Selected Addon instead of restore files
++ Reworked: Recompile addons that mods were applied to (and reverting)
++ Reworked: Cleaning of the editing folder used by buddy replacing new files with old ones
++ Fixed Bug: When not choosing a language would ask for path instead and loop
++ Fixed Bug: Bad path formats would lead to user documents
++ Fixed Bug: Wrong arguments for other clients
++ Fixed Bug: Don't proceed unpacking if file does not exist(if tamepered)
++ Fixed Bug: Don't proceed patching an unexisting file within config files
++ Fixed Bug: Annoying popup that says what language you selected
++ Fixed Bug: French localisation server automatic selecter
++ Fixed Bug: Registry subkey did not exist thus causing errors when memorizing user credentials
+
 Version 5.8.7.3
 + Fixed Bug: Compiling the same xml multiple times
 + Fixed Bug: Remember last signed in user
