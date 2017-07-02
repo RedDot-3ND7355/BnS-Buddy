@@ -34,12 +34,18 @@ namespace Revamped_BnS_Buddy
             // Get Unique SALT
             SALT = Security.FingerPrint.Value();
             SALT = StringToHex(SALT);
+            // Create unexistant registry key
+            RegistryKey regKey = Registry.LocalMachine;
+            if (regKey.OpenSubKey(@"SOFTWARE\BnS Buddy\") == null)
+            {
+                Registry.LocalMachine.CreateSubKey("SOFTWARE\\BnS Buddy");
+            }
             // Check if not already remembered
             if (File.ReadAllText(@AppPath + "\\Settings.ini").Contains("rememberme = true"))
             {
                 metroComboBox1.Enabled = true;
-                RegistryKey regKey = Registry.LocalMachine;
-                regKey = regKey.OpenSubKey(@"SOFTWARE\BnS Buddy\");
+                regKey = Registry.LocalMachine;
+                regKey = regKey.OpenSubKey(@"SOFTWARE\BnS Buddy\", true);
 
                 // foreach account login saved, add to dropbox
                 foreach (string InReg in regKey.GetSubKeyNames())
@@ -279,44 +285,6 @@ namespace Revamped_BnS_Buddy
             //ShowDialog();
             //Show(ActiveForm); // Shows the program on taskbar
             //WindowState = FormWindowState.Normal; // Undoes the minimized state of the form
-        }
-
-        public void CleanOtherMess()
-        {
-            string localvar = "";
-            try
-            {
-                DirectoryInfo path = new DirectoryInfo(DataPath);
-                foreach (DirectoryInfo subdir in path.GetDirectories())
-                {
-                    if (subdir.ToString().EndsWith(".dat.files"))
-                    {
-                        localvar = subdir.ToString();
-                        Array.ForEach(Directory.GetFiles(@DataPath + "\\" + localvar + "\\"), File.Delete);
-                        Directory.Delete(DataPath + "\\" + localvar + "\\", true);
-                    }
-                }
-            }
-            catch { /* nothing */ }
-        }
-
-        public void CleanMess()
-        {
-            string localvar = "";
-            try
-            {
-                DirectoryInfo path = new DirectoryInfo(DataPath + "\\editing");
-                foreach (DirectoryInfo subdir in path.GetDirectories())
-                {
-                    if (subdir.ToString().EndsWith(".dat.files"))
-                    {
-                        localvar = subdir.ToString();
-                        Array.ForEach(Directory.GetFiles(@DataPath + "\\editing\\" + localvar + "\\"), File.Delete);
-                        Directory.Delete(DataPath + "\\editing\\" + localvar + "\\", true);
-                    }
-                }
-            }
-            catch { /* nothing */ }
         }
 
         public void KillApp()

@@ -10,3 +10,4 @@ E:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamp
 E:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamped BnS Buddy\bin\Release\BnS Buddy.pdb
 E:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamped BnS Buddy\bin\Release\MetroFramework.dll
 E:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamped BnS Buddy\obj\Release\Revamped BnS Buddy.csprojResolveAssemblyReference.cache
+E:\Users\Endless\Documents\Visual Studio 2015\Projects\Revamped BnS Buddy\Revamped BnS Buddy\obj\Release\Revamped_BnS_Buddy.Form3.resources

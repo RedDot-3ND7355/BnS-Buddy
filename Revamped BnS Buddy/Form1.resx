@@ -130,23 +130,14 @@
     <value>Minimunchi                     Nur Zakwan
 powercozmic                   relawals
 Origamie                         Thanh Tran
-FireLight
-Claudio
-Jakob
-Kokoa Cawfee
-khalid
-Verdara
+FireLight 
+Claudio                            Jun
+Jakob                               Prabu
+Kokoa Cawfee                  Phillip
+khalid                               Emanuela
+Verdara                            KiwiNoSora
 SkylerChip
 Nhat Vu</value>
-  </data>
-  <data name="metroLabel50.Text" xml:space="preserve">
-    <value>File Formatting:
-   Filename = example.patch
-File Structure:
-   FileName = config.dat.files\\system.config2.xml
-   Search = &lt;option name="show-clause" value="true" /&gt;
-   Replace = &lt;option name="show-clause" value="false" /&gt;
-   Description = Description of addon</value>
   </data>
   <metadata name="toolStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>349, 17</value>
@@ -205,6 +196,15 @@ File Structure:
         kx0g8BTA3aZlButjSTyjODq/WcQcW/B/Je4OQhLvKQDnzN1mp0nnkvAhR8VuMzNrpm1mpjgkoVwB/v8D
         TgDQASA1MVpwzwAAAABJRU5ErkJggg==
 </value>
+  </data>
+  <data name="metroLabel50.Text" xml:space="preserve">
+    <value>File Formatting:
+   Filename = example.patch
+File Structure:
+   FileName = config.dat.files\\system.config2.xml
+   Search = &lt;option name="show-clause" value="true" /&gt;
+   Replace = &lt;option name="show-clause" value="false" /&gt;
+   Description = Description of addon</value>
   </data>
   <data name="metroLabel7.Text" xml:space="preserve">
     <value>Made with &lt;3 for those having problem modding and playing Blade and Soul
