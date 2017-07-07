@@ -31,64 +31,67 @@ namespace Revamped_BnS_Buddy
         {
             // Initialize Form
             InitializeComponent();
-            // Get Unique SALT
-            SALT = Security.FingerPrint.Value();
-            SALT = StringToHex(SALT);
-            // Create unexistant registry key
-            RegistryKey regKey = Registry.LocalMachine;
-            if (regKey.OpenSubKey(@"SOFTWARE\BnS Buddy\") == null)
+            try
             {
-                Registry.LocalMachine.CreateSubKey("SOFTWARE\\BnS Buddy");
-            }
-            // Check if not already remembered
-            if (File.ReadAllText(@AppPath + "\\Settings.ini").Contains("rememberme = true"))
-            {
-                metroComboBox1.Enabled = true;
-                regKey = Registry.LocalMachine;
-                regKey = regKey.OpenSubKey(@"SOFTWARE\BnS Buddy\", true);
-
-                // foreach account login saved, add to dropbox
-                foreach (string InReg in regKey.GetSubKeyNames())
+                // Get Unique SALT
+                SALT = Security.FingerPrint.Value();
+                SALT = StringToHex(SALT);
+                // Create unexistant registry key
+                RegistryKey regKey = Registry.LocalMachine;
+                if (regKey.OpenSubKey(@"SOFTWARE\BnS Buddy\") == null)
                 {
-                    metroComboBox1.Items.Add(InReg.ToString());
+                    Registry.LocalMachine.CreateSubKey("SOFTWARE\\BnS Buddy");
                 }
-
-                if (metroComboBox1.Items.Count >= 1)
+                // Check if not already remembered
+                if (File.ReadAllText(@AppPath + "\\Settings.ini").Contains("rememberme = true"))
                 {
-                    // Select first found
-                    metroComboBox1.SelectedIndex = 0;
+                    metroComboBox1.Enabled = true;
+                    regKey = Registry.LocalMachine;
+                    regKey = regKey.OpenSubKey(@"SOFTWARE\BnS Buddy\", true);
 
-                    // Select last used
-                    if (regKey != null)
+                    // foreach account login saved, add to dropbox
+                    foreach (string InReg in regKey.GetSubKeyNames())
                     {
-                        if (regKey.GetValue("lastused") != null)
+                        metroComboBox1.Items.Add(InReg.ToString());
+                    }
+
+                    if (metroComboBox1.Items.Count >= 1)
+                    {
+                        // Select first found
+                        metroComboBox1.SelectedIndex = 0;
+
+                        // Select last used
+                        if (regKey != null)
                         {
-                            string tmp_last = string.Empty;
-                            tmp_last = regKey.GetValue("lastused").ToString();
-                            if (tmp_last != null)
+                            if (regKey.GetValue("lastused") != null)
                             {
-                                if (tmp_last.Length > 1)
+                                string tmp_last = string.Empty;
+                                tmp_last = regKey.GetValue("lastused").ToString();
+                                if (tmp_last != null)
                                 {
-                                    metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact(tmp_last);
+                                    if (tmp_last.Length > 1)
+                                    {
+                                        metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact(tmp_last);
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    string tmp_user = string.Empty;
-                    string tmp_pass = string.Empty;
-                    if (regKey != null)
-                    {
-                        tmp_user = regKey.OpenSubKey(metroComboBox1.SelectedItem.ToString()).GetValue("username").ToString();
-                        tmp_pass = regKey.OpenSubKey(metroComboBox1.SelectedItem.ToString()).GetValue("password").ToString();
-                        metroTextBox1.Text = Dec(tmp_user);
-                        metroTextBox2.Text = Dec(tmp_pass);
-                        metroCheckBox1.CheckState = CheckState.Checked;
+                        string tmp_user = string.Empty;
+                        string tmp_pass = string.Empty;
+                        if (regKey != null)
+                        {
+                            tmp_user = regKey.OpenSubKey(metroComboBox1.SelectedItem.ToString()).GetValue("username").ToString();
+                            tmp_pass = regKey.OpenSubKey(metroComboBox1.SelectedItem.ToString()).GetValue("password").ToString();
+                            metroTextBox1.Text = Dec(tmp_user);
+                            metroTextBox2.Text = Dec(tmp_pass);
+                            metroCheckBox1.CheckState = CheckState.Checked;
+                        }
                     }
                 }
-            }
-            // Check caps lock
-            CheckLock();
+                // Check caps lock
+                CheckLock();
+            } catch(Exception x) { Prompt.Popup(x.ToString()); }
         }
 
         private string StringToHex(string s)

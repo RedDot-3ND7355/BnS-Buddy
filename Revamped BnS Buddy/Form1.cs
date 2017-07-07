@@ -1228,7 +1228,7 @@ namespace Revamped_BnS_Buddy
                 if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("langset"))
                 {
                     // Save current settings
-                    if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("automemorycleanup"))
+                    if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("customlang"))
                     {
                         string[] currentsettings = File.ReadAllLines(AppPath + "\\Settings.ini");
                         Prompt.Popup(File.ReadAllText(AppPath + "\\Settings.ini"));
@@ -1544,8 +1544,8 @@ namespace Revamped_BnS_Buddy
                 AddTextLog("Changed RegionID to EU!");
                 regionID = "1";
                 metroButton1.Text = "Play!";
-                if (!LauncherInfo())
-                    this.Close();
+                LauncherInfo();
+                   // this.Close();
             }
             else if (metroComboBox1.SelectedItem.ToString() == "North America")
             {
@@ -1555,8 +1555,8 @@ namespace Revamped_BnS_Buddy
                 AddTextLog("Changed RegionID to NA!");
                 regionID = "0";
                 metroButton1.Text = "Play!";
-                if (!LauncherInfo())
-                    this.Close();
+                LauncherInfo();
+                //this.Close();
             }
             else if (metroComboBox1.SelectedItem.ToString() == "Taiwan")
             {
@@ -1566,8 +1566,8 @@ namespace Revamped_BnS_Buddy
                 AddTextLog("Changed RegionID to Taiwan!");
                 regionID = "15";
                 metroButton1.Text = "Play!";
-                if (!LauncherInfo())
-                    this.Close();
+                LauncherInfo();
+                //this.Close();
             }
             else if (metroComboBox1.SelectedItem.ToString() == "Japanese")
             {
@@ -1586,8 +1586,8 @@ namespace Revamped_BnS_Buddy
                 AddTextLog("Changed RegionID to Korean!");
                 regionID = "0";
                 metroButton1.Text = "Play!";
-                if (!LauncherInfo())
-                    this.Close();
+                LauncherInfo();
+                    //this.Close();
             }
             // Server login
             if (regions != null)
@@ -1597,6 +1597,7 @@ namespace Revamped_BnS_Buddy
             Details();
         }
 
+        bool Conflict = false;
         bool workedSRV = false;
         public void CheckServer()
         {
@@ -1662,6 +1663,14 @@ namespace Revamped_BnS_Buddy
                                     AddTextLog(RegPathlol);
                                     AddTextLog("Reg Key Valid!");
                                     workedSRV = true;
+
+                                    // Check conflict
+                                    regKeylol = Registry.LocalMachine;
+                                    regKeylol = regKeylol.OpenSubKey(@"SOFTWARE\Wow6432Node\plaync\MXM\");
+                                    if (regKeylol != null)
+                                    {
+                                        Conflict = true;
+                                    }
                                 }
                             }
                             catch { AddTextLog("Null Value of RegKey"); }
@@ -1681,6 +1690,14 @@ namespace Revamped_BnS_Buddy
                                     AddTextLog(RegPathlol);
                                     AddTextLog("Reg Key Valid!");
                                     workedSRV = true;
+
+                                    // Check conflict
+                                    regKeylol = Registry.LocalMachine;
+                                    regKeylol = regKeylol.OpenSubKey(@"SOFTWARE\plaync\MXM\");
+                                    if (regKeylol != null)
+                                    {
+                                        Conflict = true;
+                                    }
                                 }
                             }
                             catch { AddTextLog("Null Value of RegKey"); }
@@ -1744,6 +1761,14 @@ namespace Revamped_BnS_Buddy
                                     AddTextLog(RegPathlol);
                                     AddTextLog("Reg Key Valid!");
                                     workedSRV = true;
+
+                                    // Check conflict
+                                    regKeylol = Registry.LocalMachine;
+                                    regKeylol = regKeylol.OpenSubKey(@"SOFTWARE\Wow6432Node\plaync\MXM\");
+                                    if (regKeylol != null)
+                                    {
+                                        Conflict = true;
+                                    }
                                 }
                             }
                             catch { AddTextLog("Null Value of RegKey"); }
@@ -1763,11 +1788,24 @@ namespace Revamped_BnS_Buddy
                                     AddTextLog(RegPathlol);
                                     AddTextLog("Reg Key Valid!");
                                     workedSRV = true;
+
+                                    // Check conflict
+                                    regKeylol = Registry.LocalMachine;
+                                    regKeylol = regKeylol.OpenSubKey(@"SOFTWARE\plaync\MXM\");
+                                    if (regKeylol != null)
+                                    {
+                                        Conflict = true;
+                                    }
                                 }
                             }
                             catch { AddTextLog("Null Value of RegKey"); }
                         }
                     }
+                }
+                // Conflict error message
+                if (Conflict)
+                {
+                    metroLabel65.Visible = true;
                 }
             }
 
@@ -1796,13 +1834,21 @@ namespace Revamped_BnS_Buddy
                         {
                             metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Japanese");
                         }
-                        else if (nc_content.Contains("up4svr.plaync.com.tw"))
+                        else if (nc_content.Contains("up4svr.plaync.com.tw") && !nc_content.Contains("MXM"))
                         {
                             metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Taiwan");
                         }
-                        else if (nc_content.Contains("up4web.plaync.co.kr") || nc_content.Contains("up4web.nclauncher.ncsoft.com"))
+                        else if (nc_content.Contains("up4web.plaync.co.kr") || nc_content.Contains("up4web.nclauncher.ncsoft.com") && !nc_content.Contains("MXM"))
                         {
                             metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Korean");
+                        }
+                        if (Conflict == true && metroComboBox2.SelectedItem.ToString() == "Korean")
+                        {
+                            metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Korean");
+                        }
+                        else if (Conflict == true && metroComboBox2.SelectedItem.ToString() == "Taiwan")
+                        {
+                            metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Taiwan");
                         }
                     }
                 }
@@ -2843,7 +2889,8 @@ namespace Revamped_BnS_Buddy
             metroProgressSpinner1.Visible = false;
             metroProgressSpinner1.Refresh();
         }
-        
+
+        bool LoginOccured = false;
         private void LaunchGame(EventArgs e)
         {
             // Disable mod window
@@ -2927,12 +2974,20 @@ namespace Revamped_BnS_Buddy
  
             if (metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("North America") || metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("Europe") || metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("Korean") || metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("Taiwan"))
             {
-                if (metroLabel14.Text != "Clean")
+                if (metroLabel14.Text != "Clean" && metroComboBox1.SelectedIndex != metroComboBox1.FindStringExact("Korean"))
                 {
                     RestoreConfigFiles();
                 }
                 GetLogin();
-                GrabToken();
+                if (LoginOccured)
+                {
+                    GrabToken();
+                }
+                else
+                {
+                    metroButton1.Enabled = true;
+                    AddTextLog("Cancelled");
+                }
             }
             else if (metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("Japanese"))
             {
@@ -3032,6 +3087,10 @@ namespace Revamped_BnS_Buddy
             s1.ShowDialog();
             username = @s1.username.ToString().ToLower();
             password = @s1.password.ToString();
+            if (username.Length > 1 && password.Length > 1)
+            {
+                LoginOccured = true;
+            }
             //
             if (Debugging)
                 Prompt.Popup("Username used: " + username + Environment.NewLine + "Password used: " + password);
@@ -4908,13 +4967,21 @@ namespace Revamped_BnS_Buddy
                     {
                         metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Japanese");
                     }
-                    else if (nc_content.Contains("up4svr.plaync.com.tw"))
+                    else if (nc_content.Contains("up4svr.plaync.com.tw") && !nc_content.Contains("MXM"))
                     {
                         metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Taiwan");
                     }
-                    else if (nc_content.Contains("up4web.plaync.co.kr"))
+                    else if (nc_content.Contains("up4web.plaync.co.kr") || nc_content.Contains("up4web.nclauncher.ncsoft.com") && !nc_content.Contains("MXM"))
                     {
                         metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Korean");
+                    }
+                    if (Conflict == true && metroComboBox2.SelectedItem.ToString() == "Korean")
+                    {
+                        metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Korean");
+                    }
+                    else if (Conflict == true && metroComboBox2.SelectedItem.ToString() == "Taiwan")
+                    {
+                        metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Taiwan");
                     }
                 }
                 Prompt.Popup("Please Restart App If Done Configurating");
@@ -5393,8 +5460,7 @@ namespace Revamped_BnS_Buddy
                         // Change addon check to true
                         if (AddonModded.ContainsKey(to_ToFile))
                         {
-                            AddonModded.Remove(to_ToFile);
-                            AddonModded.Add(to_ToFile, true);
+                            AddonModded[to_ToFile] = true;
                         }
                     }
                     else
@@ -5485,6 +5551,15 @@ namespace Revamped_BnS_Buddy
                                 {
                                     ToText = ToText.Replace(Search[io], Replace[io]);
                                     AddTextLog("Patched: " + (io + 1) + "/" + Replace.Count);
+                                    // Prepare for compiling after all done
+                                    if (AddonModded.ContainsKey(to_ToFile))
+                                    {
+                                        if (AddonModded[to_ToFile] == false)
+                                        {
+                                            AddonModded[to_ToFile] = true;
+                                        }
+                                    }
+
                                     if (Debugging)
                                         Prompt.Popup("After: " + ToText);
                                 }
@@ -5497,12 +5572,6 @@ namespace Revamped_BnS_Buddy
                         }
                         File.WriteAllText(DataPath + "\\" + ToFile, ToText);
                         AddTextLog("Reverted Addon: " + filename.Replace(".patch", ""));
-                        // Change addon check to true
-                        if (AddonModded.ContainsKey(to_ToFile))
-                        {
-                            AddonModded.Remove(to_ToFile);
-                            AddonModded.Add(to_ToFile, true);
-                        }
                     }
                     else { Prompt.Popup("File: " + DataPath + "\\" + ToFile + " Does not exist!  Please check your patches"); }
                 }
@@ -5593,8 +5662,7 @@ namespace Revamped_BnS_Buddy
                         // Change addon check to true
                         if (AddonModded.ContainsKey(to_ToFile))
                         {
-                            AddonModded.Remove(to_ToFile);
-                            AddonModded.Add(to_ToFile, true);
+                            AddonModded[to_ToFile] = true;
                         }
                     }
                     else
@@ -5684,6 +5752,15 @@ namespace Revamped_BnS_Buddy
                                 {
                                     ToText = ToText.Replace(Search[io], Replace[io]);
                                     AddTextLog("Patched: " + (io + 1) + "/" + Replace.Count);
+                                    // Prepare for compiling after all done
+                                    if (AddonModded.ContainsKey(to_ToFile))
+                                    {
+                                        if (AddonModded[to_ToFile] == false)
+                                        {
+                                            AddonModded[to_ToFile] = true;
+                                        }
+                                    }
+
                                     if (Debugging)
                                         Prompt.Popup("After: " + ToText);
                                 }
@@ -5696,12 +5773,6 @@ namespace Revamped_BnS_Buddy
                         }
                         File.WriteAllText(DataPath + "\\" + ToFile, ToText);
                         AddTextLog("Applied Addon: " + filename.Replace(".patch", ""));
-                        // Change addon check to true
-                        if (AddonModded.ContainsKey(to_ToFile))
-                        {
-                            AddonModded.Remove(to_ToFile);
-                            AddonModded.Add(to_ToFile, true);
-                        }
                     } else { Prompt.Popup("File: " + DataPath + "\\" + ToFile + " Does not exist!  Please check your patches"); }
                 }
                 else if (i > o)
@@ -6304,7 +6375,10 @@ namespace Revamped_BnS_Buddy
             {
                 Prompt.Popup("There was an error connecting to the Login Server, please make sure there isn't a maintenance.");
                 if (Debugging)
+                {
                     Prompt.Popup(ex.ToString());
+                }
+                metroButton1.Enabled = true;
                 return false;
             }
             return true;
