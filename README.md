@@ -21,13 +21,19 @@ Credits:
 
 
 Requirements:
-+ .Net Framework 4.0 (not client profile)
++ .Net Framework 4.5 (not client profile)
 + MetroFramework.dll (included in download)
 
 > A brain.
 
 
 Change Log:
+
+Version 5.8.7.5
++ Fixed Bug: Check settings.ini if updated was broken due to invalid settings name
++ Fixed Bug: Collision with MXM(Add an extra check for mxm registry and in NCLauncher.ini)
++ Fixed Bug: Addons would still compile a multiple pattern patch
++ Fixed Bug: Not being connected to the internet would prevent buddy from attempting to sign in again(play button grayed out)
 
 Version 5.8.7.4
 + Added: Create addon function
