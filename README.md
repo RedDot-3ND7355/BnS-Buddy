@@ -29,6 +29,10 @@ Requirements:
 
 Change Log:
 
+Version 5.8.7.6
++ Reworked: Applying addons now has option for bitness
++ Fixed Bug: Fix Server Selection for NA/EU resulting an unhandled exception
+
 Version 5.8.7.5
 + Fixed Bug: Check settings.ini if updated was broken due to invalid settings name
 + Fixed Bug: Collision with MXM(Add an extra check for mxm registry and in NCLauncher.ini)
