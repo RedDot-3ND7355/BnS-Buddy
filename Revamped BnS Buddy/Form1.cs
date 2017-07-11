@@ -1590,7 +1590,7 @@ namespace Revamped_BnS_Buddy
                     //this.Close();
             }
             // Server login
-            if (regions != null)
+            if (regions.Count != 0)
             {
                 RegionCB.DataSource = regions;
             }
@@ -5392,6 +5392,8 @@ namespace Revamped_BnS_Buddy
 
         public void UndoPatching(string filename)
         {
+            // Bitness Check
+            bool SkipFile = false;
             // Reset Search and Replace Dictionarys
             Search = new Dictionary<int, string>();
             Replace = new Dictionary<int, string>();
@@ -5407,69 +5409,95 @@ namespace Revamped_BnS_Buddy
                 // Fix file name for unpacking
                 string prev_ToFile = Path.GetDirectoryName(ToFile);
                 string to_ToFile = prev_ToFile.Replace(".files", "");
-                // Add dat file to list of addons to mod
-                if (!AddonModded.ContainsKey(to_ToFile))
+                // Bitness Check
+                if (to_ToFile.Contains("[bit]"))
                 {
-                    AddonModded.Add(to_ToFile, false);
-                }
-                // Proceed to unpacking if not existing already
-                if (!Directory.Exists(DataPath + "\\" + prev_ToFile))
-                {
-                    // Add to dictionary
-                    int tmpaf = AddonFiles.Count + 1;
-                    // Cut String to get filename
-                    string ToFileFolder = Path.GetDirectoryName(ToFile);
-                    if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFileFolder))
+                    if (metroRadioButton1.Checked == true)
                     {
-                        AddonFiles.Add(tmpaf, ToFileFolder);
+                        string ancestor = to_ToFile; // before change
+                        to_ToFile = to_ToFile.Replace("[bit]", ""); // after change
+                        prev_ToFile = prev_ToFile.Replace(ancestor, to_ToFile); // update change
+                        ToFile = ToFile.Replace(ancestor, to_ToFile); // update general
                     }
-                    // Continue...
-                    AddTextLog("Decompiling " + to_ToFile);
-                    usedfilepath = DataPath + "\\" + to_ToFile;
-                    Extractor(to_ToFile);
-                    AddTextLog("Decompiled.");
-                }
-                else
-                {
-                    // Add to dictionary
-                    int tmpaf = AddonFiles.Count + 1;
-                    string ToFileFolder = Path.GetDirectoryName(ToFile);
-                    if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFileFolder))
+                    else if (metroRadioButton2.Checked == true)
                     {
-                        AddonFiles.Add(tmpaf, ToFileFolder);
-                    }
-                    AddTextLog("File: " + ToFileFolder + " already decompiled");
-                }
-                // Continue work
-                string Searcher = File.ReadLines(FullAddonPath + "\\" + filename).Skip(1).Take(1).First().Replace("Search = ", "");
-                if (Debugging)
-                    Prompt.Popup("String to search: " + Searcher);
-                string Replacer = File.ReadLines(FullAddonPath + "\\" + filename).Skip(2).Take(1).First().Replace("Replace = ", "");
-                if (Debugging)
-                    Prompt.Popup("String to replace: " + Replacer);
-                if (File.Exists(DataPath + "\\" + ToFile))
-                {
-                    string ToText = File.ReadAllText(DataPath + "\\" + ToFile);
-                    if (Debugging)
-                        Prompt.Popup(ToText.ToString());
-                    if (ToText.ToString().Contains(Replacer.ToString()))
-                    {
-                        ToText = ToText.Replace(Replacer, Searcher);
-                        File.WriteAllText(DataPath + "\\" + ToFile, ToText);
-                        AddTextLog("Reverted Addon: " + filename.Replace(".patch", ""));
-                        // Change addon check to true
-                        if (AddonModded.ContainsKey(to_ToFile))
-                        {
-                            AddonModded[to_ToFile] = true;
-                        }
+                        string ancestor = to_ToFile; // before change
+                        to_ToFile = to_ToFile.Replace("[bit]", "64"); // after change
+                        prev_ToFile = prev_ToFile.Replace(ancestor, to_ToFile); // update change
+                        ToFile = ToFile.Replace(ancestor, to_ToFile); // update general
                     }
                     else
                     {
-                        AddTextLog("Addon: " + filename.Replace(".patch", "") + " couldn't be applied!");
-                        AddTextLog("Maybe already reverted?");
+                        SkipFile = true;
+                        AddTextLog("Skipped addon: " + filename.Replace(".patch", "") + " because no bitness was selected");
                     }
                 }
-                else { Prompt.Popup("File: " + DataPath + "\\" + ToFile + " Does not exist!  Please check your patches"); }
+                if (SkipFile == false)
+                {
+                    // Add dat file to list of addons to mod
+                    if (!AddonModded.ContainsKey(to_ToFile))
+                    {
+                        AddonModded.Add(to_ToFile, false);
+                    }
+                    // Proceed to unpacking if not existing already
+                    if (!Directory.Exists(DataPath + "\\" + prev_ToFile))
+                    {
+                        // Add to dictionary
+                        int tmpaf = AddonFiles.Count + 1;
+                        // Cut String to get filename
+                        string ToFileFolder = Path.GetDirectoryName(ToFile);
+                        if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFileFolder))
+                        {
+                            AddonFiles.Add(tmpaf, ToFileFolder);
+                        }
+                        // Continue...
+                        AddTextLog("Decompiling " + to_ToFile);
+                        usedfilepath = DataPath + "\\" + to_ToFile;
+                        Extractor(to_ToFile);
+                        AddTextLog("Decompiled.");
+                    }
+                    else
+                    {
+                        // Add to dictionary
+                        int tmpaf = AddonFiles.Count + 1;
+                        string ToFileFolder = Path.GetDirectoryName(ToFile);
+                        if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFileFolder))
+                        {
+                            AddonFiles.Add(tmpaf, ToFileFolder);
+                        }
+                        AddTextLog("File: " + ToFileFolder + " already decompiled");
+                    }
+                    // Continue work
+                    string Searcher = File.ReadLines(FullAddonPath + "\\" + filename).Skip(1).Take(1).First().Replace("Search = ", "");
+                    if (Debugging)
+                        Prompt.Popup("String to search: " + Searcher);
+                    string Replacer = File.ReadLines(FullAddonPath + "\\" + filename).Skip(2).Take(1).First().Replace("Replace = ", "");
+                    if (Debugging)
+                        Prompt.Popup("String to replace: " + Replacer);
+                    if (File.Exists(DataPath + "\\" + ToFile))
+                    {
+                        string ToText = File.ReadAllText(DataPath + "\\" + ToFile);
+                        if (Debugging)
+                            Prompt.Popup(ToText.ToString());
+                        if (ToText.ToString().Contains(Replacer.ToString()))
+                        {
+                            ToText = ToText.Replace(Replacer, Searcher);
+                            File.WriteAllText(DataPath + "\\" + ToFile, ToText);
+                            AddTextLog("Reverted Addon: " + filename.Replace(".patch", ""));
+                            // Change addon check to true
+                            if (AddonModded.ContainsKey(to_ToFile))
+                            {
+                                AddonModded[to_ToFile] = true;
+                            }
+                        }
+                        else
+                        {
+                            AddTextLog("Addon: " + filename.Replace(".patch", "") + " couldn't be applied!");
+                            AddTextLog("Maybe already reverted?");
+                        }
+                    }
+                    else { Prompt.Popup("File: " + DataPath + "\\" + ToFile + " Does not exist!  Please check your patches"); }
+                }
             }
             else if (linecount > 4)
             {
@@ -5477,116 +5505,142 @@ namespace Revamped_BnS_Buddy
                 // Fix file name for unpacking
                 string prev_ToFile = Path.GetDirectoryName(ToFile);
                 string to_ToFile = prev_ToFile.Replace(".files", "");
-                // Add dat file to list of addons to mod
-                if (!AddonModded.ContainsKey(to_ToFile))
+                // Bitness Check
+                if (to_ToFile.Contains("[bit]"))
                 {
-                    AddonModded.Add(to_ToFile, false);
-                }
-                // Proceed to unpacking if not existing already
-                if (!Directory.Exists(DataPath + "\\" + prev_ToFile))
-                {
-                    // Add to dictionary
-                    int tmpaf = AddonFiles.Count + 1;
-                    string ToFileFolder = Path.GetDirectoryName(ToFile);
-                    if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFileFolder))
+                    if (metroRadioButton1.Checked == true)
                     {
-                        AddonFiles.Add(tmpaf, ToFileFolder);
+                        string ancestor = to_ToFile; // before change
+                        to_ToFile = to_ToFile.Replace("[bit]", ""); // after change
+                        prev_ToFile = prev_ToFile.Replace(ancestor, to_ToFile); // update change
+                        ToFile = ToFile.Replace(ancestor, to_ToFile); // update general
                     }
-                    // Continue...
-                    AddTextLog("Decompiling " + to_ToFile);
-                    usedfilepath = DataPath + "\\" + to_ToFile;
-                    Extractor(to_ToFile);
-                    AddTextLog("Decompiled.");
+                    else if (metroRadioButton2.Checked == true)
+                    {
+                        string ancestor = to_ToFile; // before change
+                        to_ToFile = to_ToFile.Replace("[bit]", "64"); // after change
+                        prev_ToFile = prev_ToFile.Replace(ancestor, to_ToFile); // update change
+                        ToFile = ToFile.Replace(ancestor, to_ToFile); // update general
+                    }
+                    else
+                    {
+                        SkipFile = true;
+                        AddTextLog("Skipped addon: " + filename.Replace(".patch", "") + " because no bitness was selected");
+                    }
+                }
+                if (SkipFile == false)
+                {
+                    // Add dat file to list of addons to mod
+                    if (!AddonModded.ContainsKey(to_ToFile))
+                    {
+                        AddonModded.Add(to_ToFile, false);
+                    }
+                    // Proceed to unpacking if not existing already
+                    if (!Directory.Exists(DataPath + "\\" + prev_ToFile))
+                    {
+                        // Add to dictionary
+                        int tmpaf = AddonFiles.Count + 1;
+                        string ToFileFolder = Path.GetDirectoryName(ToFile);
+                        if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFileFolder))
+                        {
+                            AddonFiles.Add(tmpaf, ToFileFolder);
+                        }
+                        // Continue...
+                        AddTextLog("Decompiling " + to_ToFile);
+                        usedfilepath = DataPath + "\\" + to_ToFile;
+                        Extractor(to_ToFile);
+                        AddTextLog("Decompiled.");
+                    }
+                    else
+                    {
+                        // Add to dictionary
+                        int tmpaf = AddonFiles.Count + 1;
+                        string ToFileFolder = Path.GetDirectoryName(ToFile);
+                        if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFileFolder))
+                        {
+                            AddonFiles.Add(tmpaf, ToFileFolder);
+                        }
+                        AddTextLog("File: " + ToFileFolder + " already decompiled");
+                    }
+                    // Continue work
+                    int i = 0;
+                    int o = 0;
+                    IEnumerable<string> WholeText = File.ReadLines(FullAddonPath + "\\" + filename);
+
+                    foreach (string text in WholeText)
+                    {
+                        if (text.Contains("Search = "))
+                        {
+                            string line = text;
+                            string inline = line.Replace("Search = ", "");
+                            Replace.Add(i, inline);
+                            i++;
+                        }
+                    }
+                    foreach (string text in WholeText)
+                    {
+                        if (text.Contains("Replace = "))
+                        {
+                            string line = text;
+                            string inline = line.Replace("Replace = ", "");
+                            Search.Add(o, inline);
+                            o++;
+                        }
+                    }
+                    if (i == o)
+                    {
+                        if (File.Exists(DataPath + "\\" + ToFile))
+                        {
+                            string ToText = File.ReadAllText(DataPath + "\\" + ToFile);
+                            if (Debugging)
+                                Prompt.Popup("Full Text: " + ToText);
+                            for (int io = 0; i > io; io++)
+                            {
+                                if (Debugging)
+                                    Prompt.Popup("Before: " + ToText);
+                                if (Search.ContainsKey(io))
+                                {
+                                    if (ToText.Contains(Search[io]))
+                                    {
+                                        ToText = ToText.Replace(Search[io], Replace[io]);
+                                        AddTextLog("Patched: " + (io + 1) + "/" + Replace.Count);
+                                        // Prepare for compiling after all done
+                                        if (AddonModded.ContainsKey(to_ToFile))
+                                        {
+                                            if (AddonModded[to_ToFile] == false)
+                                            {
+                                                AddonModded[to_ToFile] = true;
+                                            }
+                                        }
+
+                                        if (Debugging)
+                                            Prompt.Popup("After: " + ToText);
+                                    }
+                                    else
+                                    {
+                                        AddTextLog("Error: Could not find " + (io + 1) + "/" + Replace.Count);
+                                        AddTextLog("Maybe already reverted?");
+                                    }
+                                }
+                            }
+                            File.WriteAllText(DataPath + "\\" + ToFile, ToText);
+                            AddTextLog("Reverted Addon: " + filename.Replace(".patch", ""));
+                        }
+                        else { Prompt.Popup("File: " + DataPath + "\\" + ToFile + " Does not exist!  Please check your patches"); }
+                    }
+                    else if (i > o)
+                    {
+                        Prompt.Popup("Missing Replacements found. Please check your patches");
+                    }
+                    else if (i < o)
+                    {
+                        Prompt.Popup("Missing Finds found. Please check your patches");
+                    }
                 }
                 else
                 {
-                    // Add to dictionary
-                    int tmpaf = AddonFiles.Count + 1;
-                    string ToFileFolder = Path.GetDirectoryName(ToFile);
-                    if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFileFolder))
-                    {
-                        AddonFiles.Add(tmpaf, ToFileFolder);
-                    }
-                    AddTextLog("File: " + ToFileFolder + " already decompiled");
+                    Prompt.Popup("Error: The following patch " + filename + " does not meet the requirements.");
                 }
-                // Continue work
-                int i = 0;
-                int o = 0;
-                IEnumerable<string> WholeText = File.ReadLines(FullAddonPath + "\\" + filename);
-
-                foreach (string text in WholeText)
-                {
-                    if (text.Contains("Search = "))
-                    {
-                        string line = text;
-                        string inline = line.Replace("Search = ", "");
-                        Replace.Add(i, inline);
-                        i++;
-                    }
-                }
-                foreach (string text in WholeText)
-                {
-                    if (text.Contains("Replace = "))
-                    {
-                        string line = text;
-                        string inline = line.Replace("Replace = ", "");
-                        Search.Add(o, inline);
-                        o++;
-                    }
-                }
-                if (i == o)
-                {
-                    if (File.Exists(DataPath + "\\" + ToFile))
-                    {
-                        string ToText = File.ReadAllText(DataPath + "\\" + ToFile);
-                        if (Debugging)
-                            Prompt.Popup("Full Text: " + ToText);
-                        for (int io = 0; i > io; io++)
-                        {
-                            if (Debugging)
-                                Prompt.Popup("Before: " + ToText);
-                            if (Search.ContainsKey(io))
-                            {
-                                if (ToText.Contains(Search[io]))
-                                {
-                                    ToText = ToText.Replace(Search[io], Replace[io]);
-                                    AddTextLog("Patched: " + (io + 1) + "/" + Replace.Count);
-                                    // Prepare for compiling after all done
-                                    if (AddonModded.ContainsKey(to_ToFile))
-                                    {
-                                        if (AddonModded[to_ToFile] == false)
-                                        {
-                                            AddonModded[to_ToFile] = true;
-                                        }
-                                    }
-
-                                    if (Debugging)
-                                        Prompt.Popup("After: " + ToText);
-                                }
-                                else
-                                {
-                                    AddTextLog("Error: Could not find " + (io + 1) + "/" + Replace.Count);
-                                    AddTextLog("Maybe already reverted?");
-                                }
-                            }
-                        }
-                        File.WriteAllText(DataPath + "\\" + ToFile, ToText);
-                        AddTextLog("Reverted Addon: " + filename.Replace(".patch", ""));
-                    }
-                    else { Prompt.Popup("File: " + DataPath + "\\" + ToFile + " Does not exist!  Please check your patches"); }
-                }
-                else if (i > o)
-                {
-                    Prompt.Popup("Missing Replacements found. Please check your patches");
-                }
-                else if (i < o)
-                {
-                    Prompt.Popup("Missing Finds found. Please check your patches");
-                }
-            }
-            else
-            {
-                Prompt.Popup("Error: The following patch " + filename + " does not meet the requirements.");
             }
         }
 
@@ -5594,6 +5648,8 @@ namespace Revamped_BnS_Buddy
         Dictionary<int, string> Replace = new Dictionary<int, string>();
         public void StartPatching(string filename)
         {
+            // Bitness Check
+            bool SkipFile = false;
             // Reset Search and Replace Dictionarys
             Search = new Dictionary<int, string>();
             Replace = new Dictionary<int, string>();
@@ -5609,68 +5665,93 @@ namespace Revamped_BnS_Buddy
                 // Fix file name for unpacking
                 string prev_ToFile = Path.GetDirectoryName(ToFile);
                 string to_ToFile = prev_ToFile.Replace(".files", "");
-                // Add dat file to list of addons to mod
-                if (!AddonModded.ContainsKey(to_ToFile))
+                // Bitness Check
+                if (to_ToFile.Contains("[bit]"))
                 {
-                    AddonModded.Add(to_ToFile, false);
-                }
-                // Proceed to unpacking if not existing already
-                if (!Directory.Exists(DataPath + "\\" + prev_ToFile))
-                {
-                    // Add to dictionary
-                    int tmpaf = AddonFiles.Count + 1;
-                    // Cut String to get filename
-                    string ToFileFolder = Path.GetDirectoryName(ToFile);
-                    if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFileFolder))
+                    if (metroRadioButton1.Checked == true)
                     {
-                        AddonFiles.Add(tmpaf, ToFileFolder);
+                        string ancestor = to_ToFile; // before change
+                        to_ToFile = to_ToFile.Replace("[bit]", ""); // after change
+                        prev_ToFile = prev_ToFile.Replace(ancestor, to_ToFile); // update change
+                        ToFile = ToFile.Replace(ancestor, to_ToFile); // update general
                     }
-                    // Continue...
-                    AddTextLog("Decompiling " + to_ToFile);
-                    usedfilepath = DataPath + "\\" + to_ToFile;
-                    Extractor(to_ToFile);
-                    AddTextLog("Decompiled.");
-                }
-                else
-                {
-                    // Add to dictionary
-                    int tmpaf = AddonFiles.Count + 1;
-                    string ToFileFolder = Path.GetDirectoryName(ToFile);
-                    if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFileFolder))
+                    else if (metroRadioButton2.Checked == true)
                     {
-                        AddonFiles.Add(tmpaf, ToFileFolder);
-                    }
-                    AddTextLog("File: " + ToFileFolder + " already decompiled");
-                }
-                // Continue work
-                string Searcher = File.ReadLines(FullAddonPath + "\\" + filename).Skip(1).Take(1).First().Replace("Search = ", "");
-                if (Debugging)
-                    Prompt.Popup("String to search: " + Searcher);
-                string Replacer = File.ReadLines(FullAddonPath + "\\" + filename).Skip(2).Take(1).First().Replace("Replace = ", "");
-                if (Debugging)
-                    Prompt.Popup("String to replace: " + Replacer);
-                if (File.Exists(DataPath + "\\" + ToFile))
-                {
-                    string ToText = File.ReadAllText(DataPath + "\\" + ToFile);
-                    if (Debugging)
-                        Prompt.Popup(ToText.ToString());
-                    if (ToText.ToString().Contains(Searcher.ToString()))
-                    {
-                        ToText = ToText.Replace(Searcher, Replacer);
-                        File.WriteAllText(DataPath + "\\" + ToFile, ToText);
-                        AddTextLog("Applied Addon: " + filename.Replace(".patch", ""));
-                        // Change addon check to true
-                        if (AddonModded.ContainsKey(to_ToFile))
-                        {
-                            AddonModded[to_ToFile] = true;
-                        }
+                        string ancestor = to_ToFile; // before change
+                        to_ToFile = to_ToFile.Replace("[bit]", "64"); // after change
+                        prev_ToFile = prev_ToFile.Replace(ancestor, to_ToFile); // update change
+                        ToFile = ToFile.Replace(ancestor, to_ToFile); // update general
                     }
                     else
                     {
-                        AddTextLog("Addon: " + filename.Replace(".patch", "") + " couldn't be applied!");
-                        AddTextLog("Maybe already patched?");
+                        SkipFile = true;
+                        AddTextLog("Skipped addon: " + filename.Replace(".patch", "") + " because no bitness was selected");
                     }
-                } else { Prompt.Popup("File: " + DataPath + "\\" + ToFile + " Does not exist!  Please check your patches"); }
+                }
+                if (SkipFile == false) { 
+                    // Add dat file to list of addons to mod
+                    if (!AddonModded.ContainsKey(to_ToFile))
+                    {
+                        AddonModded.Add(to_ToFile, false);
+                    }
+                    // Proceed to unpacking if not existing already
+                    if (!Directory.Exists(DataPath + "\\" + prev_ToFile))
+                    {
+                        // Add to dictionary
+                        int tmpaf = AddonFiles.Count + 1;
+                        // Cut String to get filename
+                        string ToFileFolder = Path.GetDirectoryName(ToFile);
+                        if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFileFolder))
+                        {
+                            AddonFiles.Add(tmpaf, ToFileFolder);
+                        }
+                        // Continue...
+                        AddTextLog("Decompiling " + to_ToFile);
+                        usedfilepath = DataPath + "\\" + to_ToFile;
+                        Extractor(to_ToFile);
+                        AddTextLog("Decompiled.");
+                    }
+                    else
+                    {
+                        // Add to dictionary
+                        int tmpaf = AddonFiles.Count + 1;
+                        string ToFileFolder = Path.GetDirectoryName(ToFile);
+                        if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFileFolder))
+                        {
+                            AddonFiles.Add(tmpaf, ToFileFolder);
+                        }
+                        AddTextLog("File: " + ToFileFolder + " already decompiled");
+                    }
+                    // Continue work
+                    string Searcher = File.ReadLines(FullAddonPath + "\\" + filename).Skip(1).Take(1).First().Replace("Search = ", "");
+                    if (Debugging)
+                        Prompt.Popup("String to search: " + Searcher);
+                    string Replacer = File.ReadLines(FullAddonPath + "\\" + filename).Skip(2).Take(1).First().Replace("Replace = ", "");
+                    if (Debugging)
+                        Prompt.Popup("String to replace: " + Replacer);
+                    if (File.Exists(DataPath + "\\" + ToFile))
+                    {
+                        string ToText = File.ReadAllText(DataPath + "\\" + ToFile);
+                        if (Debugging)
+                            Prompt.Popup(ToText.ToString());
+                        if (ToText.ToString().Contains(Searcher.ToString()))
+                        {
+                            ToText = ToText.Replace(Searcher, Replacer);
+                            File.WriteAllText(DataPath + "\\" + ToFile, ToText);
+                            AddTextLog("Applied Addon: " + filename.Replace(".patch", ""));
+                            // Change addon check to true
+                            if (AddonModded.ContainsKey(to_ToFile))
+                            {
+                                AddonModded[to_ToFile] = true;
+                            }
+                        }
+                        else
+                        {
+                            AddTextLog("Addon: " + filename.Replace(".patch", "") + " couldn't be applied!");
+                            AddTextLog("Maybe already patched?");
+                        }
+                    } else { Prompt.Popup("File: " + DataPath + "\\" + ToFile + " Does not exist!  Please check your patches"); }
+                }
             }
             else if (linecount > 4)
             {
@@ -5678,110 +5759,137 @@ namespace Revamped_BnS_Buddy
                 // Fix file name for unpacking
                 string prev_ToFile = Path.GetDirectoryName(ToFile);
                 string to_ToFile = prev_ToFile.Replace(".files", "");
-                // Add dat file to list of addons to mod
-                if (!AddonModded.ContainsKey(to_ToFile))
+                // Bitness Check
+                if (to_ToFile.Contains("[bit]"))
                 {
-                    AddonModded.Add(to_ToFile, false);
-                }
-                // Proceed to unpacking if not existing already
-                if (!Directory.Exists(DataPath + "\\" + prev_ToFile))
-                {
-                    // Add to dictionary
-                    int tmpaf = AddonFiles.Count + 1;
-                    string ToFileFolder = Path.GetDirectoryName(ToFile);
-                    if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFileFolder))
+                    if (metroRadioButton1.Checked == true)
                     {
-                        AddonFiles.Add(tmpaf, ToFileFolder);
+                        string ancestor = to_ToFile; // before change
+                        to_ToFile = to_ToFile.Replace("[bit]", ""); // after change
+                        prev_ToFile = prev_ToFile.Replace(ancestor, to_ToFile); // update change
+                        ToFile = ToFile.Replace(ancestor, to_ToFile); // update general
                     }
-                    // Continue...
-                    AddTextLog("Decompiling " + to_ToFile);
-                    usedfilepath = DataPath + "\\" + to_ToFile;
-                    Extractor(to_ToFile);
-                    AddTextLog("Decompiled.");
-                }
-                else
-                {
-                    // Add to dictionary
-                    int tmpaf = AddonFiles.Count + 1;
-                    string ToFileFolder = Path.GetDirectoryName(ToFile);
-                    if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFileFolder))
+                    else if (metroRadioButton2.Checked == true)
                     {
-                        AddonFiles.Add(tmpaf, ToFileFolder);
+                        string ancestor = to_ToFile; // before change
+                        to_ToFile = to_ToFile.Replace("[bit]", "64"); // after change
+                        prev_ToFile = prev_ToFile.Replace(ancestor, to_ToFile); // update change
+                        ToFile = ToFile.Replace(ancestor, to_ToFile); // update general
                     }
-                    AddTextLog("File: " + ToFileFolder + " already decompiled");
-                }
-                // Continue work
-                int i = 0;
-                int o = 0;
-                IEnumerable<string> WholeText = File.ReadLines(FullAddonPath + "\\" + filename);
-
-                foreach (string text in WholeText)
-                {
-                    if (text.Contains("Search = "))
+                    else
                     {
-                        string line = text;
-                        string inline = line.Replace("Search = ", "");
-                        Search.Add(i, inline);
-                        i++;
+                        SkipFile = true;
+                        AddTextLog("Skipped addon: " + filename.Replace(".patch", "") + " because no bitness was selected");
                     }
                 }
-                foreach (string text in WholeText)
+                if (SkipFile == false)
                 {
-                    if (text.Contains("Replace = "))
+                    // Add dat file to list of addons to mod
+                    if (!AddonModded.ContainsKey(to_ToFile))
                     {
-                        string line = text;
-                        string inline = line.Replace("Replace = ", "");
-                        Replace.Add(o, inline);
-                        o++;
+                        AddonModded.Add(to_ToFile, false);
                     }
-                }
-                if (i == o)
-                {
-                    if (File.Exists(DataPath + "\\" + ToFile))
+                    // Proceed to unpacking if not existing already
+                    if (!Directory.Exists(DataPath + "\\" + prev_ToFile))
                     {
-                        string ToText = File.ReadAllText(DataPath + "\\" + ToFile);
-                        if (Debugging)
-                            Prompt.Popup("Full Text: " + ToText);
-                        for (int io = 0; i > io; io++)
+                        // Add to dictionary
+                        int tmpaf = AddonFiles.Count + 1;
+                        string ToFileFolder = Path.GetDirectoryName(ToFile);
+                        if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFileFolder))
                         {
-                            if (Debugging)
-                                Prompt.Popup("Before: " + ToText);
-                            if (Search.ContainsKey(io))
-                            {
-                                if (ToText.Contains(Search[io]))
-                                {
-                                    ToText = ToText.Replace(Search[io], Replace[io]);
-                                    AddTextLog("Patched: " + (io + 1) + "/" + Replace.Count);
-                                    // Prepare for compiling after all done
-                                    if (AddonModded.ContainsKey(to_ToFile))
-                                    {
-                                        if (AddonModded[to_ToFile] == false)
-                                        {
-                                            AddonModded[to_ToFile] = true;
-                                        }
-                                    }
+                            AddonFiles.Add(tmpaf, ToFileFolder);
+                        }
+                        // Continue...
+                        AddTextLog("Decompiling " + to_ToFile);
+                        usedfilepath = DataPath + "\\" + to_ToFile;
+                        Extractor(to_ToFile);
+                        AddTextLog("Decompiled.");
+                    }
+                    else
+                    {
+                        // Add to dictionary
+                        int tmpaf = AddonFiles.Count + 1;
+                        string ToFileFolder = Path.GetDirectoryName(ToFile);
+                        if (!AddonFiles.ContainsKey(tmpaf) && !AddonFiles.ContainsValue(ToFileFolder))
+                        {
+                            AddonFiles.Add(tmpaf, ToFileFolder);
+                        }
+                        AddTextLog("File: " + ToFileFolder + " already decompiled");
+                    }
+                    // Continue work
+                    int i = 0;
+                    int o = 0;
+                    IEnumerable<string> WholeText = File.ReadLines(FullAddonPath + "\\" + filename);
 
-                                    if (Debugging)
-                                        Prompt.Popup("After: " + ToText);
-                                }
-                                else
+                    foreach (string text in WholeText)
+                    {
+                        if (text.Contains("Search = "))
+                        {
+                            string line = text;
+                            string inline = line.Replace("Search = ", "");
+                            Search.Add(i, inline);
+                            i++;
+                        }
+                    }
+                    foreach (string text in WholeText)
+                    {
+                        if (text.Contains("Replace = "))
+                        {
+                            string line = text;
+                            string inline = line.Replace("Replace = ", "");
+                            Replace.Add(o, inline);
+                            o++;
+                        }
+                    }
+                    if (i == o)
+                    {
+                        if (File.Exists(DataPath + "\\" + ToFile))
+                        {
+                            string ToText = File.ReadAllText(DataPath + "\\" + ToFile);
+                            if (Debugging)
+                                Prompt.Popup("Full Text: " + ToText);
+                            for (int io = 0; i > io; io++)
+                            {
+                                if (Debugging)
+                                    Prompt.Popup("Before: " + ToText);
+                                if (Search.ContainsKey(io))
                                 {
-                                    AddTextLog("Error: Could not find " + (io + 1) + "/" + Replace.Count);
-                                    AddTextLog("Maybe already done?");
+                                    if (ToText.Contains(Search[io]))
+                                    {
+                                        ToText = ToText.Replace(Search[io], Replace[io]);
+                                        AddTextLog("Patched: " + (io + 1) + "/" + Replace.Count);
+                                        // Prepare for compiling after all done
+                                        if (AddonModded.ContainsKey(to_ToFile))
+                                        {
+                                            if (AddonModded[to_ToFile] == false)
+                                            {
+                                                AddonModded[to_ToFile] = true;
+                                            }
+                                        }
+
+                                        if (Debugging)
+                                            Prompt.Popup("After: " + ToText);
+                                    }
+                                    else
+                                    {
+                                        AddTextLog("Error: Could not find " + (io + 1) + "/" + Replace.Count);
+                                        AddTextLog("Maybe already done?");
+                                    }
                                 }
                             }
+                            File.WriteAllText(DataPath + "\\" + ToFile, ToText);
+                            AddTextLog("Applied Addon: " + filename.Replace(".patch", ""));
                         }
-                        File.WriteAllText(DataPath + "\\" + ToFile, ToText);
-                        AddTextLog("Applied Addon: " + filename.Replace(".patch", ""));
-                    } else { Prompt.Popup("File: " + DataPath + "\\" + ToFile + " Does not exist!  Please check your patches"); }
-                }
-                else if (i > o)
-                {
-                    Prompt.Popup("Missing Replacements found. Please check your patches");
-                }
-                else if (i < o)
-                {
-                    Prompt.Popup("Missing Finds found. Please check your patches");
+                        else { Prompt.Popup("File: " + DataPath + "\\" + ToFile + " Does not exist!  Please check your patches"); }
+                    }
+                    else if (i > o)
+                    {
+                        Prompt.Popup("Missing Replacements found. Please check your patches");
+                    }
+                    else if (i < o)
+                    {
+                        Prompt.Popup("Missing Finds found. Please check your patches");
+                    }
                 }
             }
             else
@@ -6216,17 +6324,54 @@ namespace Revamped_BnS_Buddy
         public void GrabToken() // Login action
         {
             // Change Region based
-            if (metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("North America"))
+            if (metroComboBox1.SelectedItem != null)
             {
-                RegionCB.SelectedIndex = RegionCB.FindStringExact("North America");
-                if (Debugging)
-                    Prompt.Popup("Using North America");
-            }
-            else
-            {
-                RegionCB.SelectedIndex = RegionCB.FindStringExact("Europe");
-                if (Debugging)
-                    Prompt.Popup("Using Europe");
+                // Attempt fix
+                if (regions.Count != 0 && RegionCB.Items.Count == 0)
+                {
+                    AddTextLog("Attempting to fix server selection");
+                    RegionCB.DataSource = regions;
+                    // If attempt didnt work, manually add
+                    if (RegionCB.Items.Count == 0)
+                    {
+                        AddTextLog("Failed");
+                        AddTextLog("Attempting a second method");
+                        for (int ini = 0; regions.Count > ini; ini++)
+                        RegionCB.Items.Add(regions[ini]);
+                    }
+                    AddTextLog("Proceeding...");
+                    // Should be good to go!
+                }
+                // Go!
+                string tmp0 = metroComboBox1.SelectedItem.ToString();
+                if (tmp0 == "North America" || tmp0 == "Europe")
+                {
+                    if (RegionCB.Items.Count > 1) // Automatically select the server selected
+                    {
+                        if (metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("North America"))
+                        {
+                            RegionCB.SelectedIndex = RegionCB.FindStringExact("North America");
+                            if (Debugging)
+                                Prompt.Popup("Using North America");
+                        }
+                        else
+                        {
+                            RegionCB.SelectedIndex = RegionCB.FindStringExact("Europe");
+                            if (Debugging)
+                                Prompt.Popup("Using Europe");
+                        }
+                    }
+                    else if (RegionCB.Items.Count == 1) // Select the only server available if other is blocked
+                    {
+                        RegionCB.SelectedIndex = 0;
+                        if (Debugging)
+                            Prompt.Popup("Using " + RegionCB.SelectedItem.ToString());
+                    }
+                    else // Popup message if none is available
+                    {
+                        Prompt.Popup("Error: No available servers were found for NA/EU!");
+                    }
+                }
             }
             // End region based
 
@@ -6236,33 +6381,64 @@ namespace Revamped_BnS_Buddy
                 worker.CancelAsync();
             }
 
-            string tmp = metroComboBox1.SelectedItem.ToString();
-            // NA/EU
-            if (tmp == "North America" || tmp == "Europe")
+            if (metroComboBox1.SelectedItem != null)
             {
-                currentAppId = ((region)RegionCB.SelectedValue).appId;
-                currentValue = ((region)RegionCB.SelectedValue).value;
+                string tmp = metroComboBox1.SelectedItem.ToString();
+                // NA/EU
+                if (tmp == "North America" || tmp == "Europe")
+                {
+                    currentAppId = ((region)RegionCB.SelectedValue).appId;
+                    currentValue = ((region)RegionCB.SelectedValue).value;
+                }
+                // KOREA
+                else
+                if (tmp == "Korean")
+                {
+                    currentAppId = "B0D42105-0CB6-BC9F-3CB2-BE28A0662340";
+                }
+                // TAIWAN
+                else
+                if (tmp == "Taiwan")
+                {
+                    currentAppId = "33BC338F-2651-8ECD-9E2A-444843707997";
+                }
             }
-            // KOREA
-            else
-            if (tmp == "Korean")
+            else // additional check to make sure it's not nulled
             {
-                currentAppId = "B0D42105-0CB6-BC9F-3CB2-BE28A0662340";
+                metroComboBox1.SelectedIndex = 0;
+                // Reset App Id
+                string tmp = metroComboBox1.SelectedItem.ToString();
+                // NA/EU
+                if (tmp == "North America" || tmp == "Europe")
+                {
+                    currentAppId = ((region)RegionCB.SelectedValue).appId;
+                    currentValue = ((region)RegionCB.SelectedValue).value;
+                }
+                // KOREA
+                else
+                if (tmp == "Korean")
+                {
+                    currentAppId = "B0D42105-0CB6-BC9F-3CB2-BE28A0662340";
+                }
+                // TAIWAN
+                else
+                if (tmp == "Taiwan")
+                {
+                    currentAppId = "33BC338F-2651-8ECD-9E2A-444843707997";
+                }
             }
-            // TAIWAN
-            else
-            if (tmp == "Taiwan")
+
+            try
             {
-                currentAppId = "33BC338F-2651-8ECD-9E2A-444843707997";
-            }
-            //Set some variables that are going to be used
-            epoch = ((long)(DateTime.UtcNow - new DateTime(2001, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds).ToString();
-            //username = metroTextBox1.Text;
-            //password = metroTextBox2.Text;
-            pid = System.Diagnostics.Process.GetCurrentProcess().Id.ToString();
-            privateKey = new BigInteger(sha.ComputeHash(BigInteger.genRandom(6).getBytes()));
-            exchangeKey = Two;
-            counter = 0;
+                //Set some variables that are going to be used
+                epoch = ((long)(DateTime.UtcNow - new DateTime(2001, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds).ToString();
+                //username = metroTextBox1.Text;
+                //password = metroTextBox2.Text;
+                pid = System.Diagnostics.Process.GetCurrentProcess().Id.ToString();
+                privateKey = new BigInteger(sha.ComputeHash(BigInteger.genRandom(6).getBytes()));
+                exchangeKey = Two;
+                counter = 0;
+            } catch(Exception x) { Prompt.Popup("Error: " + x.ToString()); }
 
             worker = new BackgroundWorker();
             worker.WorkerSupportsCancellation = true;
@@ -6273,6 +6449,8 @@ namespace Revamped_BnS_Buddy
 
         private bool LauncherInfo()
         {
+            metroButton1.Enabled = false;
+            AddTextLog("Adding available servers...");
             //Get login server for BNS Info
             try
             {
@@ -6298,7 +6476,7 @@ namespace Revamped_BnS_Buddy
                 if (tmp == "Taiwan")
                 {
                     patch_server = "up4svr.plaync.com.tw";
-                    game_id = "ncLauncherS"; // TWBNS22 // NCTaiwan
+                    game_id = "ncLauncherS";
                 }
                 // if all else fails
                 else 
@@ -6359,14 +6537,20 @@ namespace Revamped_BnS_Buddy
                 LoginPort = Int32.Parse(Regex.Match(xml, "port=\"([^\"]*)\"", RegexOptions.IgnoreCase).Groups[1].Value);
                 LoginProgramid = Regex.Match(xml, "programid=\"([^\"]*)\"", RegexOptions.IgnoreCase).Groups[1].Value;
                 // test
-                LoginAppid = Regex.Match(xml, "appid=\"([^\"]*)\"", RegexOptions.IgnoreCase).Groups[1].Value;
+                if (tmp != "North America" && tmp != "Europe")
+                {
+                    LoginAppid = Regex.Match(xml, "appid=\"([^\"]*)\"", RegexOptions.IgnoreCase).Groups[1].Value;
+                }
 
                 XmlDocument xmldoc = new XmlDocument();
                 xmldoc.LoadXml(xml);
 
-                foreach (XmlElement regionEle in xmldoc.SelectNodes("//region"))
+                if (tmp == "North America" || tmp == "Europe")
                 {
-                    regions.Add(new region(regionEle.Attributes["name"].Value, regionEle.Attributes["value"].Value, regionEle.Attributes["appid"].Value));
+                    foreach (XmlElement regionEle in xmldoc.SelectNodes("//region"))
+                    {
+                        regions.Add(new region(regionEle.Attributes["name"].Value, regionEle.Attributes["value"].Value, regionEle.Attributes["appid"].Value));
+                    }
                 }
 
                 //Prompt.Popup(String.Format("IP: {0}\nPort: {1}\nProgramID: {2}\nAppID: {3}", LoginIp, LoginPort, LoginProgramid/*, LoginAppid */));
@@ -6381,6 +6565,8 @@ namespace Revamped_BnS_Buddy
                 metroButton1.Enabled = true;
                 return false;
             }
+            metroButton1.Enabled = true;
+            AddTextLog("Added");
             return true;
         }
 

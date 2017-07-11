@@ -7,11 +7,11 @@ E:\Program Files (x86)\NCSOFT\BNS_KR\BnS
 Reg Key Valid!
 Path Found!
 Lang Found!
-languageID = Chineset
+languageID = English
 Path Validated!
 Path Found!
 Lang Found!
 Path Validated!
 Checking For Backups
-Loading Screen Backup Not Found!
+Loading Screen Backup Found!
 Extracting config.dat for verification
