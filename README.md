@@ -29,6 +29,9 @@ Requirements:
 
 Change Log:
 
+Version 5.8.7.7
++ Fixed Bug: Refreshing addons would only remove 1-2 from the list instead of all modified items
+
 Version 5.8.7.6
 + Reworked: Applying addons now has option for bitness
 + Fixed Bug: Fix Server Selection for NA/EU resulting an unhandled exception
