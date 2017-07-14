@@ -5906,17 +5906,26 @@ namespace Revamped_BnS_Buddy
 
         public void CheckAddonsPaths()
         {
-            foreach (TreeNode names in treeView3.Nodes)
+            ClearCV3 = true;
+            treeView3.SelectedNode = null;
+            int iniTV = treeView3.Nodes.Count;
+            int countTV = 0;
+            foreach (TreeNode tv3 in treeView3.Nodes)
             {
-                if (names != null)
+                if (tv3 != null)
                 {
-                    string file = names.FullPath + ".patch";
+                    string file = tv3.FullPath + ".patch";
                     if (!File.Exists(FullAddonPath + "\\" + file))
                     {
-                        treeView3.SelectedNode = null;
-                        names.Remove();
+                        tv3.Remove();
                     }
                 }
+            }
+            countTV = treeView3.Nodes.Count;
+            ClearCV3 = false;
+            if (iniTV != countTV)
+            {
+                CheckAddonsPaths();
             }
         }
 
@@ -5931,28 +5940,32 @@ namespace Revamped_BnS_Buddy
             RefreshAddons();
         }
 
+        bool ClearCV3 = false;
         private void treeView3_AfterSelect(object sender, TreeViewEventArgs e)
         {
             try
             {
-                string description = "";
-                string filename = e.Node.FullPath.ToString() + ".patch";
-                IEnumerable<string> WholeText = File.ReadLines(FullAddonPath + "\\" + filename);
-                foreach (string text in WholeText)
+                if (ClearCV3 == false)
                 {
-                    if (text.Contains("Description = "))
+                    string description = "";
+                    string filename = e.Node.FullPath.ToString() + ".patch";
+                    IEnumerable<string> WholeText = File.ReadLines(FullAddonPath + "\\" + filename);
+                    foreach (string text in WholeText)
                     {
-                        string line = text;
-                        description = line.Replace("Description = ", "");
+                        if (text.Contains("Description = "))
+                        {
+                            string line = text;
+                            description = line.Replace("Description = ", "");
+                        }
                     }
-                }
-                if (description.Length > 0)
-                {
-                    metroTextBox6.Text = description;
-                }
-                else
-                {
-                    metroTextBox6.Text = "No description provided!";
+                    if (description.Length > 0)
+                    {
+                        metroTextBox6.Text = description;
+                    }
+                    else
+                    {
+                        metroTextBox6.Text = "No description provided!";
+                    }
                 }
             }
             catch { metroTextBox6.Text = "No description provided!"; }

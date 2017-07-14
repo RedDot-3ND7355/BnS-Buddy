@@ -56,7 +56,7 @@
         '\"',
         '\'',
         '\''};
-            this.fastColoredTextBox1.AutoScrollMinSize = new System.Drawing.Size(427, 56);
+            this.fastColoredTextBox1.AutoScrollMinSize = new System.Drawing.Size(467, 56);
             this.fastColoredTextBox1.BackBrush = null;
             this.fastColoredTextBox1.BackColor = System.Drawing.Color.Transparent;
             this.fastColoredTextBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
@@ -67,6 +67,7 @@
             this.fastColoredTextBox1.Cursor = System.Windows.Forms.Cursors.IBeam;
             this.fastColoredTextBox1.DisabledColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
             this.fastColoredTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.fastColoredTextBox1.Font = new System.Drawing.Font("Courier New", 9.75F);
             this.fastColoredTextBox1.ForeColor = System.Drawing.SystemColors.Control;
             this.fastColoredTextBox1.IsReplaceMode = false;
             this.fastColoredTextBox1.Location = new System.Drawing.Point(20, 60);
@@ -76,9 +77,9 @@
             this.fastColoredTextBox1.ServiceColors = ((FastColoredTextBoxNS.ServiceColors)(resources.GetObject("fastColoredTextBox1.ServiceColors")));
             this.fastColoredTextBox1.Size = new System.Drawing.Size(570, 309);
             this.fastColoredTextBox1.TabIndex = 3;
-            this.fastColoredTextBox1.Text = "FileName = example.dat.files\\\\example.example2.xml\r\nSearch = <option name=\"exampl" +
-    "e\" value=\"true\" />\r\nReplace = <option name=\"example\" value=\"false\" />\r\nDescripti" +
-    "on = Disable example";
+            this.fastColoredTextBox1.Text = "FileName = example[bit].dat.files\\\\example.example2.xml\r\nSearch = <option name=\"e" +
+    "xample\" value=\"true\" />\r\nReplace = <option name=\"example\" value=\"false\" />\r\nDesc" +
+    "ription = Disable example";
             this.fastColoredTextBox1.TextAreaBorderColor = System.Drawing.Color.White;
             this.fastColoredTextBox1.Zoom = 100;
             // 
