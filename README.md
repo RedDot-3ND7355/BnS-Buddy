@@ -29,6 +29,11 @@ Requirements:
 
 Change Log:
 
+Version 5.8.7.9
++ Added: Priority boost when focusing BnS Game Process
++ Removed: Removed the popups after updating Buddy for changes made to settings.ini
++ Fixed Bug: Starting BnS Buddy with game killer check on would prevent it from working
+
 Version 5.8.7.7
 + Fixed Bug: Refreshing addons would only remove 1-2 from the list instead of all modified items
 
