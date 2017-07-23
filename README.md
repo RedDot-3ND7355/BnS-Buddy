@@ -29,6 +29,10 @@ Requirements:
 
 Change Log:
 
+Version 5.8.8.0
++ Removed: Forgot a popup while updating settings.ini
++ Fixed Bug: Setting Custom Mod Folder Would be blank in settings.ini 
+
 Version 5.8.7.9
 + Added: Priority boost when focusing BnS Game Process
 + Removed: Removed the popups after updating Buddy for changes made to settings.ini
