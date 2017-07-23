@@ -19,24 +19,3 @@ Extracted
 Checking system.config2.xml if modded
 config.dat is Clean
 Extracting config64.dat for verification
-Extracted
-Checking system.config2.xml if modded
-config64.dat is Clean
-Reading Registry...
-E:\Program Files (x86)\NCWest\NCLauncher
-Reg Key Valid!
-Changed RegionID to NA!
-Adding available servers...
-Added
-Cleaning Mess
-Cleaned up editing folder
-Grabbing Online Version...
-Grabbed: 5.8.7.6
-Up to date.
-Getting Ping From Server...
-Got Ping.
-Cleaning Mess
-Cleaned up editing folder
-Cleaning Mess
-Cleaned config.dat.files
-Cleaned config64.dat.files

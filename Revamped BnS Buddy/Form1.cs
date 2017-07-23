@@ -63,7 +63,7 @@ namespace Revamped_BnS_Buddy
         public string TaiwanPath = "";
         public string CustomGamePath = "";
         public string CustomClientPath = "";
-        public string DefaultValues = "unattended = false" + Environment.NewLine + "notexturestreaming = false" + Environment.NewLine + "savelogs = false" + Environment.NewLine + "showlogs = true" + Environment.NewLine + "variables = false" + Environment.NewLine + "tooltips = true" + Environment.NewLine + "customgame = false" + Environment.NewLine + "customclient = false" + Environment.NewLine + "admincheck = true" + Environment.NewLine + "ncsoftlogin = false" + Environment.NewLine + "showdonate = true" + Environment.NewLine + "minimize = true" + Environment.NewLine + "launcherlogs = false" + Environment.NewLine + "modmanlogs = false" + Environment.NewLine + "customclientpath = " + Environment.NewLine + "customgamepath = " + Environment.NewLine + "updatechecker = true" + Environment.NewLine + "pingchecker = true" + Environment.NewLine + "gamekiller = true" + Environment.NewLine + "useallcores = false" + Environment.NewLine + "arguements = " + Environment.NewLine + "prtime = 500" + Environment.NewLine + "autoupdate = true" + Environment.NewLine + "firsttime = true" + Environment.NewLine + "default = " + Environment.NewLine + "defaultset = false" + Environment.NewLine + "defaultclient = " + Environment.NewLine + "priority = Normal" + Environment.NewLine + "modfolder = " + Environment.NewLine + "modfolderset = false" + Environment.NewLine + "rememberme = false" + Environment.NewLine + "automemorycleanup = false" + Environment.NewLine + "langset = false" + Environment.NewLine + "langpath = ";
+        public string DefaultValues = "unattended = false" + Environment.NewLine + "notexturestreaming = false" + Environment.NewLine + "savelogs = false" + Environment.NewLine + "showlogs = true" + Environment.NewLine + "variables = false" + Environment.NewLine + "tooltips = true" + Environment.NewLine + "customgame = false" + Environment.NewLine + "customclient = false" + Environment.NewLine + "admincheck = true" + Environment.NewLine + "ncsoftlogin = false" + Environment.NewLine + "showdonate = true" + Environment.NewLine + "minimize = true" + Environment.NewLine + "launcherlogs = false" + Environment.NewLine + "modmanlogs = false" + Environment.NewLine + "customclientpath = " + Environment.NewLine + "customgamepath = " + Environment.NewLine + "updatechecker = true" + Environment.NewLine + "pingchecker = true" + Environment.NewLine + "gamekiller = true" + Environment.NewLine + "useallcores = false" + Environment.NewLine + "arguements = " + Environment.NewLine + "prtime = 500" + Environment.NewLine + "autoupdate = true" + Environment.NewLine + "firsttime = true" + Environment.NewLine + "default = " + Environment.NewLine + "defaultset = false" + Environment.NewLine + "defaultclient = " + Environment.NewLine + "priority = Normal" + Environment.NewLine + "modfolder = " + Environment.NewLine + "modfolderset = false" + Environment.NewLine + "rememberme = false" + Environment.NewLine + "automemorycleanup = false" + Environment.NewLine + "langset = false" + Environment.NewLine + "langpath = " + Environment.NewLine + "boostprocess = true";
         public string ActiveDataFile = "";
         public string XmlSavePath = "";
         public string NewDat = "";
@@ -1225,17 +1225,15 @@ namespace Revamped_BnS_Buddy
                 // Create if missing
                 if (!File.Exists(AppPath + "\\Settings.ini")) { File.WriteAllText(AppPath + "\\Settings.ini", DefaultValues); }
                 // Check if updated.
-                if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("langset"))
+                if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("boostprocess"))
                 {
                     // Save current settings
                     if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("customlang"))
                     {
                         string[] currentsettings = File.ReadAllLines(AppPath + "\\Settings.ini");
-                        Prompt.Popup(File.ReadAllText(AppPath + "\\Settings.ini"));
                         // Create new file
                         File.Delete(AppPath + "\\Settings.ini");
                         File.WriteAllText(AppPath + "\\Settings.ini", DefaultValues);
-                        Prompt.Popup(File.ReadAllText(AppPath + "\\Settings.ini"));
                         // Start saving old settings
                         int i = 0;
                         foreach (string line in currentsettings)
@@ -1244,7 +1242,6 @@ namespace Revamped_BnS_Buddy
                             Prompt.Popup(line);
                             lineChanger(line, AppPath + "\\Settings.ini", i);
                         }
-                        Prompt.Popup(File.ReadAllText(AppPath + "\\Settings.ini"));
                     }
                     else /* Fix Bug caused by previous versions */
                     {
@@ -1336,6 +1333,10 @@ namespace Revamped_BnS_Buddy
                 {
                     GameKiller = false;
                     metroToggle15.Checked = false;
+                }
+                if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("boostprocess = false"))
+                {
+                    metroToggle20.Checked = false;
                 }
                 if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("updatechecker = false"))
                 {
@@ -2197,12 +2198,15 @@ namespace Revamped_BnS_Buddy
         {
             if (GameKiller == true)
             {
-                // Kill game process
-                foreach (var process in Process.GetProcessesByName("Client"))
+                try
                 {
-                    process.Kill();
-                    AddTextLog("Killed Game Process.");
-                }
+                    // Kill game process
+                    foreach (var process in Process.GetProcessesByName("Client"))
+                    {
+                        process.Kill();
+                        AddTextLog("Killed Game Process.");
+                    }
+                } catch { AddTextLog("Could Not Kill Game Process."); }
             }
         }
 
@@ -2342,6 +2346,7 @@ namespace Revamped_BnS_Buddy
                     // fix priority based on settings live edit
                     try
                     {
+                        // Priority
                         if (metroComboBox6.SelectedItem != null)
                         {
                             if (process.PriorityClass != Priority)
@@ -2351,6 +2356,12 @@ namespace Revamped_BnS_Buddy
                             }
                         }
                         metroLabel60.Text = process.PriorityClass.ToString();
+                        // Process focus boost
+                        if (metroToggle20.Checked == true && process.PriorityBoostEnabled == false)
+                        {
+                            process.PriorityBoostEnabled = true;
+                            AddTextLog("Priority Boost Enabled.");
+                        }
                     }
                     catch {/* ignore */}
                     GameStarted = true;
@@ -4177,6 +4188,42 @@ namespace Revamped_BnS_Buddy
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // Seperator!
         ///////////////////////////////////////////////////////////////////////////////////////////////
+
+
+        private void metroToggle20_CheckedChanged(object sender, EventArgs e)
+        {
+            if (PathFound == true)
+            {
+                if (metroToggle20.Checked == true)
+                {
+                    try
+                    {
+                        // Check Settings
+                        var fileContents = System.IO.File.ReadAllText(@AppPath + "\\Settings.ini");
+                        fileContents = fileContents.Replace("boostprocess = false", "boostprocess = true");
+                        System.IO.File.WriteAllText(@AppPath + "\\Settings.ini", fileContents);
+                    }
+                    catch
+                    {
+                        AddTextLog("Could not save option!");
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        // Check Settings
+                        var fileContents = System.IO.File.ReadAllText(@AppPath + "\\Settings.ini");
+                        fileContents = fileContents.Replace("boostprocess = true", "boostprocess = false");
+                        System.IO.File.WriteAllText(@AppPath + "\\Settings.ini", fileContents);
+                    }
+                    catch
+                    {
+                        AddTextLog("Could not save option!");
+                    }
+                }
+            }
+        }
 
         private void metroToggle2_CheckedChanged(object sender, EventArgs e)
         {
@@ -6660,7 +6707,8 @@ namespace Revamped_BnS_Buddy
                 return name;
             }
         }
-        
+
+
         private void Form1_Load_1(object sender, EventArgs e)
         { 
             // to be cleaned

@@ -123,27 +123,8 @@
   <metadata name="metroTabPage1.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <metadata name="metroTabPage1.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>True</value>
-  </metadata>
   <metadata name="metroToolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>217, 17</value>
-  </metadata>
-  <data name="metroLabel24.Text" xml:space="preserve">
-    <value>Minimunchi                     Nur Zakwan
-powercozmic                   relawals
-Origamie                         Thanh Tran
-FireLight 
-Claudio                            Jun
-Jakob                               Prabu
-Kokoa Cawfee                 Emanuela
-khalid                              KiwiNoSora
-Verdara                            David
-SkylerChip
-Nhat Vu</value>
-  </data>
-  <metadata name="toolStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>349, 17</value>
   </metadata>
   <metadata name="toolStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>349, 17</value>
@@ -164,12 +145,6 @@ Nhat Vu</value>
         TgDQASA1MVpwzwAAAABJRU5ErkJggg==
 </value>
   </data>
-  <metadata name="toolStrip2.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>454, 17</value>
-  </metadata>
-  <metadata name="toolStrip2.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>True</value>
-  </metadata>
   <data name="fastColoredTextBox1.ServiceColors" mimetype="application/x-microsoft.net.object.binary.base64">
     <value>
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdGYXN0Q29sb3JlZFRleHRCb3gsIFZlcnNpb249Mi4xNi4xNi4w
@@ -217,6 +192,19 @@ File Structure:
    Search = &lt;option name="show-clause" value="true" /&gt;
    Replace = &lt;option name="show-clause" value="false" /&gt;
    Description = Description of addon</value>
+  </data>
+  <data name="metroLabel24.Text" xml:space="preserve">
+    <value>Minimunchi                     Nur Zakwan
+powercozmic                   relawals
+Origamie                         Thanh Tran
+FireLight 
+Claudio                            Jun
+Jakob                               Prabu
+Kokoa Cawfee                 Emanuela
+khalid                              KiwiNoSora
+Verdara                            David
+SkylerChip
+Nhat Vu</value>
   </data>
   <data name="metroLabel7.Text" xml:space="preserve">
     <value>Made with &lt;3 for those having problem modding and playing Blade and Soul
@@ -6410,9 +6398,6 @@ Credits:
         AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
 </value>
   </data>
-  <metadata name="metroToolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>217, 17</value>
-  </metadata>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>44</value>
   </metadata>
