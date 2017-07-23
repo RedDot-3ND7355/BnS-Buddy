@@ -1239,7 +1239,6 @@ namespace Revamped_BnS_Buddy
                         foreach (string line in currentsettings)
                         {
                             i++;
-                            Prompt.Popup(line);
                             lineChanger(line, AppPath + "\\Settings.ini", i);
                         }
                     }
@@ -4862,7 +4861,7 @@ namespace Revamped_BnS_Buddy
             {
                 CustomModSet = true;
                 // Replace current line with new one
-                lineChanger("modfolder = " + metroTextBox3.Text, @AppPath + "\\Settings.ini", 29);
+                lineChanger("modfolder = " + metroTextBox7.Text, @AppPath + "\\Settings.ini", 29);
                 // Write Setting to ini
                 var fileContents2 = System.IO.File.ReadAllText(@AppPath + "\\Settings.ini");
                 fileContents2 = fileContents2.Replace("modfolderset = false", "modfolderset = true");
