@@ -29,6 +29,48 @@ Requirements:
 
 Change Log:
 
+Version 5.8.9.0
++ Added: Start 2nd instance of game Client with multiclient
++ Added: Remember unique key
++ Added: Forget account in Login Form For selected one
++ Added: Support for umap files in Mod Manager
++ Added: Toggles for GCD and INGAME estimations
++ Reworked: Extra tab for 'hidden' features was incomplete
++ Reworked: Relocated Memory cleaner when game starts
++ Fixed Bug: Could not enter custom patch name when creating addon
++ Fixed Bug: The colors for Launcher tab
++ Fixed Bug: Removed "Could not Start Client.exe!" even after it started
++ Fixed Bug: Could not kill Client (Access Denied even with admin rights) globally called Client
++ Fixed Bug: Forgot to add Korean Test Server support Paths
++ Fixed Bug: Error decrypting key via registry for login
++ Fixed Bug: Couldn't properly choose for Live or Test server
++ Fixed Bug: White clickable lines appeared in about tab
+
+Version 5.8.8.6
++ Added: Signature check
++ Added: Server validation to fetch online build number
++ Added: Estimated GCD time response
++ Added: Estimated InGame time response
++ Added: Korean Test Server Registry Path
++ Reworked: Completely reworked Fix Loading Screen & Backup check for it
++ Fixed Bug: Trying to login when maintenance was occuring lead to error
++ Fixed Bug: Korean Test server appid was replaced with proper one
++ Fixed Bug: Login form would error out if Registry could not be read
++ Fixed Bug: Color wether ping was good or not was not changing
++ Fixed Bug: Password would take more than 16 characters wich prevents users to login if password was originally longer than 16 chars
++ Fixed Bug: Tab selector would go out of bounds for too many items
++ Fixed Bug: Pinging wrong adress for na
++ Fixed Bug: Signature of BnS Buddy re-added due to a dependency build issue
+
+Version 5.8.8.5
++ Added: Maintenance Check(handler)
++ Added: Korean Test server option
++ Added: Interval(repeat) for autoclean
++ Rework: Fix Loading Screen now properly removes even if one of them is missing, same for restoring
++ Fixed Bug: Mod Manager tab buttons not working after game killed/closed
++ Fixed Bug: Boost Process would not auto start
++ Fixed Bug: Memory Cleaner would not auto clean
+
 Version 5.8.8.0
 + Removed: Forgot a popup while updating settings.ini
 + Fixed Bug: Setting Custom Mod Folder Would be blank in settings.ini 
