@@ -72,6 +72,7 @@ namespace Revamped_BnS_Buddy
                                     if (tmp_last.Length > 1)
                                     {
                                         metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact(tmp_last);
+                                        metroButton3.Visible = true;
                                     }
                                 }
                             }
@@ -86,12 +87,13 @@ namespace Revamped_BnS_Buddy
                             metroTextBox1.Text = Dec(tmp_user);
                             metroTextBox2.Text = Dec(tmp_pass);
                             metroCheckBox1.CheckState = CheckState.Checked;
+                            metroButton3.Visible = true;
                         }
                     }
                 }
                 // Check caps lock
                 CheckLock();
-            } catch(Exception x) { Prompt.Popup(x.ToString()); }
+            } catch { Prompt.Popup("Unknown Error Occured: Resetted Registry."); ClearRegistry(); }
         }
 
         private string StringToHex(string s)
@@ -351,6 +353,7 @@ namespace Revamped_BnS_Buddy
                     tmp_pass = regKey.OpenSubKey(user).GetValue("password").ToString();
                     metroTextBox1.Text = Dec(tmp_user);
                     metroTextBox2.Text = Dec(tmp_pass);
+                    metroButton3.Visible = true;
                 }
             }
             catch
@@ -389,6 +392,32 @@ namespace Revamped_BnS_Buddy
             }
         }
 
+        private void metroButton3_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string input = metroTextBox1.Text;
+                int inputclear = input.IndexOf("@");
+                if (inputclear > 0)
+                    input = input.Substring(0, inputclear);
+
+                RegistryKey regKey = Registry.LocalMachine;
+                regKey = regKey.OpenSubKey(@"SOFTWARE\BnS Buddy\" + input + @"\");
+                string tmp_user = string.Empty;
+                string tmp_pass = string.Empty;
+                if (regKey != null)
+                {
+                    Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).DeleteSubKeyTree(input);
+                    Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).DeleteValue("lastused");
+                    metroButton3.Visible = false;
+                }
+                metroComboBox1.Items.Remove(input);
+            }
+            catch
+            {
+                Prompt.Popup("Error: Could not Forget user!");
+            }
+        }
     }
 }
 

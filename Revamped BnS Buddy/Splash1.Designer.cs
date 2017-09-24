@@ -40,6 +40,7 @@
             this.metroComboBox1 = new MetroFramework.Controls.MetroComboBox();
             this.metroLabel4 = new MetroFramework.Controls.MetroLabel();
             this.metroCheckBox1 = new MetroFramework.Controls.MetroCheckBox();
+            this.metroButton3 = new MetroFramework.Controls.MetroButton();
             this.SuspendLayout();
             // 
             // metroLabel1
@@ -77,6 +78,7 @@
             // metroTextBox2
             // 
             this.metroTextBox2.Location = new System.Drawing.Point(23, 140);
+            this.metroTextBox2.MaxLength = 16;
             this.metroTextBox2.Name = "metroTextBox2";
             this.metroTextBox2.PasswordChar = '●';
             this.metroTextBox2.Size = new System.Drawing.Size(312, 23);
@@ -164,11 +166,23 @@
             this.metroCheckBox1.Theme = MetroFramework.MetroThemeStyle.Dark;
             this.metroCheckBox1.UseVisualStyleBackColor = true;
             // 
+            // metroButton3
+            // 
+            this.metroButton3.Location = new System.Drawing.Point(259, 93);
+            this.metroButton3.Name = "metroButton3";
+            this.metroButton3.Size = new System.Drawing.Size(75, 21);
+            this.metroButton3.TabIndex = 14;
+            this.metroButton3.Text = "Forget";
+            this.metroButton3.Theme = MetroFramework.MetroThemeStyle.Dark;
+            this.metroButton3.Visible = false;
+            this.metroButton3.Click += new System.EventHandler(this.metroButton3_Click);
+            // 
             // Splash1
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.ClientSize = new System.Drawing.Size(358, 213);
             this.ControlBox = false;
+            this.Controls.Add(this.metroButton3);
             this.Controls.Add(this.metroComboBox1);
             this.Controls.Add(this.metroCheckBox1);
             this.Controls.Add(this.metroLabel4);
@@ -207,5 +221,6 @@
         private MetroFramework.Controls.MetroLabel metroLabel4;
         private MetroFramework.Controls.MetroCheckBox metroCheckBox1;
         private MetroFramework.Controls.MetroComboBox metroComboBox1;
+        private MetroFramework.Controls.MetroButton metroButton3;
     }
 }

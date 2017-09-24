@@ -67,7 +67,6 @@
             this.fastColoredTextBox1.Cursor = System.Windows.Forms.Cursors.IBeam;
             this.fastColoredTextBox1.DisabledColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
             this.fastColoredTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fastColoredTextBox1.Font = new System.Drawing.Font("Courier New", 9.75F);
             this.fastColoredTextBox1.ForeColor = System.Drawing.SystemColors.Control;
             this.fastColoredTextBox1.IsReplaceMode = false;
             this.fastColoredTextBox1.Location = new System.Drawing.Point(20, 60);
@@ -110,8 +109,6 @@
             // 
             this.metroTextBox7.Location = new System.Drawing.Point(293, 28);
             this.metroTextBox7.Name = "metroTextBox7";
-            this.metroTextBox7.PromptText = "example off 32bit";
-            this.metroTextBox7.ReadOnly = true;
             this.metroTextBox7.Size = new System.Drawing.Size(216, 23);
             this.metroTextBox7.TabIndex = 12;
             this.metroTextBox7.Theme = MetroFramework.MetroThemeStyle.Dark;

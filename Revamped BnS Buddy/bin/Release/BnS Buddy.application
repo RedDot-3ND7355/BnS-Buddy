@@ -4,17 +4,17 @@
   <description asmv2:publisher="BnS Buddy" asmv2:product="BnS Buddy" xmlns="urn:schemas-microsoft-com:asm.v1" />
   <deployment install="true" mapFileExtensions="true" />
   <compatibleFrameworks xmlns="urn:schemas-microsoft-com:clickonce.v2">
-    <framework targetVersion="4.0" profile="Full" supportedRuntime="4.0.30319" />
+    <framework targetVersion="4.5" profile="Full" supportedRuntime="4.0.30319" />
   </compatibleFrameworks>
   <dependency>
-    <dependentAssembly dependencyType="install" codebase="BnS Buddy.exe.manifest" size="7916">
+    <dependentAssembly dependencyType="install" codebase="BnS Buddy.exe.manifest" size="8644">
       <assemblyIdentity name="BnS Buddy.exe" version="1.0.0.0" publicKeyToken="0000000000000000" language="neutral" processorArchitecture="msil" type="win32" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
-        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>3VjiLKhlV2NK6fnpvEdSDkB+ZPY=</dsig:DigestValue>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>fmo1K/xWlqH8Q7zPeo2C61P8VseHunSv+m7aO27oO1M=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

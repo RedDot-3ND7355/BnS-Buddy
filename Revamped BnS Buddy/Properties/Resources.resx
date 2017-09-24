@@ -121,4 +121,10 @@
   <data name="BnS_Buddy_Updater" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\BnS Buddy Updater.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="winmm_32_" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\winmm(32).dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="winmm_64_" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\winmm(64).dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>

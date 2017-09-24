@@ -19,7 +19,7 @@ namespace Revamped_BnS_Buddy.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -66,6 +66,26 @@ namespace Revamped_BnS_Buddy.Properties {
         internal static byte[] BnS_Buddy_Updater {
             get {
                 object obj = ResourceManager.GetObject("BnS_Buddy_Updater", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] winmm_32_ {
+            get {
+                object obj = ResourceManager.GetObject("winmm_32_", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] winmm_64_ {
+            get {
+                object obj = ResourceManager.GetObject("winmm_64_", resourceCulture);
                 return ((byte[])(obj));
             }
         }

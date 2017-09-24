@@ -6,12 +6,12 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("BnS Buddy")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Alternative Launcher for BnS")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Endless")]
 [assembly: AssemblyProduct("BnS Buddy")]
 [assembly: AssemblyCopyright("Copyright ©  2017")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyTrademark("Endless")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("5.8.7.9")]
-[assembly: AssemblyFileVersion("5.8.7.9")]
+[assembly: AssemblyVersion("5.8.9.05")]
+[assembly: AssemblyFileVersion("5.8.9.05")]

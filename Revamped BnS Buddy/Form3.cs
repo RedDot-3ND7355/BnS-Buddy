@@ -75,6 +75,7 @@ namespace Revamped_BnS_Buddy
                         tmp = tmp.Replace(".patch", "");
                         fastColoredTextBox1.Text = File.ReadAllText(openFileDialog1.FileName);
                         metroTextBox7.Text = tmp;
+                        metroTextBox7.ReadOnly = true;
                     }
                     catch (Exception x)
                     {
@@ -98,6 +99,7 @@ namespace Revamped_BnS_Buddy
                 if (savefile.ShowDialog() == DialogResult.OK)
                 {
                     File.WriteAllText(savefile.FileName, fastColoredTextBox1.Text);
+                    metroTextBox7.ReadOnly = false;
                 }
             } catch(Exception x) { Prompt.Popup("Error: " + x.ToString()); }
         }
@@ -107,6 +109,7 @@ namespace Revamped_BnS_Buddy
             try
             {
                 File.WriteAllText(Form1.CurrentForm.FullAddonPath.ToString() + metroTextBox7.Text + ".patch", fastColoredTextBox1.Text);
+                metroTextBox7.ReadOnly = false;
             } catch(Exception x) { Prompt.Popup("Error: " + x.ToString()); }
         }
     }
