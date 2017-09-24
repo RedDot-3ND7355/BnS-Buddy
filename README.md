@@ -17,7 +17,7 @@ Credits:
 + Miyako - Inspired by his/her BnS-Ark Tool!
 + Endless aka Kogaru - Recoded from scratch and improved!
 + ronny1982 - For bnsdat tool 
-+ LokiReborn - For porting bnsdat to C# 
++ LokiReborn - For porting bnsdat to C# and token generation
 
 
 Requirements:
