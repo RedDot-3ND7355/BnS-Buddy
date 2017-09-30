@@ -123,21 +123,6 @@
   <metadata name="metroToolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>427, 17</value>
   </metadata>
-  <data name="metroLabel7.Text" xml:space="preserve">
-    <value>Made with &lt;3 for those having problems modding and playing Blade and Soul
-Features:      
-                   - Unattended: Run Game Unsupervised(Bypass Startup Dialogs).
-                   - No Texture Streaming: Force Loading of textures locally(Improves Speed).
-                   - Fix Loading Screen: Remove Loading screen files to improve loading speed.
-                   - Splash Changer: Change the splash image when starting the game.
-                   - Mod Manager: Easier management of mods for your game.
-                   - Dat Editor: Edit BnS's Arbitrary data files to your liking.
-                   - Donators: Name of all the lovely people who donated for my coffee.
-                   - Addons: Dat Editing to a whole new level of automation.
-Credits:       
-                  - Endless: Because I was part of the low-end boat. | ronny1982: BnSDat
-                  - Miyako: Whom I was inspired from | LokiReborn: Port BnSDat and Token</value>
-  </data>
   <metadata name="toolStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
@@ -164,6 +149,21 @@ Prabu
 Emanuela 
 KiwiNoSora
 David</value>
+  </data>
+  <data name="metroLabel7.Text" xml:space="preserve">
+    <value>Made with &lt;3 for those having problems modding and playing Blade and Soul
+Features:      
+                   - Unattended: Run Game Unsupervised(Bypass Startup Dialogs).
+                   - No Texture Streaming: Force Loading of textures locally(Improves Speed).
+                   - Fix Loading Screen: Remove Loading screen files to improve loading speed.
+                   - Splash Changer: Change the splash image when starting the game.
+                   - Mod Manager: Easier management of mods for your game.
+                   - Dat Editor: Edit BnS's Arbitrary data files to your liking.
+                   - Donators: Name of all the lovely people who donated for my coffee.
+                   - Addons: Dat Editing to a whole new level of automation.
+Credits:       
+                  - Endless: Because I was part of the low-end boat. | ronny1982: BnSDat
+                  - Miyako: Whom I was inspired from | LokiReborn: Port BnSDat and Token</value>
   </data>
   <metadata name="timer1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>227, 17</value>

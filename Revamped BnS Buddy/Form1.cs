@@ -28,6 +28,7 @@ using Mono.Math;
 using System.Net.Sockets;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using System.Runtime;
 
 namespace Revamped_BnS_Buddy
 {
@@ -107,7 +108,7 @@ namespace Revamped_BnS_Buddy
         public BackgroundWorker bnsdat;
         public BackgroundWorker bnsdatc;
         public Form2 s2;
-        public Process proc = new Process();
+        //public Process proc = new Process();
         // Seperator
         public Form1()
         {
@@ -3214,14 +3215,36 @@ namespace Revamped_BnS_Buddy
             CleanMem();
         }
 
+        
         public void CleanMem()
         {
-            /*
-            AddTextLog("Cleaning Memory...");
-            GC.Collect();
-            GC.WaitForFullGCComplete();
-            AddTextLog("Memory Cleaned");
-            */
+            if (GameStarted == true) {
+                AddTextLog("Cleaning Memory...");
+                GCSettings.LatencyMode = GCLatencyMode.LowLatency;
+                long before = GC.GetTotalMemory(false);
+                AddTextLog("Before: " + before / 1024 + " MB");
+                GC.AddMemoryPressure(before);
+                GC.Collect(2, GCCollectionMode.Optimized, false);
+                long after = GC.GetTotalMemory(false);
+                GC.RemoveMemoryPressure(after);
+                AddTextLog("After: " + after / 1024 + " MB");
+                AddTextLog("Freed: " + (before - after) / 1024 + " MB");
+                AddTextLog("Memory Cleaned");
+            }
+            else
+            {
+                AddTextLog("Cleaning Memory...");
+                GCSettings.LatencyMode = GCLatencyMode.Interactive;
+                long before = GC.GetTotalMemory(true);
+                AddTextLog("Before: " + before / 1024 + " MB");
+                GC.AddMemoryPressure(before);
+                GC.Collect(2, GCCollectionMode.Forced, false);
+                long after = GC.GetTotalMemory(true);
+                GC.RemoveMemoryPressure(after);
+                AddTextLog("After: " + after / 1024 + " MB");
+                AddTextLog("Freed: " + (before - after) / 1024 + " MB");
+                AddTextLog("Memory Cleaned");
+            }
         }
 
         private void metroButton1_Click(object sender, EventArgs e)
@@ -3285,11 +3308,31 @@ namespace Revamped_BnS_Buddy
                     }
                     else
                     {
-                        proc.Kill();
-                        AddTextLog("Killed Game Process");
+                        bool killed = false;
+                        foreach (var process in Process.GetProcessesByName("Client"))
+                        {
+                            if (!killed)
+                            {
+                                killed = true;
+                                process.Kill();
+                                AddTextLog("Killed Game Process");
+                            }
+                        }
                     }
                 }
-                catch { Prompt.Popup("Error: Could not kill process owned by " + tmp + "!"); metroComboBox9.SelectedIndex = -1;  metroComboBox9.Items.Remove(tmp); metroComboBox9.SelectedIndex = 1; }
+                catch
+                {
+                    if (tmp != "")
+                    {
+                        Prompt.Popup("Error: Could not kill process owned by " + tmp + "!");
+                    } else { Prompt.Popup("Error: Process not found!"); }
+                    metroComboBox9.SelectedIndex = -1;
+                    metroComboBox9.Items.Remove(tmp);
+                    if (metroComboBox9.Items.Count > 1)
+                    {
+                        metroComboBox9.SelectedIndex = 1;
+                    }
+                }
             }
             else
             {
@@ -3554,10 +3597,12 @@ namespace Revamped_BnS_Buddy
             }
             else if (metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("Japanese"))
             {
+                Process proc = new Process();
                 proc.StartInfo.FileName = LaunchPath;
                 proc.StartInfo.Arguments = "/LaunchByLauncher /Sesskey /SessKey:\"\" /CompanyID:\"14\" /ChannelGroupIndex:\"-1\"" + UseAllCores + " " + Unattended + " " + NoTextureStreaming + " " + metroTextBox5.Text;
                 proc.StartInfo.UseShellExecute = false;
-                proc.StartInfo.RedirectStandardError = true;
+                proc.StartInfo.RedirectStandardError = false;
+                //proc.StandardError reader += ;
                 bool gameworked = false;
                 try
                 {
@@ -3617,10 +3662,11 @@ namespace Revamped_BnS_Buddy
             }
             else
             {
+                Process proc = new Process();
                 proc.StartInfo.FileName = LaunchPath;
                 proc.StartInfo.Arguments = "-lang:" + languageID + " -lite:2 -region:" + regionID + " /sesskey /launchbylauncher  /CompanyID:12 /ChannelGroupIndex:-1 " + UseAllCores + " " + Unattended + " " + NoTextureStreaming + " " + metroTextBox5.Text;
                 proc.StartInfo.UseShellExecute = false;
-                proc.StartInfo.RedirectStandardError = true;
+                proc.StartInfo.RedirectStandardError = false;
                 bool gameworked = false;
                 try
                 {
@@ -3690,7 +3736,14 @@ namespace Revamped_BnS_Buddy
             password = @s1.password.ToString();
             if (username.Length > 1 && password.Length > 1)
             {
-                LoginOccured = true;
+                if (!metroComboBox9.Items.Contains(username))
+                {
+                    LoginOccured = true;
+                }
+                else
+                {
+                    AddTextLog("This user is already logged in!");
+                }
             }
             //
             if (Debugging)
@@ -5979,7 +6032,7 @@ namespace Revamped_BnS_Buddy
                 string directory = files.Split(Path.DirectorySeparatorChar).Last();
                 if (files.Length != 0)
                 {
-                    if (directory.Contains(".patch"))
+                    if (directory.EndsWith(".patch"))
                     {
                         string tmp = directory.Replace(".patch", "");
                         if (checkNode3(tmp) == true)
@@ -7571,7 +7624,7 @@ namespace Revamped_BnS_Buddy
             groupBox17.Enabled = false;
             if (AppStarted)
             {
-                if (metroToggle21.Checked == true)
+                if (metroToggle24.Checked == true)
                 {
                     lineChanger("igpshow = true", @AppPath + "\\Settings.ini", 39);
                     metroLabel70.Visible = true;
@@ -8165,6 +8218,7 @@ namespace Revamped_BnS_Buddy
             // Return token
             string tmp = String.Format(args, token);
             FinalToken = tmp;
+            Process proc = new Process();
             proc.StartInfo.FileName = LaunchPath;
             string temp = metroComboBox1.SelectedItem.ToString();
             if (temp == "North America" || temp == "Europe") // NA/EU
