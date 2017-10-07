@@ -29,6 +29,24 @@ Requirements:
 
 Change Log:
  
+Version 5.8.9.2
++ Added: Auto-login
++ Added: Logs during login process to make the login more understandable
++ Reworked: Client killer saves the last used client process id
++ Fixed Bug: Restoring/Reapplying loading screen fix was checked when not and did the opposite
++ Fixed Bug: When no server are available, unhandled exception occurs and crashes
++ Fixed Bug: When one account fails to login all other sessions closes
++ Fixed Bug: When decompiling a multiple folder mod via addon
+ 
+Version 5.8.9.1
++ Reworked: Give access by default to MultiClient on Extra tab 
++ Fixed Bug: Was allowing twice the same acc login at the same time
++ Fixed Bug: Adding non-patch files to the list
++ Fixed Bug: Loading screen bug caused by bns buddy
++ Fixed Bug: Memory cleaner was intrusive to game process in it's cleaning
++ Fixed Bug: Could not show IGP estimation if GCD estimation wasn't on
++ Fixed Bug: When no process are listed as running, tried to set to an unexisting process 
+
 Version 5.8.9.0
 + Added: Start 2nd instance of game Client with multiclient
 + Added: Remember unique key
