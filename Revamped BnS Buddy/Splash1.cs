@@ -91,6 +91,7 @@ namespace Revamped_BnS_Buddy
                         }
                     }
                 }
+
                 // Check caps lock
                 CheckLock();
             } catch { Prompt.Popup("Unknown Error Occured: Resetted Registry."); ClearRegistry(); }
@@ -416,6 +417,15 @@ namespace Revamped_BnS_Buddy
             catch
             {
                 Prompt.Popup("Error: Could not Forget user!");
+            }
+        }
+
+        private void Splash1_Shown(object sender, EventArgs e)
+        {
+            // Auto Login
+            if (File.ReadAllText(@AppPath + "\\Settings.ini").Contains("autologin = true"))
+            {
+                Perform();
             }
         }
     }

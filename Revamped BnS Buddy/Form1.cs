@@ -66,7 +66,7 @@ namespace Revamped_BnS_Buddy
         public string TaiwanPath = "";
         public string CustomGamePath = "";
         public string CustomClientPath = "";
-        public string DefaultValues = "unattended = false" + Environment.NewLine + "notexturestreaming = false" + Environment.NewLine + "savelogs = false" + Environment.NewLine + "showlogs = true" + Environment.NewLine + "variables = false" + Environment.NewLine + "tooltips = true" + Environment.NewLine + "customgame = false" + Environment.NewLine + "customclient = false" + Environment.NewLine + "admincheck = true" + Environment.NewLine + "ncsoftlogin = false" + Environment.NewLine + "showdonate = true" + Environment.NewLine + "minimize = true" + Environment.NewLine + "launcherlogs = false" + Environment.NewLine + "modmanlogs = false" + Environment.NewLine + "customclientpath = " + Environment.NewLine + "customgamepath = " + Environment.NewLine + "updatechecker = true" + Environment.NewLine + "pingchecker = true" + Environment.NewLine + "gamekiller = true" + Environment.NewLine + "useallcores = false" + Environment.NewLine + "arguements = " + Environment.NewLine + "prtime = 500" + Environment.NewLine + "autoupdate = true" + Environment.NewLine + "firsttime = true" + Environment.NewLine + "default = " + Environment.NewLine + "defaultset = false" + Environment.NewLine + "defaultclient = " + Environment.NewLine + "priority = Normal" + Environment.NewLine + "modfolder = " + Environment.NewLine + "modfolderset = false" + Environment.NewLine + "rememberme = false" + Environment.NewLine + "automemorycleanup = false" + Environment.NewLine + "langset = false" + Environment.NewLine + "langpath = " + Environment.NewLine + "boostprocess = true" + Environment.NewLine + "cleanint = OFF" + Environment.NewLine + "uniquepass = " + Environment.NewLine + "gcdshow = false" + Environment.NewLine + "igpshow = false";
+        public string DefaultValues = "unattended = false" + Environment.NewLine + "notexturestreaming = false" + Environment.NewLine + "savelogs = false" + Environment.NewLine + "showlogs = true" + Environment.NewLine + "variables = false" + Environment.NewLine + "tooltips = true" + Environment.NewLine + "customgame = false" + Environment.NewLine + "customclient = false" + Environment.NewLine + "admincheck = true" + Environment.NewLine + "ncsoftlogin = false" + Environment.NewLine + "showdonate = true" + Environment.NewLine + "minimize = true" + Environment.NewLine + "launcherlogs = false" + Environment.NewLine + "modmanlogs = false" + Environment.NewLine + "customclientpath = " + Environment.NewLine + "customgamepath = " + Environment.NewLine + "updatechecker = true" + Environment.NewLine + "pingchecker = true" + Environment.NewLine + "gamekiller = true" + Environment.NewLine + "useallcores = false" + Environment.NewLine + "arguements = " + Environment.NewLine + "prtime = 500" + Environment.NewLine + "autoupdate = true" + Environment.NewLine + "firsttime = true" + Environment.NewLine + "default = " + Environment.NewLine + "defaultset = false" + Environment.NewLine + "defaultclient = " + Environment.NewLine + "priority = Normal" + Environment.NewLine + "modfolder = " + Environment.NewLine + "modfolderset = false" + Environment.NewLine + "rememberme = false" + Environment.NewLine + "automemorycleanup = false" + Environment.NewLine + "langset = false" + Environment.NewLine + "langpath = " + Environment.NewLine + "boostprocess = true" + Environment.NewLine + "cleanint = OFF" + Environment.NewLine + "uniquepass = " + Environment.NewLine + "gcdshow = false" + Environment.NewLine + "igpshow = false" + Environment.NewLine + "autologin = false";
         public string ActiveDataFile = "";
         public string XmlSavePath = "";
         public string NewDat = "";
@@ -102,13 +102,13 @@ namespace Revamped_BnS_Buddy
         public int medium = Convert.ToInt32("65");
         public int good = Convert.ToInt32("1");
         public int wakeywakey = 500;
+        public int appuniqueid = 0;
         public BackgroundWorker bw1;
         public BackgroundWorker bw2;
         public BackgroundWorker bw3;
         public BackgroundWorker bnsdat;
         public BackgroundWorker bnsdatc;
         public Form2 s2;
-        //public Process proc = new Process();
         // Seperator
         public Form1()
         {
@@ -1340,7 +1340,7 @@ namespace Revamped_BnS_Buddy
                 // Create if missing
                 if (!File.Exists(AppPath + "\\Settings.ini")) { File.WriteAllText(AppPath + "\\Settings.ini", DefaultValues); }
                 // Check if updated.
-                if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("igpshow"))
+                if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("autologin"))
                 {
                     // Save current settings
                     if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("customlang"))
@@ -1578,6 +1578,10 @@ namespace Revamped_BnS_Buddy
                     metroLabel71.Visible = true;
                     metroLabel70.Refresh();
                     metroLabel71.Refresh();
+                }
+                if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("autologin = true"))
+                {
+                    metroToggle25.Checked = true;
                 }
             }
             catch
@@ -2528,8 +2532,11 @@ namespace Revamped_BnS_Buddy
                     // Kill game process
                     foreach (var process in Process.GetProcessesByName("Client"))
                     {
-                        process.Kill();
-                        AddTextLog("Killed Game Process.");
+                        if (process.Id == appuniqueid)
+                        {
+                            process.Kill();
+                            AddTextLog("Killed Game Process.");
+                        }
                     }
                 } catch { AddTextLog("Could Not Kill Game Process."); }
             }
@@ -2927,6 +2934,10 @@ namespace Revamped_BnS_Buddy
                 {
                     AddTextLog("Applied Loading Screen Fix!");
                 }
+                else if (runninglyn == false && loadingpkg == false)
+                {
+                    metroToggle1.CheckState = CheckState.Checked;
+                }
                 else
                 {
                     metroToggle1.CheckState = CheckState.Unchecked;
@@ -2973,6 +2984,10 @@ namespace Revamped_BnS_Buddy
                 if (runninglyn == true && loadingpkg == true)
                 {
                     AddTextLog("Restored Loading Screen!");
+                }
+                else if (runninglyn == false && loadingpkg == false)
+                {
+                    metroToggle1.CheckState = CheckState.Unchecked;
                 }
                 else
                 {
@@ -3313,9 +3328,12 @@ namespace Revamped_BnS_Buddy
                         {
                             if (!killed)
                             {
-                                killed = true;
-                                process.Kill();
-                                AddTextLog("Killed Game Process");
+                                if (process.Id == appuniqueid)
+                                {
+                                    killed = true;
+                                    process.Kill();
+                                    AddTextLog("Killed Game Process");
+                                }
                             }
                         }
                     }
@@ -3570,7 +3588,7 @@ namespace Revamped_BnS_Buddy
                 AddTextLog("Applying Addons...");
                 StartGameAddons();
             }
-            AddTextLog("Starting Client...");
+            AddTextLog("Starting Auth...");
             // Default values
             // /GarenaToken:token --publisher:garena /GameRegion:thailand /TextLang:th // Thailand
             // /LaunchByLauncher /Sesskey /SessKey:"" /CompanyID:"14" /ChannelGroupIndex:"-1" // Japanese
@@ -3592,11 +3610,21 @@ namespace Revamped_BnS_Buddy
                 else
                 {
                     metroButton1.Enabled = true;
-                    AddTextLog("Cancelled");
+                    if (Maintenance)
+                    {
+                        AddTextLog("Server in Maintenance");
+                        AddTextLog("Cancelled");
+                    }
+                    else
+                    {
+                        AddTextLog("Login Failed");
+                        AddTextLog("Cancelled");
+                    }
                 }
             }
             else if (metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("Japanese"))
             {
+                AddTextLog("Starting Client!");
                 Process proc = new Process();
                 proc.StartInfo.FileName = LaunchPath;
                 proc.StartInfo.Arguments = "/LaunchByLauncher /Sesskey /SessKey:\"\" /CompanyID:\"14\" /ChannelGroupIndex:\"-1\"" + UseAllCores + " " + Unattended + " " + NoTextureStreaming + " " + metroTextBox5.Text;
@@ -3620,6 +3648,9 @@ namespace Revamped_BnS_Buddy
                 {
                     proc.Start();
                     AddTextLog("Started Client.exe!");
+                    // Set the ID of the process
+                    appuniqueid = proc.Id;
+                    // Continue
                     GameStarted = true;
                     gameworked = true;
                     // MultiClient notice
@@ -3662,6 +3693,7 @@ namespace Revamped_BnS_Buddy
             }
             else
             {
+                AddTextLog("Starting Client!");
                 Process proc = new Process();
                 proc.StartInfo.FileName = LaunchPath;
                 proc.StartInfo.Arguments = "-lang:" + languageID + " -lite:2 -region:" + regionID + " /sesskey /launchbylauncher  /CompanyID:12 /ChannelGroupIndex:-1 " + UseAllCores + " " + Unattended + " " + NoTextureStreaming + " " + metroTextBox5.Text;
@@ -3684,6 +3716,9 @@ namespace Revamped_BnS_Buddy
                 {
                     proc.Start();
                     AddTextLog("Started Client.exe!");
+                    // Set the ID of the process
+                    appuniqueid = proc.Id;
+                    // Continue
                     GameStarted = true;
                     gameworked = true;
                     // MultiClient notice
@@ -6405,6 +6440,10 @@ namespace Revamped_BnS_Buddy
                     Prompt.Popup("File to patch: " + ToFile);
                 // Fix file name for unpacking
                 string prev_ToFile = Path.GetDirectoryName(ToFile);
+                if (prev_ToFile.Contains("\\"))
+                {
+                    prev_ToFile = prev_ToFile.Remove(prev_ToFile.IndexOf("\\"));
+                }
                 string to_ToFile = prev_ToFile.Replace(".files", "");
                 // Bitness Check
                 if (to_ToFile.Contains("[bit]"))
@@ -6499,6 +6538,10 @@ namespace Revamped_BnS_Buddy
                 string ToFile = File.ReadLines(FullAddonPath + "\\" + filename).Skip(0).Take(1).First().Replace("FileName = ", "");
                 // Fix file name for unpacking
                 string prev_ToFile = Path.GetDirectoryName(ToFile);
+                if (prev_ToFile.Contains("\\"))
+                {
+                    prev_ToFile = prev_ToFile.Remove(prev_ToFile.IndexOf("\\"));
+                }
                 string to_ToFile = prev_ToFile.Replace(".files", "");
                 // Bitness Check
                 if (to_ToFile.Contains("[bit]"))
@@ -7077,6 +7120,7 @@ namespace Revamped_BnS_Buddy
 
         public void GrabToken() // Login action
         {
+            bool naeu = false;
             // Change Region based
             if (metroComboBox1.SelectedItem != null)
             {
@@ -7091,7 +7135,7 @@ namespace Revamped_BnS_Buddy
                         AddTextLog("Failed");
                         AddTextLog("Attempting a second method");
                         for (int ini = 0; regions.Count > ini; ini++)
-                        RegionCB.Items.Add(regions[ini]);
+                            RegionCB.Items.Add(regions[ini]);
                     }
                     AddTextLog("Proceeding...");
                     // Should be good to go!
@@ -7124,6 +7168,7 @@ namespace Revamped_BnS_Buddy
                     else // Popup message if none is available
                     {
                         Prompt.Popup("Error: No available servers were found for NA/EU!");
+                        naeu = true;
                     }
                 }
             }
@@ -7134,7 +7179,7 @@ namespace Revamped_BnS_Buddy
                 LoginServer.Close();
                 worker.CancelAsync();
             }
-            
+            if (!naeu) { 
                 if (metroComboBox1.SelectedItem != null)
                 {
                     string tmp = metroComboBox1.SelectedItem.ToString();
@@ -7176,11 +7221,11 @@ namespace Revamped_BnS_Buddy
                     else
                     if (tmp == "Korean")
                     {
-                    if (metroComboBox8.SelectedItem.ToString() == "Live")
-                    {
-                        currentAppId = "B0D42105-0CB6-BC9F-3CB2-BE28A0662340";
-                    }
-                    else { currentAppId = "18A2B067-7A7E-DA99-CDF1-3BBE3BE93F68"; }
+                        if (metroComboBox8.SelectedItem.ToString() == "Live")
+                        {
+                            currentAppId = "B0D42105-0CB6-BC9F-3CB2-BE28A0662340";
+                        }
+                        else { currentAppId = "18A2B067-7A7E-DA99-CDF1-3BBE3BE93F68"; }
                     }
                     // TAIWAN
                     else
@@ -7189,8 +7234,6 @@ namespace Revamped_BnS_Buddy
                         currentAppId = "33BC338F-2651-8ECD-9E2A-444843707997";
                     }
                 }
-
-
                 try
                 {
                     //Set some variables that are going to be used
@@ -7208,7 +7251,11 @@ namespace Revamped_BnS_Buddy
                 worker.WorkerSupportsCancellation = true;
                 worker.DoWork += Try_Connection;
                 worker.RunWorkerAsync();
-            
+            }
+            else
+            {
+                AddTextLog("Error: Login Failed, servers are not reachable!");
+            }
         }
 
 
@@ -7642,6 +7689,21 @@ namespace Revamped_BnS_Buddy
             groupBox17.Enabled = true;
         }
 
+        private void metroToggle25_CheckedChanged(object sender, EventArgs e)
+        {
+            if (AppStarted)
+            {
+                if (metroToggle25.Checked == true)
+                {
+                    lineChanger("autologin = true", @AppPath + "\\Settings.ini", 40);
+                }
+                else
+                {
+                    lineChanger("autologin = false", @AppPath + "\\Settings.ini", 40);
+                }
+            }
+        }
+
         private void Form1_Load_1(object sender, EventArgs e)
         { 
             // to be cleaned
@@ -7997,7 +8059,10 @@ namespace Revamped_BnS_Buddy
                     Prompt.Popup("Please verify your new ip to NCSoft's website(whitelist via security settings) or NCSoft Launcher via pin confirmation.");
                     foreach (var process in Process.GetProcessesByName("Client"))
                     {
-                        process.Kill();
+                        if (process.Id == appuniqueid)
+                        {
+                            process.Kill();
+                        }
                     }
                     metroButton1.Enabled = true;
                     Show(); // Shows the program on taskbar
@@ -8126,7 +8191,10 @@ namespace Revamped_BnS_Buddy
                         Prompt.Popup("Please verify your new ip to NCSoft's website(whitelist via security settings) or NCSoft Launcher via pin confirmation.");
                         foreach (var process in Process.GetProcessesByName("Client"))
                         {
-                            process.Kill();
+                            if (process.Id == appuniqueid)
+                            {
+                                process.Kill();
+                            }
                         }
                         metroButton1.Enabled = true;
                         Show(); // Shows the program on taskbar
@@ -8211,6 +8279,7 @@ namespace Revamped_BnS_Buddy
 
         void login_enable(bool yes)
         {
+            AddTextLog("Login successful!");
             if (!metroLabel14.Text.Contains("Clean"))
             {
                 RestoreConfigFiles();
@@ -8218,6 +8287,7 @@ namespace Revamped_BnS_Buddy
             // Return token
             string tmp = String.Format(args, token);
             FinalToken = tmp;
+            AddTextLog("Starting Client!");
             Process proc = new Process();
             proc.StartInfo.FileName = LaunchPath;
             string temp = metroComboBox1.SelectedItem.ToString();
@@ -8259,6 +8329,9 @@ namespace Revamped_BnS_Buddy
             {
                 proc.Start();
                 AddTextLog("Started Client.exe!");
+                // Set the ID of the process
+                appuniqueid = proc.Id;
+                // Continue
                 GameStarted = true;
                 gameworked = true;
                 // Add to Multi Client Lib if MultiClient is enabled in Extra

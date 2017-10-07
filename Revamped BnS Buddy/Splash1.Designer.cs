@@ -203,6 +203,7 @@
             this.TextAlign = System.Windows.Forms.VisualStyles.HorizontalAlign.Center;
             this.Theme = MetroFramework.MetroThemeStyle.Dark;
             this.TopMost = true;
+            this.Shown += new System.EventHandler(this.Splash1_Shown);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Splash1_KeyDown);
             this.ResumeLayout(false);
             this.PerformLayout();
