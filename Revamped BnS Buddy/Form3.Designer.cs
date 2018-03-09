@@ -40,7 +40,9 @@
             this.metroButton4 = new MetroFramework.Controls.MetroButton();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.Themer = new MetroFramework.Components.MetroStyleManager(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.fastColoredTextBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Themer)).BeginInit();
             this.SuspendLayout();
             // 
             // fastColoredTextBox1
@@ -158,6 +160,10 @@
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
+            // Themer
+            // 
+            this.Themer.Owner = this;
+            // 
             // Form3
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -177,6 +183,7 @@
             this.Text = "Addon Creator";
             this.Theme = MetroFramework.MetroThemeStyle.Dark;
             ((System.ComponentModel.ISupportInitialize)(this.fastColoredTextBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Themer)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -194,5 +201,6 @@
         private MetroFramework.Controls.MetroButton metroButton4;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private MetroFramework.Components.MetroStyleManager Themer;
     }
 }

@@ -123,33 +123,33 @@
   <metadata name="metroToolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>427, 17</value>
   </metadata>
+  <data name="metroLabel24.Text" xml:space="preserve">
+    <value>Minimunchi       Chirayu                        Yevvie                    Deam
+PowerCozmic    JUNWOO                     Volmie                    Kimi
+Origamie            Ìsla                                Koharu Izikawa     Kawaii
+FireLight             karim                            Arne                       Kenji
+Claudio               Eike                              Ragz                        Pille
+Jakob                  Phillip                           Saint Child
+Kokoa Cawfee   David                            Takemi
+Khalid                 Jun                                Tehyeh
+Verdara               Prabu
+SkylerChip         Xakorik
+Nhat Vu             Alex                                Kitty
+Nur Zakwan      Jonathan                       Thu
+Relawals            Joel                                 Amasaki
+Thanh Tran       zeroshady                      Kuro
+Jun                     Eyomi                             Uraki243
+Prabu                 VasssH                           EliasReffstrup
+Emanuela          HaJin Takemikazuchi  Momo Kozuki
+KiwiNoSora       rara1987                         Azzuray
+David                 Punio                             Chaosc0re</value>
+  </data>
   <metadata name="toolStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
   <metadata name="toolStrip2.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>122, 17</value>
   </metadata>
-  <data name="metroLabel24.Text" xml:space="preserve">
-    <value>Minimunchi       Chirayu 
-PowerCozmic    JUNWOO
-Origamie            Ìsla 
-FireLight             karim 
-Claudio               Eike 
-Jakob                  Phillip 
-Kokoa Cawfee   David 
-Khalid                 Jun 
-Verdara               Prabu
-SkylerChip         Xakorik
-Nhat Vu             Alex
-Nur Zakwan      Jonathan 
-Relawals            Joel
-Thanh Tran       zeroshady
-Jun                     Eyomi
-Prabu                 VasssH
-Emanuela 
-KiwiNoSora
-David</value>
-  </data>
   <data name="metroLabel7.Text" xml:space="preserve">
     <value>Made with &lt;3 for those having problems modding and playing Blade and Soul
 Features:      
@@ -6347,6 +6347,9 @@ Credits:
   <metadata name="CClock.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>559, 17</value>
   </metadata>
+  <metadata name="Themer.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>648, 17</value>
+  </metadata>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>38</value>
   </metadata>
@@ -12522,4 +12525,7 @@ Credits:
         AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
 </value>
   </data>
+  <metadata name="timer2.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>741, 17</value>
+  </metadata>
 </root>
