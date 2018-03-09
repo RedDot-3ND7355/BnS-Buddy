@@ -28,6 +28,56 @@ Requirements:
 
 
 Change Log:
+
+Version 5.8.9.4
++ Added: Timer to say if connection is being slow during login
++ Added: Custom exe name for Client
++ Added: User count online
++ Added: Color dropdown for BnS Buddy's design
++ Added: Portuguese support
++ Added: Sorting to Addons
++ Added: Sorting to Splashes
++ Added: Remember last used server
++ Added: Preview Button in Splash Changer
++ Added: Context Menu to BnS Buddy Notification Icon When Minimized
++ Reworked: Ping method for na/eu
++ Reworked: Mod manager now moves mods to subfolders for better organisation
++ Reworked: Multiple Game Installation Resetting
++ Reworked: Changing Server would load different installed paths
++ Reworked: Changed addons location
++ Reworked: Repositioned the Bitness selection for the game Client & Changed the Default Path configuration
++ Reworked: Bitness selection for addons is automatically selected along with the bitness selected of the current client
++ Fixed Bug: Matching prefix for emails before @ would create duplicate entries of the same name
++ Fixed Bug: Sometimes pressing tooltip on xml edit tab would not work
++ Fixed Bug: Did not allow login after maintenance is over on same session
++ Fixed Bug: Would not load korean paths
++ Fixed Bug: Custom mod path would not have backup path following
++ Fixed Bug: Creating random /mod folders on root drive
++ Fixed Bug: Restore button in settings didn't do anything
++ Fixed Bug: Maximize/Minimize button went batshit crazy and didn't follow his orders when resizing form
++ Fixed Bug: Remember Me did not toggle unless you signed in on login form
++ Fixed Bug: Emails starting with the same name will be overwritten on registry
++ Fixed Bug: Cleaning Mess when exiting, starting game and opening BnS Buddy would not clean
++ Fixed Bug: Removed the excessive flickering when BnS Buddy Refreshed the Mod Manager list
++ Fixed Bug: Fixed tooltips still appear after pressing compile/decompile
++ Fixed Bug: Disabled the compile/decompile when game is running which resulted in a permanent freeze
++ Fixed Bug: Pressing Compile button on dat editor when not decompiled would crash/freeze BnS Buddy
++ Fixed Bug: Applying a mod in mod manager while folder is empty and none other selected would freeze BnS Buddy
++ Fixed Bug: Splash Preview within BnS Buddy wasn't respecting image ratio
++ Fixed Bug: Buddy would not be killed if closed via taskbar
++ Fixed Bug: Status for clean or patched files would always stay patched if was previous true
+
+Version 5.8.9.3
++ Reworked: Mod manager handling
++ Fixed Bug: Auto-login wouldn't let you connect to second account
++ Fixed Bug: Would not load korean paths (workaround)
++ Fixed Bug: Unknown error caused by unique fingerprint
++ Fixed Bug: Killing an unexisting process
++ Fixed Bug: Mod Manager renaming mod folders when not finished transferring
++ Fixed Bug: Keeping old updater not allowing to update
++ Fixed Bug: Loop of applying fix loading screen when files already pre-existed
++ Fixed Bug: Icmp servers from ncsoft would be unpingable, now pinging servers directly
++ Fixed Bug: Modifying cleanint and prtime if previously matching would modify both at the same time
  
 Version 5.8.9.2
 + Added: Auto-login
