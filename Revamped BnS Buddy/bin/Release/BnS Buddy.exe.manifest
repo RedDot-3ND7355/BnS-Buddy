@@ -4,7 +4,7 @@
   <description asmv2:iconFile="p1_2134088_1e7a9a64.ico" xmlns="urn:schemas-microsoft-com:asm.v1" />
   <application />
   <entryPoint>
-    <assemblyIdentity name="BnS Buddy" version="5.8.9.2" language="neutral" processorArchitecture="msil" />
+    <assemblyIdentity name="BnS Buddy" version="5.8.9.4" language="neutral" processorArchitecture="msil" />
     <commandLine file="BnS Buddy.exe" parameters="" />
   </entryPoint>
   <trustInfo>
@@ -80,14 +80,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="BnS Buddy.exe" size="6740480">
-      <assemblyIdentity name="BnS Buddy" version="5.8.9.2" language="neutral" processorArchitecture="msil" />
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="BnS Buddy.exe" size="6767104">
+      <assemblyIdentity name="BnS Buddy" version="5.8.9.4" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>7j9WPOGBPS6KSZC24YENQatpokri2QDTlteixLhatiA=</dsig:DigestValue>
+        <dsig:DigestValue>Q+Qyz79v/KoGn2CCvV0ucbBBNKEEYqO+TAe6yNey4rE=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
