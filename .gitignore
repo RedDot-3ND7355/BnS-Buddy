@@ -1,0 +1,15 @@
+# Ignore Compiled Files
+*.exe
+# Ignore Compile RARs 
+*.rar
+*.zip
+*.7zip
+# Ignore Certs
+*.pfx
+*.pub
+# Ignore Stuff
+*.csproj
+# Ignore Text Files
+*.txt
+# Ignore Settings
+Settings.ini
