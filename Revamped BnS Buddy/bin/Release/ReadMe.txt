@@ -25,52 +25,7 @@ Requirements:
 ++ A brain :P
 
 
-FUTURE UPDATES:
-Add [5.8.9.3]: Performance boost (same method as multiclient)
-Add [5.8.9.5]: Local bin support and local64 from other data folder
-Add [5.9.0.0]: Translations
-Add [6.0.0.0]: Remotely fetch mods/addons/splash from server
-
-
 Change Log:
-Version 5.8.9.2
-+ Added: Auto-login
-+ Added: Logs during login process to make the login more understandable
-+ Reworked: Client killer saves the last used client process id
-+ Fixed Bug: Restoring/Reapplying loading screen fix was checked when not and did the opposite
-+ Fixed Bug: When no server are available, unhandled exception occurs and crashes
-+ Fixed Bug: When one account fails to login all other sessions closes
-+ Fixed Bug: When decompiling a multiple folder mod via addon
-
-Version 5.8.9.1
-+ Reworked: Give access by default to MultiClient on Extra tab 
-+ Fixed Bug: Was allowing twice the same acc login at the same time
-+ Fixed Bug: Adding non-patch files to the list
-+ Fixed Bug: Loading screen bug caused by bns buddy
-+ Fixed Bug: Memory cleaner was intrusive to game process in it's cleaning
-+ Fixed Bug: Could not show IGP estimation if GCD estimation wasn't on
-+ Fixed Bug: When no process are listed as running, tried to set to an unexisting process
-
-Updater 2.1
-+ Added: Admin check to prevent errors by downloading/moving files
-
-Version 5.8.9.0
-+ Added: Start 2nd instance of game Client with multiclient
-+ Added: Remember unique key
-+ Added: Forget account in Login Form For selected one
-+ Added: Support for umap files in Mod Manager
-+ Added: Toggles for GCD and INGAME estimations
-+ Reworked: Extra tab for 'hidden' features was incomplete
-+ Reworked: Relocated Memory cleaner when game starts
-+ Fixed Bug: Could not enter custom patch name when creating addon
-+ Fixed Bug: The colors for Launcher tab
-+ Fixed Bug: Removed "Could not Start Client.exe!" even after it started
-+ Fixed Bug: Could not kill Client (Access Denied even with admin rights) globally called Client
-+ Fixed Bug: Forgot to add Korean Test Server support Paths
-+ Fixed Bug: Error decrypting key via registry for login
-+ Fixed Bug: Couldn't properly choose for Live or Test server
-+ Fixed Bug: White clickable lines appeared in about tab
-
 Updater 2.0
 + Added: Toggle for auto update
 + Reworked: fetching online build ver.
