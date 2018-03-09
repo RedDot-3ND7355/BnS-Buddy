@@ -11,7 +11,6 @@ using System.Collections;
 using Microsoft.Win32;
 using System.ComponentModel;
 using System.Drawing;
-using System.Linq;
 
 namespace Revamped_BnS_Buddy
 {
@@ -27,14 +26,11 @@ namespace Revamped_BnS_Buddy
         public unsafe string SALT = "";
         public bool remembered = false;
         public bool INTRUDER = false;
-
+        
         public Splash1()
         {
             // Initialize Form
             InitializeComponent();
-            // Get Color
-            GetColor();
-            // Proceed
             try
             {
                 // Get Unique SALT
@@ -53,9 +49,11 @@ namespace Revamped_BnS_Buddy
                     regKey = Registry.LocalMachine;
                     regKey = regKey.OpenSubKey(@"SOFTWARE\BnS Buddy\", true);
 
-                    // Add | Delete | Sort -> Users
-                    ReOrderTree(regKey);
-                    // Continue
+                    // foreach account login saved, add to dropbox
+                    foreach (string InReg in regKey.GetSubKeyNames())
+                    {
+                        metroComboBox1.Items.Add(InReg.ToString());
+                    }
 
                     if (metroComboBox1.Items.Count >= 1)
                     {
@@ -73,7 +71,7 @@ namespace Revamped_BnS_Buddy
                                 {
                                     if (tmp_last.Length > 1)
                                     {
-                                        metroComboBox1.SelectedIndex = metroComboBox1.FindString(tmp_last);
+                                        metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact(tmp_last);
                                         metroButton3.Visible = true;
                                     }
                                 }
@@ -84,10 +82,8 @@ namespace Revamped_BnS_Buddy
                         string tmp_pass = string.Empty;
                         if (regKey != null)
                         {
-                            string tmp_select = metroComboBox1.SelectedItem.ToString();
-                            //tmp_select = tmp_select.Substring(0, tmp_select.IndexOf(" "));
-                            tmp_user = regKey.OpenSubKey(tmp_select).GetValue("username").ToString();
-                            tmp_pass = regKey.OpenSubKey(tmp_select).GetValue("password").ToString();
+                            tmp_user = regKey.OpenSubKey(metroComboBox1.SelectedItem.ToString()).GetValue("username").ToString();
+                            tmp_pass = regKey.OpenSubKey(metroComboBox1.SelectedItem.ToString()).GetValue("password").ToString();
                             metroTextBox1.Text = Dec(tmp_user);
                             metroTextBox2.Text = Dec(tmp_pass);
                             metroCheckBox1.CheckState = CheckState.Checked;
@@ -99,163 +95,6 @@ namespace Revamped_BnS_Buddy
                 // Check caps lock
                 CheckLock();
             } catch { Prompt.Popup("Unknown Error Occured: Resetted Registry."); ClearRegistry(); }
-        }
-
-        private void ReOrderTree(RegistryKey regKey)
-        {
-            bool DidItWork = false;
-            // foreach account login saved, add to dropbox
-            if (regKey != null)
-            {
-                foreach (string InReg in regKey.GetSubKeyNames())
-                {
-                    if (InReg != null)
-                    {
-                        // Original Reg Key
-                        RegistryKey Original = regKey;
-                        // String 1
-                        string initial = InReg.ToString();
-                        // String 2
-                        string tmp_adder = regKey.OpenSubKey(InReg.ToString()).GetValue("username").ToString();
-                        tmp_adder = Dec(tmp_adder);
-                        string tmp_origin = tmp_adder.Substring(tmp_adder.IndexOf("@") + 1);
-                        tmp_adder = tmp_adder.Substring(0, tmp_adder.IndexOf("@"));
-                        // Compare
-                        if (InReg.ToString() == (tmp_adder + " (" + tmp_origin + ") "))
-                        {
-                            if (!metroComboBox1.Items.Contains(tmp_adder + " (" + tmp_origin + ") "))
-                            {
-                                metroComboBox1.Items.Add(tmp_adder + " (" + tmp_origin + ") ");
-                            }
-                        }
-                        else // Convert if old then add
-                        {
-                            // Conversion
-                            RegistryKey tmpkey = regKey;
-                            tmpkey = tmpkey.OpenSubKey(InReg);
-                            RenameSubKey(regKey, InReg.ToString(), tmp_adder + " (" + tmp_origin + ") ");
-                            // Add
-                            DidItWork = true;
-                        }
-                    }
-                }
-            }
-            // Restart to Add
-            if (DidItWork)
-            {
-                ReOrderTree(regKey);
-            }
-        }
-
-        public bool RenameSubKey(RegistryKey parentKey, string subKeyName, string newSubKeyName)
-        {
-            CopyKey(parentKey, subKeyName, newSubKeyName);
-            if (subKeyName != null)
-            {
-                parentKey.DeleteSubKeyTree(subKeyName);
-            }
-            return true;
-        }
-
-        public bool CopyKey(RegistryKey parentKey,
-            string keyNameToCopy, string newKeyName)
-        {
-            //Create new key
-            RegistryKey destinationKey = parentKey.CreateSubKey(newKeyName);
-
-            //Open the sourceKey we are copying from
-            RegistryKey sourceKey = parentKey.OpenSubKey(keyNameToCopy);
-
-            RecurseCopyKey(sourceKey, destinationKey);
-
-            return true;
-        }
-
-        private void RecurseCopyKey(RegistryKey sourceKey, RegistryKey destinationKey)
-        {
-            //copy all the values
-            foreach (string valueName in sourceKey.GetValueNames())
-            {
-                object objValue = sourceKey.GetValue(valueName);
-                RegistryValueKind valKind = sourceKey.GetValueKind(valueName);
-                destinationKey.SetValue(valueName, objValue, valKind);
-            }
-
-            //For Each subKey 
-            //Create a new subKey in destinationKey 
-            //Call myself 
-            foreach (string sourceSubKeyName in sourceKey.GetSubKeyNames())
-            {
-                RegistryKey sourceSubKey = sourceKey.OpenSubKey(sourceSubKeyName);
-                RegistryKey destSubKey = destinationKey.CreateSubKey(sourceSubKeyName);
-                RecurseCopyKey(sourceSubKey, destSubKey);
-            }
-        }
-
-        private void GetColor()
-        {
-            Prompt.AppPath = AppPath;
-            string line = File.ReadLines(@AppPath + "\\Settings.ini").Skip(43).Take(1).First().Replace("buddycolor = ", "");
-            if (line == "Black")
-            {
-                Themer.Style = MetroFramework.MetroColorStyle.Black;
-            }
-            else if (line == "Red")
-            {
-                Themer.Style = MetroFramework.MetroColorStyle.Red;
-            }
-            else if (line == "Purple")
-            {
-                Themer.Style = MetroFramework.MetroColorStyle.Purple;
-            }
-            else if (line == "Pink")
-            {
-                Themer.Style = MetroFramework.MetroColorStyle.Pink;
-            }
-            else if (line == "Orange")
-            {
-                Themer.Style = MetroFramework.MetroColorStyle.Orange;
-            }
-            else if (line == "Magenta")
-            {
-                Themer.Style = MetroFramework.MetroColorStyle.Magenta;
-            }
-            else if (line == "Lime")
-            {
-                Themer.Style = MetroFramework.MetroColorStyle.Lime;
-            }
-            else if (line == "Green")
-            {
-                Themer.Style = MetroFramework.MetroColorStyle.Green;
-            }
-            else if (line == "Default")
-            {
-                Themer.Style = MetroFramework.MetroColorStyle.Default;
-            }
-            else if (line == "Brown")
-            {
-                Themer.Style = MetroFramework.MetroColorStyle.Brown;
-            }
-            else if (line == "Blue")
-            {
-                Themer.Style = MetroFramework.MetroColorStyle.Blue;
-            }
-            else if (line == "Silver")
-            {
-                Themer.Style = MetroFramework.MetroColorStyle.Silver;
-            }
-            else if (line == "Teal")
-            {
-                Themer.Style = MetroFramework.MetroColorStyle.Teal;
-            }
-            else if (line == "White")
-            {
-                Themer.Style = MetroFramework.MetroColorStyle.White;
-            }
-            else if (line == "Yellow")
-            {
-                Themer.Style = MetroFramework.MetroColorStyle.Yellow;
-            }
         }
 
         private string StringToHex(string s)
@@ -304,10 +143,7 @@ namespace Revamped_BnS_Buddy
             {
                 Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).DeleteSubKeyTree(InReg.ToString());
             }
-            if (regKey.GetValue("lastused") != null)
-            {
-                regKey.DeleteValue("lastused");
-            }
+            regKey.DeleteValue("lastused");
         }
 
         public bool CheckIfAny()
@@ -332,8 +168,6 @@ namespace Revamped_BnS_Buddy
             return bool_data;
         } 
 
-
-
         public void Perform()
         {
             // Login
@@ -351,15 +185,16 @@ namespace Revamped_BnS_Buddy
                         try
                         {
                             string input = metroTextBox1.Text;
-                            string tmp_origin = input.Substring(input.IndexOf("@") + 1);
-                            input = input.Substring(0, input.IndexOf("@"));
+                            int inputclear = input.IndexOf("@");
+                            if (inputclear > 0)
+                                input = input.Substring(0, inputclear);
 
                             // Create lastused
-                            Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).SetValue("lastused", input + " (" + tmp_origin + ") ", Microsoft.Win32.RegistryValueKind.String);
+                            Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).SetValue("lastused", input, Microsoft.Win32.RegistryValueKind.String);
                             // Create entries
-                            Registry.LocalMachine.CreateSubKey("SOFTWARE\\BnS Buddy\\" + input + " (" + tmp_origin + ") ");
-                            Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy\\" + input + " (" + tmp_origin + ") ", true).SetValue("username", Enc(@metroTextBox1.Text), Microsoft.Win32.RegistryValueKind.String);
-                            Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy\\" + input + " (" + tmp_origin + ") ", true).SetValue("password", Enc(@metroTextBox2.Text), Microsoft.Win32.RegistryValueKind.String);
+                            Registry.LocalMachine.CreateSubKey("SOFTWARE\\BnS Buddy\\" + input);
+                            Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy\\" + input, true).SetValue("username", Enc(@metroTextBox1.Text), Microsoft.Win32.RegistryValueKind.String);
+                            Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy\\" + input, true).SetValue("password", Enc(@metroTextBox2.Text), Microsoft.Win32.RegistryValueKind.String);
                             if (File.ReadAllText(@AppPath + "\\Settings.ini").Contains("rememberme = false"))
                             {
                                 string tmp = File.ReadAllText(@AppPath + "\\Settings.ini");
@@ -389,11 +224,7 @@ namespace Revamped_BnS_Buddy
                             if (regKey != null)
                             {
                                 Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).DeleteSubKeyTree(input);
-                                if (Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).GetValue("lastused") != null)
-                                {
-                                    Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).DeleteValue("lastused");
-                                }
-
+                                Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).DeleteValue("lastused");
                                 if (CheckIfAny() == false)
                                 {
                                     if (File.ReadAllText(@AppPath + "\\Settings.ini").Contains("rememberme = true"))
@@ -414,6 +245,9 @@ namespace Revamped_BnS_Buddy
 
                     this.Hide();
                     this.Close();
+                    //ShowDialog();
+                    //Show(ActiveForm); // Shows the program on taskbar
+                    //WindowState = FormWindowState.Normal; // Undoes the minimized state of the form
                 }
                 catch
                 {
@@ -448,8 +282,15 @@ namespace Revamped_BnS_Buddy
         string DataPath = Revamped_BnS_Buddy.Form1.CurrentForm.DataPath;
         private void metroButton2_Click(object sender, EventArgs e)
         {
+            // Close login window
+            //CleanMess();
+            //CleanOtherMess();
+            //KillApp();
             this.Hide();
             this.Close();
+            //ShowDialog();
+            //Show(ActiveForm); // Shows the program on taskbar
+            //WindowState = FormWindowState.Normal; // Undoes the minimized state of the form
         }
 
         public void KillApp()
@@ -503,7 +344,6 @@ namespace Revamped_BnS_Buddy
             try
             {
                 string user = metroComboBox1.SelectedItem.ToString();
-                //user = user.Substring(0, user.IndexOf(" "));
                 RegistryKey regKey = Registry.LocalMachine;
                 regKey = regKey.OpenSubKey(@"SOFTWARE\BnS Buddy\");
                 string tmp_user = string.Empty;
@@ -525,13 +365,8 @@ namespace Revamped_BnS_Buddy
 
         public static class Prompt
         {
-            public static string AppPath { get; internal set; }
-
             public static void Popup(string Message)
             {
-                // Get Color
-                string line = File.ReadLines(@AppPath + "\\Settings.ini").Skip(43).Take(1).First().Replace("buddycolor = ", "");
-                // Continue
                 ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
                 MetroFramework.Forms.MetroForm prompt = new MetroFramework.Forms.MetroForm()
                 {
@@ -554,68 +389,6 @@ namespace Revamped_BnS_Buddy
                 prompt.Controls.Add(confirmation);
                 prompt.Controls.Add(textLabel);
                 prompt.AcceptButton = confirmation;
-                // Set style
-                if (line == "Black")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Black;
-                }
-                else if (line == "Red")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Red;
-                }
-                else if (line == "Purple")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Purple;
-                }
-                else if (line == "Pink")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Pink;
-                }
-                else if (line == "Orange")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Orange;
-                }
-                else if (line == "Magenta")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Magenta;
-                }
-                else if (line == "Lime")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Lime;
-                }
-                else if (line == "Green")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Green;
-                }
-                else if (line == "Default")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Default;
-                }
-                else if (line == "Brown")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Brown;
-                }
-                else if (line == "Blue")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Blue;
-                }
-                else if (line == "Silver")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Silver;
-                }
-                else if (line == "Teal")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Teal;
-                }
-                else if (line == "White")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.White;
-                }
-                else if (line == "Yellow")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Yellow;
-                }
-                // Prompt
                 prompt.ShowDialog();
             }
         }
@@ -636,10 +409,7 @@ namespace Revamped_BnS_Buddy
                 if (regKey != null)
                 {
                     Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).DeleteSubKeyTree(input);
-                    if (Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).GetValue("lastused") != null)
-                    {
-                        Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).DeleteValue("lastused");
-                    }
+                    Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", true).DeleteValue("lastused");
                     metroButton3.Visible = false;
                 }
                 metroComboBox1.Items.Remove(input);
@@ -655,30 +425,7 @@ namespace Revamped_BnS_Buddy
             // Auto Login
             if (File.ReadAllText(@AppPath + "\\Settings.ini").Contains("autologin = true"))
             {
-                // Skip if multiclient is active :3
-                if (Form1.CurrentForm.metroLabel81.Text != "Active" && Form1.CurrentForm.metroLabel82.Text != "Active")
-                {
-                    Perform();
-                }
-            }
-        }
-
-        static void lineChanger(string newText, string fileName, int line_to_edit)
-        {
-            string[] arrLine = File.ReadAllLines(fileName);
-            arrLine[line_to_edit - 1] = newText;
-            File.WriteAllLines(fileName, arrLine);
-        }
-
-        private void metroCheckBox1_Click(object sender, EventArgs e)
-        {
-            if (metroCheckBox1.Checked)
-            {
-                lineChanger("rememberme = true", @AppPath + "\\Settings.ini", 31);
-            }
-            else
-            {
-                lineChanger("rememberme = false", @AppPath + "\\Settings.ini", 31);
+                Perform();
             }
         }
     }
@@ -698,38 +445,8 @@ namespace Security
             fingerPrint = String.Empty;
             if (string.IsNullOrEmpty(fingerPrint))
             {
-                string a1 = null;
-                string a2 = null;
-                string a3 = null;
-                try
-                {
-                    a1 = cpuId();
-                } catch { a1 = ""; }
-                try
-                {
-                    a2 = biosId();
-                } catch { a2 = ""; }
-                try
-                {
-                    a3 = baseId();
-                } catch { a3 = ""; }
-                string test = "";
-                if (a1 != null)
-                {
-                    test += a1;
-                }
-                if (a2 != null)
-                {
-                    test += a2;
-                }
-                if (a3 != null)
-                {
-                    test += a3;
-                }
-                if (test.Contains(" "))
-                {
-                    test += test.Replace(" ", "");
-                }
+                string test = (cpuId() + biosId() + baseId());
+                test = test.Replace(" ", "");
                 fingerPrint = test;
             }
             return fingerPrint;
@@ -776,7 +493,7 @@ namespace Security
                 {
                     try
                     {
-                        if (mo[wmiProperty] != null)
+                        if (mo[wmiProperty] != null) 
                             result = mo[wmiProperty].ToString();
                         break;
                     }

@@ -28,12 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form2));
             this.metroProgressSpinner1 = new MetroFramework.Controls.MetroProgressSpinner();
             this.metroButton1 = new MetroFramework.Controls.MetroButton();
-            this.Themer = new MetroFramework.Components.MetroStyleManager(this.components);
-            ((System.ComponentModel.ISupportInitialize)(this.Themer)).BeginInit();
             this.SuspendLayout();
             // 
             // metroProgressSpinner1
@@ -57,10 +54,6 @@
             this.metroButton1.Theme = MetroFramework.MetroThemeStyle.Dark;
             this.metroButton1.Click += new System.EventHandler(this.metroButton1_Click);
             // 
-            // Themer
-            // 
-            this.Themer.Owner = this;
-            // 
             // Form2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -78,7 +71,6 @@
             this.TextAlign = System.Windows.Forms.VisualStyles.HorizontalAlign.Center;
             this.Theme = MetroFramework.MetroThemeStyle.Dark;
             this.TopMost = true;
-            ((System.ComponentModel.ISupportInitialize)(this.Themer)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -87,6 +79,5 @@
 
         private MetroFramework.Controls.MetroProgressSpinner metroProgressSpinner1;
         private MetroFramework.Controls.MetroButton metroButton1;
-        private MetroFramework.Components.MetroStyleManager Themer;
     }
 }

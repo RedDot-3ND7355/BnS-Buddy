@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Splash1));
             this.metroLabel1 = new MetroFramework.Controls.MetroLabel();
             this.metroLabel2 = new MetroFramework.Controls.MetroLabel();
@@ -42,8 +41,6 @@
             this.metroLabel4 = new MetroFramework.Controls.MetroLabel();
             this.metroCheckBox1 = new MetroFramework.Controls.MetroCheckBox();
             this.metroButton3 = new MetroFramework.Controls.MetroButton();
-            this.Themer = new MetroFramework.Components.MetroStyleManager(this.components);
-            ((System.ComponentModel.ISupportInitialize)(this.Themer)).BeginInit();
             this.SuspendLayout();
             // 
             // metroLabel1
@@ -71,8 +68,9 @@
             // 
             this.metroTextBox1.Location = new System.Drawing.Point(23, 92);
             this.metroTextBox1.Name = "metroTextBox1";
-            this.metroTextBox1.Size = new System.Drawing.Size(311, 23);
+            this.metroTextBox1.Size = new System.Drawing.Size(312, 23);
             this.metroTextBox1.TabIndex = 3;
+            this.metroTextBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.metroTextBox1.Theme = MetroFramework.MetroThemeStyle.Dark;
             this.metroTextBox1.UseStyleColors = true;
             this.metroTextBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.metroTextBox1_KeyDown);
@@ -93,9 +91,9 @@
             // 
             // metroButton1
             // 
-            this.metroButton1.Location = new System.Drawing.Point(259, 169);
+            this.metroButton1.Location = new System.Drawing.Point(179, 169);
             this.metroButton1.Name = "metroButton1";
-            this.metroButton1.Size = new System.Drawing.Size(76, 29);
+            this.metroButton1.Size = new System.Drawing.Size(156, 29);
             this.metroButton1.TabIndex = 8;
             this.metroButton1.Text = "Sign in";
             this.metroButton1.Theme = MetroFramework.MetroThemeStyle.Dark;
@@ -139,7 +137,7 @@
             this.metroComboBox1.ItemHeight = 23;
             this.metroComboBox1.Location = new System.Drawing.Point(23, 169);
             this.metroComboBox1.Name = "metroComboBox1";
-            this.metroComboBox1.Size = new System.Drawing.Size(230, 29);
+            this.metroComboBox1.Size = new System.Drawing.Size(150, 29);
             this.metroComboBox1.TabIndex = 13;
             this.metroComboBox1.Theme = MetroFramework.MetroThemeStyle.Dark;
             this.metroToolTip1.SetToolTip(this.metroComboBox1, "Select other accounts");
@@ -167,22 +165,17 @@
             this.metroCheckBox1.Text = "Remember me";
             this.metroCheckBox1.Theme = MetroFramework.MetroThemeStyle.Dark;
             this.metroCheckBox1.UseVisualStyleBackColor = true;
-            this.metroCheckBox1.Click += new System.EventHandler(this.metroCheckBox1_Click);
             // 
             // metroButton3
             // 
             this.metroButton3.Location = new System.Drawing.Point(259, 93);
             this.metroButton3.Name = "metroButton3";
-            this.metroButton3.Size = new System.Drawing.Size(74, 20);
+            this.metroButton3.Size = new System.Drawing.Size(75, 21);
             this.metroButton3.TabIndex = 14;
             this.metroButton3.Text = "Forget";
             this.metroButton3.Theme = MetroFramework.MetroThemeStyle.Dark;
             this.metroButton3.Visible = false;
             this.metroButton3.Click += new System.EventHandler(this.metroButton3_Click);
-            // 
-            // Themer
-            // 
-            this.Themer.Owner = this;
             // 
             // Splash1
             // 
@@ -212,7 +205,6 @@
             this.TopMost = true;
             this.Shown += new System.EventHandler(this.Splash1_Shown);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Splash1_KeyDown);
-            ((System.ComponentModel.ISupportInitialize)(this.Themer)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -231,6 +223,5 @@
         private MetroFramework.Controls.MetroCheckBox metroCheckBox1;
         private MetroFramework.Controls.MetroComboBox metroComboBox1;
         private MetroFramework.Controls.MetroButton metroButton3;
-        private MetroFramework.Components.MetroStyleManager Themer;
     }
 }

@@ -35,10 +35,7 @@ namespace Revamped_BnS_Buddy
             //EmbeddedAssembly.Load(resource2, "cscompmgd.dll");
 
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
-            if (!AppDomain.CurrentDomain.FriendlyName.Contains("vshost.exe"))
-            {
-                Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-            }
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
