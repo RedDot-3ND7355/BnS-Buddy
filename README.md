@@ -17,7 +17,8 @@ Credits:
 + Miyako - Inspired by his/her BnS-Ark Tool!
 + Endless aka Kogaru - Recoded from scratch and improved!
 + ronny1982 - For bnsdat tool 
-+ LokiReborn - For porting bnsdat to C# and token generation
++ LokiReborn - For porting bnsdat to C# and adding AuthToken
++ Yevvie - For Icons, Splash art and BnS Buddy Forum images
 
 
 Requirements:
@@ -28,6 +29,57 @@ Requirements:
 
 
 Change Log:
+
+Version 5.8.9.8
++ Added: Skip/Remove ads with your secret key that you have found
++ Added: Custom splashes now included in BnS Buddy (Artwork by Yevvie)
++ Added: Image dimensions now shown on splash changer after selection
++ Added: A Small check for TLS 1.2 while fetching version
++ Reworked: The icons
++ Reworked: Reposition of the admin check
++ Reworked: Moved splashes to local like addons
++ Reworked: Changed TW's ip for an 100% accurate ping
++ Fixed Bug: Added an additionnal null check for previous sessions
++ Fixed Bug: Opening an invalid bmp file would error out Splash Editor with out of memory error
++ Fixed Bug: Kill Game button would start new session if cancelled multiclient login popup
++ Fixed Bug: The infinite-click decompile/compile/... is now properly fixed
++ Fixed Bug: Subfolders in addons path would cause a file not found error
++ Fixed Bug: BnS Budy would kill all Clients if failed to login(timeout)
++ Fixed Bug: MXM Conflict check wouldn't discard after appearing once
++ Fixed Bug: Using DAT Editor functions with some KR users would spit errors of path not being good
+
+Version 5.8.9.7
++ Added: New Icons (Artwork by Yevvie)
++ Reworked: Rewritten a few things related to color
++ Fixed Bug: Error trying to delete a folder non-recursively
++ Fixed Bug: Pressing X on login form to forget user no longer worked
++ Fixed Bug: Time out response from login
++ Fixed Bug: Quickly double clicking the decompile on dat editor tab would freeze Buddy
+
+Version 5.8.9.6
++ Added: Ads *Jumps into the world of sponsoring*
++ Added: Automatically extract MetroFramework.dll when missing
++ Removed: Popup for missing MetroFramework.dll file
++ Reworked: Splash changer now properly checking if splash is modded or not AND changed to where BnS Buddy is located
++ Fixed Bug: Pressing Refreh in splash changer and switch tab back and forth will error out the viewer
+
+Version 5.8.9.5
++ Added: Popup for missing MetroFramework.dll file
++ Added: Auto-resize for email in login form
++ Added: Single-Instance only check
++ Added: Disabled auto-login by default if MultiClient is turned on
++ Added: 5 Seconds delay between clicks for refresh of user count to prevent spam and hang
++ Reworked: Changed the forget button to an X
++ Reworked: Fetching on AppStart would hang form for a couple of seconds
++ Fixed Bug: Changing remember me on login form would not sync with settings tab
++ Fixed Bug: Changed ip for TW server due to inaccurate ping
++ Fixed Bug: Fetching while having a slow connection to end-point for user online count would freeze the form
++ Fixed Bug: Unsecurely Fetched the user online count
++ Fixed Bug: Having Selected Japanese server would switch back to NA/EU if it was installed
++ Fixed Bug: Tooltip for Custom Client Name would be wrong
++ Fixed Bug: When BnS Buddy would be offline, it would try to fetch the count and have an overlapping html code
++ Fixed Bug: Wanting to login would wipe constantly the registry of the credentials
++ Fixed Bug: After wiping credential would cause crash
 
 Version 5.8.9.4
 + Added: Timer to say if connection is being slow during login
