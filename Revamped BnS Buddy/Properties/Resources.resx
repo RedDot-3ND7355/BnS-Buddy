@@ -118,13 +118,22 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="BnS_Buddy_Updater" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\BnS Buddy Updater.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="winmm_64_" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\winmm(64).dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="winmm_32_" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\winmm(32).dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="winmm_64_" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\winmm(64).dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="BnS_Buddy_Updater" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\BnS Buddy Updater.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="MetroFramework" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\MetroFramework.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="buddysplash_big" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\buddysplash-big;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="buddysplash_small" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\buddysplash-small;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

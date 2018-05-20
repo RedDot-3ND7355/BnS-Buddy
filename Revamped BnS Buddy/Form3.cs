@@ -83,6 +83,8 @@ namespace Revamped_BnS_Buddy
             {
                 Themer.Style = MetroFramework.MetroColorStyle.Yellow;
             }
+            // Set global
+            Prompt.ColorSet = Themer.Style;
         }
 
         private void metroButton2_Click(object sender, EventArgs e)
@@ -95,10 +97,10 @@ namespace Revamped_BnS_Buddy
         {
             public static string AppPath { get; internal set; }
 
+            public static MetroFramework.MetroColorStyle ColorSet { get; internal set; }
+
             public static void Popup(string Message)
             {
-                // Get Color
-                string line = File.ReadLines(@AppPath + "\\Settings.ini").Skip(43).Take(1).First().Replace("buddycolor = ", "");
                 // Continue
                 ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
                 MetroFramework.Forms.MetroForm prompt = new MetroFramework.Forms.MetroForm()
@@ -123,66 +125,7 @@ namespace Revamped_BnS_Buddy
                 prompt.Controls.Add(textLabel);
                 prompt.AcceptButton = confirmation;
                 // Set style
-                if (line == "Black")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Black;
-                }
-                else if (line == "Red")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Red;
-                }
-                else if (line == "Purple")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Purple;
-                }
-                else if (line == "Pink")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Pink;
-                }
-                else if (line == "Orange")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Orange;
-                }
-                else if (line == "Magenta")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Magenta;
-                }
-                else if (line == "Lime")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Lime;
-                }
-                else if (line == "Green")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Green;
-                }
-                else if (line == "Default")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Default;
-                }
-                else if (line == "Brown")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Brown;
-                }
-                else if (line == "Blue")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Blue;
-                }
-                else if (line == "Silver")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Silver;
-                }
-                else if (line == "Teal")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Teal;
-                }
-                else if (line == "White")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.White;
-                }
-                else if (line == "Yellow")
-                {
-                    prompt.Style = MetroFramework.MetroColorStyle.Yellow;
-                }
+                prompt.Style = ColorSet;
                 // Prompt
                 prompt.ShowDialog();
             }

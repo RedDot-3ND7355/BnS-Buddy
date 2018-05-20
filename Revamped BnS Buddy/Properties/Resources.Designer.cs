@@ -73,6 +73,36 @@ namespace Revamped_BnS_Buddy.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] buddysplash_big {
+            get {
+                object obj = ResourceManager.GetObject("buddysplash_big", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] buddysplash_small {
+            get {
+                object obj = ResourceManager.GetObject("buddysplash_small", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] MetroFramework {
+            get {
+                object obj = ResourceManager.GetObject("MetroFramework", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] winmm_32_ {
             get {
                 object obj = ResourceManager.GetObject("winmm_32_", resourceCulture);

@@ -73,8 +73,10 @@
             this.metroTextBox1.Name = "metroTextBox1";
             this.metroTextBox1.Size = new System.Drawing.Size(311, 23);
             this.metroTextBox1.TabIndex = 3;
+            this.metroTextBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.metroTextBox1.Theme = MetroFramework.MetroThemeStyle.Dark;
             this.metroTextBox1.UseStyleColors = true;
+            this.metroTextBox1.TextChanged += new System.EventHandler(this.metroTextBox1_TextChanged);
             this.metroTextBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.metroTextBox1_KeyDown);
             // 
             // metroTextBox2
@@ -171,11 +173,11 @@
             // 
             // metroButton3
             // 
-            this.metroButton3.Location = new System.Drawing.Point(259, 93);
+            this.metroButton3.Location = new System.Drawing.Point(314, 93);
             this.metroButton3.Name = "metroButton3";
-            this.metroButton3.Size = new System.Drawing.Size(74, 20);
+            this.metroButton3.Size = new System.Drawing.Size(19, 20);
             this.metroButton3.TabIndex = 14;
-            this.metroButton3.Text = "Forget";
+            this.metroButton3.Text = "X";
             this.metroButton3.Theme = MetroFramework.MetroThemeStyle.Dark;
             this.metroButton3.Visible = false;
             this.metroButton3.Click += new System.EventHandler(this.metroButton3_Click);

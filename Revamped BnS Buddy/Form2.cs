@@ -20,19 +20,6 @@ namespace Revamped_BnS_Buddy
             // Get Color
             GetColor();
             // Continue
-            if (File.Exists(AppPath + "\\Settings.ini"))
-            {
-                // Check Quick Settings.ini
-                if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("admincheck = false"))
-                {
-                    AdminCheck = false;
-                }
-                // Check if admin
-                if (AdminCheck == true)
-                {
-                    CheckIsAdministrator();
-                }
-            }
         }
 
         private void GetColor()
@@ -97,23 +84,6 @@ namespace Revamped_BnS_Buddy
             else if (line == "Yellow")
             {
                 Themer.Style = MetroFramework.MetroColorStyle.Yellow;
-            }
-        }
-
-        public static bool IsAdministrator()
-        {
-            // Direct admin check
-            return (new WindowsPrincipal(WindowsIdentity.GetCurrent()))
-                    .IsInRole(WindowsBuiltInRole.Administrator);
-        }
-
-        public void CheckIsAdministrator()
-        {
-            // Check admin shortcut
-            if (IsAdministrator() == false)
-            {
-                MessageBox.Show("Please run as Admin", "Error: Not admin", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
-                KillApp();
             }
         }
 

@@ -49,6 +49,7 @@
             // 
             // metroButton1
             // 
+            this.metroButton1.Cursor = System.Windows.Forms.Cursors.Default;
             this.metroButton1.Location = new System.Drawing.Point(85, 147);
             this.metroButton1.Name = "metroButton1";
             this.metroButton1.Size = new System.Drawing.Size(75, 23);
@@ -69,6 +70,7 @@
             this.ControlBox = false;
             this.Controls.Add(this.metroButton1);
             this.Controls.Add(this.metroProgressSpinner1);
+            this.Cursor = System.Windows.Forms.Cursors.AppStarting;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;

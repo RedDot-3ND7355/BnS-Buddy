@@ -105,6 +105,7 @@
             this.metroLabel3.Text = "Tips";
             this.metroLabel3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.metroLabel3.Theme = MetroFramework.MetroThemeStyle.Dark;
+            this.metroLabel3.UseStyleColors = true;
             this.metroLabel3.Click += new System.EventHandler(this.metroLabel3_Click);
             // 
             // metroTextBox7
@@ -114,6 +115,7 @@
             this.metroTextBox7.Size = new System.Drawing.Size(216, 23);
             this.metroTextBox7.TabIndex = 12;
             this.metroTextBox7.Theme = MetroFramework.MetroThemeStyle.Dark;
+            this.metroTextBox7.UseStyleColors = true;
             // 
             // metroLabel55
             // 
@@ -125,6 +127,7 @@
             this.metroLabel55.TabIndex = 13;
             this.metroLabel55.Text = "Patch name:";
             this.metroLabel55.Theme = MetroFramework.MetroThemeStyle.Dark;
+            this.metroLabel55.UseStyleColors = true;
             // 
             // metroButton1
             // 
