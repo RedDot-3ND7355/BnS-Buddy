@@ -13,3 +13,6 @@
 *.txt
 # Ignore Settings
 Settings.ini
+# Ignore bin
+bin/
+Resources/BigInteger\.dll

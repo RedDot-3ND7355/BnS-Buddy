@@ -1,0 +1,136 @@
+{
+  "version": 3,
+  "targets": {
+    ".NETFramework,Version=v4.5": {
+      "MetroModernUI/1.4.0": {
+        "type": "package",
+        "compile": {
+          "lib/net/MetroFramework.Design.dll": {},
+          "lib/net/MetroFramework.Fonts.dll": {},
+          "lib/net/MetroFramework.dll": {}
+        },
+        "runtime": {
+          "lib/net/MetroFramework.Design.dll": {},
+          "lib/net/MetroFramework.Fonts.dll": {},
+          "lib/net/MetroFramework.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.5/win": {
+      "MetroModernUI/1.4.0": {
+        "type": "package",
+        "compile": {
+          "lib/net/MetroFramework.Design.dll": {},
+          "lib/net/MetroFramework.Fonts.dll": {},
+          "lib/net/MetroFramework.dll": {}
+        },
+        "runtime": {
+          "lib/net/MetroFramework.Design.dll": {},
+          "lib/net/MetroFramework.Fonts.dll": {},
+          "lib/net/MetroFramework.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.5/win-x64": {
+      "MetroModernUI/1.4.0": {
+        "type": "package",
+        "compile": {
+          "lib/net/MetroFramework.Design.dll": {},
+          "lib/net/MetroFramework.Fonts.dll": {},
+          "lib/net/MetroFramework.dll": {}
+        },
+        "runtime": {
+          "lib/net/MetroFramework.Design.dll": {},
+          "lib/net/MetroFramework.Fonts.dll": {},
+          "lib/net/MetroFramework.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.5/win-x86": {
+      "MetroModernUI/1.4.0": {
+        "type": "package",
+        "compile": {
+          "lib/net/MetroFramework.Design.dll": {},
+          "lib/net/MetroFramework.Fonts.dll": {},
+          "lib/net/MetroFramework.dll": {}
+        },
+        "runtime": {
+          "lib/net/MetroFramework.Design.dll": {},
+          "lib/net/MetroFramework.Fonts.dll": {},
+          "lib/net/MetroFramework.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "MetroModernUI/1.4.0": {
+      "sha512": "p2F3w8bF1tb0tpkDceEVO65UYMKnJxdQyNxVyl/OjrFZHighicLYZDppKkiqmvBZ10XUi2mqHiIJUzXBP3GElQ==",
+      "type": "package",
+      "path": "metromodernui/1.4.0",
+      "files": [
+        "lib/net/MetroFramework.Design.dll",
+        "lib/net/MetroFramework.Fonts.dll",
+        "lib/net/MetroFramework.dll",
+        "metromodernui.1.4.0.nupkg.sha512",
+        "metromodernui.nuspec"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    ".NETFramework,Version=v4.5": [
+      "MetroModernUI >= 1.4.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\Endless\\.nuget\\packages\\": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "C:\\Users\\Endless\\Documents\\Visual Studio 2017\\Projects\\5.9 Source\\BnS-Buddy.csproj",
+      "projectName": "BnS-Buddy",
+      "projectPath": "C:\\Users\\Endless\\Documents\\Visual Studio 2017\\Projects\\5.9 Source\\BnS-Buddy.csproj",
+      "packagesPath": "C:\\Users\\Endless\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Endless\\Documents\\Visual Studio 2017\\Projects\\5.9 Source\\obj\\",
+      "projectStyle": "PackageReference",
+      "skipContentFileWrite": true,
+      "configFilePaths": [
+        "C:\\Users\\Endless\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net45"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net45": {
+          "projectReferences": {}
+        }
+      }
+    },
+    "frameworks": {
+      "net45": {
+        "dependencies": {
+          "MetroModernUI": {
+            "target": "Package",
+            "version": "[1.4.0, )"
+          }
+        }
+      }
+    },
+    "runtimes": {
+      "win": {
+        "#import": []
+      },
+      "win-x64": {
+        "#import": []
+      },
+      "win-x86": {
+        "#import": []
+      }
+    }
+  }
+}

@@ -30,6 +30,58 @@ Requirements:
 
 Change Log:
 
+Version 5.9.0.4
++ Added: Warden to Animation toggles
++ Added: Notifications for FTH
++ Added: Validations for xml search / replacement in addons (ex. If you forget a > it will reject the change so it doesn’t break the game)
++ Updated: NCoin logo to the NCoin symbol for Buy NCoin
++ Updated: Minimum ping interval to 1s and max to 5s
++ Reworked: Functionality of .dat (de)compressing to support extraction/insertion of specific file(s) without the need to open the entire archive
++ Reworked: Server communication for login as well as support for IP Verification
++ Removed: Annoying popups when Clearing FTH Entries
++ Fixed Bug: Login issue for NA/EU (supports both known values incase NcSoft reverts the change)
++ Fixed Bug: Few elements to show proper color on color change in Extras
++ Fixed Bug: Auto-scrolling for text log on the Launcher Page
+
+Version 5.9.0.3
++ Fixed Bug: FTH Get count would cause a crash
+
+Updater 2.5.1.6
++ Fixed Bug: A bad color check in settings.ini would prevent updater from starting/loading.
+
+Version 5.9.0.2
++ Fixed Bug: BnS Buddy is prevented from starting
+
+Version 5.9.0.1
++ Added: FTH Toggle with clear entries button
++ Added: Select all addons buttons
++ Added: Prevention of going to 64bit client if the system is 32bit archetype
++ Updated: Donor list
++ Removed: Black Color Style to the theme
++ Fixed Bug: TabStop for login
++ Fixed Bug: Changing Theme color would not change tile colors for menu
++ Fixed Bug: White Style has broken Menu color
++ Fixed Bug: When changing style the Merch button wouldn't change style until tab changed
++ Fixed Bug: Mod Manager buttons not available cancelling a game start attempt or sign in
++ Fixed Bug: When class animations are toggle on and off, buttons weren't available
+
+Updater 2.5.1.5
++ Added: Run as admin by default
++ Fixed Bug: Could not run without admin rights
+
+Version 5.9.0.0
++ Added: Buy Ncoin Merch link
++ Added: Sliding Menu & Slider Effect Toggle(settings page 2)
++ Added: Run as admin by default
++ Removed: Tabs
++ Fixed Bug: Flickering issue when loading buddy
++ Fixed Bug: Bad tooltip shown for "kill game"
+
+Version 5.8.9.9
++ Added: Toggles for class animations in extra tab
++ Added: Update Dialog for manual updates with changelog
++ Fixed Bug: Prevent preview(button) if splash is invalid
+
 Version 5.8.9.8
 + Added: Skip/Remove ads with your secret key that you have found
 + Added: Custom splashes now included in BnS Buddy (Artwork by Yevvie)
