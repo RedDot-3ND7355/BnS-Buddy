@@ -30,6 +30,23 @@ Requirements:
 
 Change Log:
 
+Version 5.9.0.5
++ Added: New ad in Ads page (rotated)
++ Added: Toggle for Battleground crash fix
++ Updated: Ping refresh is now 5s by default
++ Updated: Added a warning when switching animations toggle when game is running
++ Reworked: Dat Editor entirely reworked
++ Fixed Bug: Visual glitch of arrow in Dat Editor
++ Fixed Bug: MultipleInstallations would throw null on some systems
++ Fixed Bug: When addons did not contain [bit] log would throw wrong message
++ Fixed Bug: Could not paste in Verification Code box
++ Fixed Bug: When Password is wrong on login, play button would be locked
++ Fixed Bug: Missing Icon for Login Form
++ Fixed Bug: FileCheck Form would cause a crash
++ Fixed Bug: Wasn't able to submit login when pressing enter
++ Fixed Bug: Changed the ip for kr server ping (might not work for every countries)
++ Disabled: Memory cleaner while game is active until we find the cause of the memory leak
+
 Version 5.9.0.4
 + Added: Warden to Animation toggles
 + Added: Notifications for FTH
