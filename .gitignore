@@ -15,4 +15,5 @@
 Settings.ini
 # Ignore bin
 bin/
+obj/
 Resources/BigInteger\.dll

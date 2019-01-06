@@ -306,6 +306,16 @@ namespace Revamped_BnS_Buddy
                 Themer.Style = MetroColorStyle.Yellow;
             }
             base.Style = Themer.Style;
+
+            metroComboBox1.Theme = MetroThemeStyle.Dark;
+            metroComboBox1.Style = Themer.Style;
+
+            if(Themer.Style == MetroColorStyle.White)
+            {
+                metroComboBox1.Theme = MetroThemeStyle.Light;
+                metroComboBox1.Style = MetroColorStyle.Silver;
+            }
+
             Refresh();
             Prompt.ColorSet = Themer.Style;
         }

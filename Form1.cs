@@ -4,6 +4,7 @@ using Ionic.Zlib;
 using MetroFramework;
 using MetroFramework.Components;
 using MetroFramework.Controls;
+using MetroFramework.Drawing;
 using MetroFramework.Forms;
 using Microsoft.Win32;
 using Mono.Math;
@@ -164,7 +165,8 @@ namespace Revamped_BnS_Buddy
                     prompt.Close();
                 };
                 metroButton.TabStop = false;
-                metroComboBox.Text = "Choose Default Installation";
+                metroComboBox.Items.Add("Choose Default Installation");
+                //metroComboBox.Text = "Choose Default Installation";
                 if (installs.ContainsKey("NA/EU") && installs["NA/EU"].ToString().Length > 1)
                 {
                     metroComboBox.Items.Add("NA/EU");
@@ -186,6 +188,7 @@ namespace Revamped_BnS_Buddy
                     metroComboBox.Items.Add("Korean Test");
                 }
                 metroComboBox.TabStop = false;
+                metroComboBox.SelectedIndex = 0;
                 prompt.Controls.Add(metroComboBox);
                 prompt.Controls.Add(metroButton);
                 prompt.Controls.Add(value);
@@ -571,7 +574,7 @@ namespace Revamped_BnS_Buddy
 
         public string CustomClientPath = "";
 
-        public string DefaultValues = "unattended = false" + Environment.NewLine + "notexturestreaming = false" + Environment.NewLine + "savelogs = false" + Environment.NewLine + "showlogs = true" + Environment.NewLine + "variables = false" + Environment.NewLine + "tooltips = true" + Environment.NewLine + "customgame = false" + Environment.NewLine + "customclient = false" + Environment.NewLine + "admincheck = true" + Environment.NewLine + "ncsoftlogin = false" + Environment.NewLine + "showdonate = true" + Environment.NewLine + "minimize = true" + Environment.NewLine + "launcherlogs = false" + Environment.NewLine + "modmanlogs = false" + Environment.NewLine + "customclientpath = " + Environment.NewLine + "customgamepath = " + Environment.NewLine + "updatechecker = true" + Environment.NewLine + "pingchecker = true" + Environment.NewLine + "gamekiller = true" + Environment.NewLine + "useallcores = false" + Environment.NewLine + "arguments = " + Environment.NewLine + "prtime = 1000" + Environment.NewLine + "autoupdate = true" + Environment.NewLine + "firsttime = true" + Environment.NewLine + "default = " + Environment.NewLine + "defaultset = false" + Environment.NewLine + "defaultclient = " + Environment.NewLine + "priority = Normal" + Environment.NewLine + "modfolder = " + Environment.NewLine + "modfolderset = false" + Environment.NewLine + "rememberme = false" + Environment.NewLine + "automemorycleanup = false" + Environment.NewLine + "langset = false" + Environment.NewLine + "langpath = " + Environment.NewLine + "boostprocess = true" + Environment.NewLine + "cleanint = OFF" + Environment.NewLine + "uniquepass = " + Environment.NewLine + "gcdshow = false" + Environment.NewLine + "igpshow = false" + Environment.NewLine + "autologin = false" + Environment.NewLine + "usercountcheck = true" + Environment.NewLine + "showcount = true" + Environment.NewLine + "customclientname = " + Environment.NewLine + "buddycolor = Blue" + Environment.NewLine + "lastserver = " + Environment.NewLine + "menuslidereffect = true";
+        public string DefaultValues = "unattended = false" + Environment.NewLine + "notexturestreaming = false" + Environment.NewLine + "savelogs = false" + Environment.NewLine + "showlogs = true" + Environment.NewLine + "variables = false" + Environment.NewLine + "tooltips = true" + Environment.NewLine + "customgame = false" + Environment.NewLine + "customclient = false" + Environment.NewLine + "admincheck = true" + Environment.NewLine + "ncsoftlogin = false" + Environment.NewLine + "showdonate = true" + Environment.NewLine + "minimize = true" + Environment.NewLine + "launcherlogs = false" + Environment.NewLine + "modmanlogs = false" + Environment.NewLine + "customclientpath = " + Environment.NewLine + "customgamepath = " + Environment.NewLine + "updatechecker = true" + Environment.NewLine + "pingchecker = true" + Environment.NewLine + "gamekiller = true" + Environment.NewLine + "useallcores = false" + Environment.NewLine + "arguments = " + Environment.NewLine + "prtime = 5000" + Environment.NewLine + "autoupdate = true" + Environment.NewLine + "firsttime = true" + Environment.NewLine + "default = " + Environment.NewLine + "defaultset = false" + Environment.NewLine + "defaultclient = " + Environment.NewLine + "priority = Normal" + Environment.NewLine + "modfolder = " + Environment.NewLine + "modfolderset = false" + Environment.NewLine + "rememberme = false" + Environment.NewLine + "automemorycleanup = false" + Environment.NewLine + "langset = false" + Environment.NewLine + "langpath = " + Environment.NewLine + "boostprocess = true" + Environment.NewLine + "cleanint = OFF" + Environment.NewLine + "uniquepass = " + Environment.NewLine + "gcdshow = false" + Environment.NewLine + "igpshow = false" + Environment.NewLine + "autologin = false" + Environment.NewLine + "usercountcheck = true" + Environment.NewLine + "showcount = true" + Environment.NewLine + "customclientname = " + Environment.NewLine + "buddycolor = Blue" + Environment.NewLine + "lastserver = " + Environment.NewLine + "menuslidereffect = true";
 
         public string ActiveDataFile = "";
 
@@ -1043,9 +1046,10 @@ namespace Revamped_BnS_Buddy
             metroTabControl1.SelectTab(0);
         }
 
+        public string urltobrowseto = "https://www.exitlag.com/refer/443658";
         private void pictureBox2_Click(object sender, EventArgs e)
         {
-            Process.Start("https://www.exitlag.com/refer/443658");
+            Process.Start(urltobrowseto);
         }
 
         private void Unhandler()
@@ -1292,15 +1296,18 @@ namespace Revamped_BnS_Buddy
                 if (localMachine != null)
                 {
                     string text = (string)localMachine.GetValue("BaseDir");
-                    if (!workedREG)
+                    if (text.Length > 0)
                     {
-                        RegPath = (string)localMachine.GetValue("BaseDir");
+                        if (!workedREG)
+                        {
+                            RegPath = (string)localMachine.GetValue("BaseDir");
+                        }
+                        AddTextLog(text);
+                        AddTextLog("Reg Key Valid!");
+                        workedREG = true;
+                        Reg64 = true;
+                        Installs.Add("NA/EU", text);
                     }
-                    AddTextLog(text);
-                    AddTextLog("Reg Key Valid!");
-                    workedREG = true;
-                    Reg64 = true;
-                    Installs.Add("NA/EU", text);
                 }
             }
             catch
@@ -1314,14 +1321,17 @@ namespace Revamped_BnS_Buddy
                 if (localMachine2 != null)
                 {
                     string text2 = (string)localMachine2.GetValue("BaseDir");
-                    if (!workedREG)
+                    if (text2.Length > 0)
                     {
-                        RegPath = (string)localMachine2.GetValue("BaseDir");
+                        if (!workedREG)
+                        {
+                            RegPath = (string)localMachine2.GetValue("BaseDir");
+                        }
+                        AddTextLog(text2);
+                        AddTextLog("Reg Key Valid!");
+                        workedREG = true;
+                        Installs.Add("NA/EU", text2);
                     }
-                    AddTextLog(text2);
-                    AddTextLog("Reg Key Valid!");
-                    workedREG = true;
-                    Installs.Add("NA/EU", text2);
                 }
             }
             catch
@@ -1335,14 +1345,17 @@ namespace Revamped_BnS_Buddy
                 if (localMachine3 != null)
                 {
                     string text3 = (string)localMachine3.GetValue("BaseDir");
-                    if (!workedREG)
+                    if (text3.Length > 0)
                     {
-                        RegPath = (string)localMachine3.GetValue("BaseDir");
+                        if (!workedREG)
+                        {
+                            RegPath = (string)localMachine3.GetValue("BaseDir");
+                        }
+                        AddTextLog(text3);
+                        AddTextLog("Reg Key Valid!");
+                        workedREG = true;
+                        Installs.Add("Taiwan", text3);
                     }
-                    AddTextLog(text3);
-                    AddTextLog("Reg Key Valid!");
-                    workedREG = true;
-                    Installs.Add("Taiwan", text3);
                 }
             }
             catch
@@ -1356,15 +1369,18 @@ namespace Revamped_BnS_Buddy
                 if (localMachine4 != null)
                 {
                     string text4 = (string)localMachine4.GetValue("BaseDir");
-                    if (!workedREG)
+                    if (text4.Length > 0)
                     {
-                        RegPath = (string)localMachine4.GetValue("BaseDir");
+                        if (!workedREG)
+                        {
+                            RegPath = (string)localMachine4.GetValue("BaseDir");
+                        }
+                        AddTextLog(text4);
+                        AddTextLog("Reg Key Valid!");
+                        workedREG = true;
+                        Reg64 = true;
+                        Installs.Add("Taiwan", text4);
                     }
-                    AddTextLog(text4);
-                    AddTextLog("Reg Key Valid!");
-                    workedREG = true;
-                    Reg64 = true;
-                    Installs.Add("Taiwan", text4);
                 }
             }
             catch
@@ -1378,14 +1394,17 @@ namespace Revamped_BnS_Buddy
                 if (localMachine5 != null)
                 {
                     string text5 = (string)localMachine5.GetValue("BaseDir");
-                    if (!workedREG)
+                    if (text5.Length > 0)
                     {
-                        RegPath = (string)localMachine5.GetValue("BaseDir");
+                        if (!workedREG)
+                        {
+                            RegPath = (string)localMachine5.GetValue("BaseDir");
+                        }
+                        AddTextLog(text5);
+                        AddTextLog("Reg Key Valid!");
+                        workedREG = true;
+                        Installs.Add("Japanese", text5);
                     }
-                    AddTextLog(text5);
-                    AddTextLog("Reg Key Valid!");
-                    workedREG = true;
-                    Installs.Add("Japanese", text5);
                 }
             }
             catch
@@ -1399,15 +1418,18 @@ namespace Revamped_BnS_Buddy
                 if (localMachine6 != null)
                 {
                     string text6 = (string)localMachine6.GetValue("BaseDir");
-                    if (!workedREG)
+                    if (text6.Length > 0)
                     {
-                        RegPath = (string)localMachine6.GetValue("BaseDir");
+                        if (!workedREG)
+                        {
+                            RegPath = (string)localMachine6.GetValue("BaseDir");
+                        }
+                        AddTextLog(text6);
+                        AddTextLog("Reg Key Valid!");
+                        workedREG = true;
+                        Reg64 = true;
+                        Installs.Add("Japanese", text6);
                     }
-                    AddTextLog(text6);
-                    AddTextLog("Reg Key Valid!");
-                    workedREG = true;
-                    Reg64 = true;
-                    Installs.Add("Japanese", text6);
                 }
             }
             catch
@@ -1421,14 +1443,17 @@ namespace Revamped_BnS_Buddy
                 if (localMachine7 != null)
                 {
                     string text7 = (string)localMachine7.GetValue("BaseDir");
-                    if (!workedREG)
+                    if (text7.Length > 0)
                     {
-                        RegPath = (string)localMachine7.GetValue("BaseDir");
+                        if (!workedREG)
+                        {
+                            RegPath = (string)localMachine7.GetValue("BaseDir");
+                        }
+                        AddTextLog(text7);
+                        AddTextLog("Reg Key Valid!");
+                        workedREG = true;
+                        Installs.Add("Korean", text7);
                     }
-                    AddTextLog(text7);
-                    AddTextLog("Reg Key Valid!");
-                    workedREG = true;
-                    Installs.Add("Korean", text7);
                 }
             }
             catch
@@ -1442,14 +1467,17 @@ namespace Revamped_BnS_Buddy
                 if (localMachine8 != null)
                 {
                     string text8 = (string)localMachine8.GetValue("BaseDir");
-                    if (!workedREG)
+                    if (text8.Length > 0)
                     {
-                        RegPath = (string)localMachine8.GetValue("BaseDir");
+                        if (!workedREG)
+                        {
+                            RegPath = (string)localMachine8.GetValue("BaseDir");
+                        }
+                        AddTextLog(text8);
+                        AddTextLog("Reg Key Valid!");
+                        workedREG = true;
+                        Installs.Add("Korean Test", text8);
                     }
-                    AddTextLog(text8);
-                    AddTextLog("Reg Key Valid!");
-                    workedREG = true;
-                    Installs.Add("Korean Test", text8);
                 }
             }
             catch
@@ -1463,15 +1491,18 @@ namespace Revamped_BnS_Buddy
                 if (localMachine9 != null)
                 {
                     string text9 = (string)localMachine9.GetValue("BaseDir");
-                    if (!workedREG)
+                    if (text9.Length > 0)
                     {
-                        RegPath = (string)localMachine9.GetValue("BaseDir");
+                        if (!workedREG)
+                        {
+                            RegPath = (string)localMachine9.GetValue("BaseDir");
+                        }
+                        AddTextLog(text9);
+                        AddTextLog("Reg Key Valid!");
+                        workedREG = true;
+                        Reg64 = true;
+                        Installs.Add("Korean", text9);
                     }
-                    AddTextLog(text9);
-                    AddTextLog("Reg Key Valid!");
-                    workedREG = true;
-                    Reg64 = true;
-                    Installs.Add("Korean", text9);
                 }
             }
             catch
@@ -1485,15 +1516,18 @@ namespace Revamped_BnS_Buddy
                 if (localMachine10 != null)
                 {
                     string text10 = (string)localMachine10.GetValue("BaseDir");
-                    if (!workedREG)
+                    if (text10.Length > 0)
                     {
-                        RegPath = (string)localMachine10.GetValue("BaseDir");
+                        if (!workedREG)
+                        {
+                            RegPath = (string)localMachine10.GetValue("BaseDir");
+                        }
+                        AddTextLog(text10);
+                        AddTextLog("Reg Key Valid!");
+                        workedREG = true;
+                        Reg64 = true;
+                        Installs.Add("Korean Test", text10);
                     }
-                    AddTextLog(text10);
-                    AddTextLog("Reg Key Valid!");
-                    workedREG = true;
-                    Reg64 = true;
-                    Installs.Add("Korean Test", text10);
                 }
             }
             catch
@@ -1560,6 +1594,9 @@ namespace Revamped_BnS_Buddy
 
         private void metroComboBox5_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (metroComboBox5.SelectedIndex == -1)
+                return;
+
             if (metroComboBox5.SelectedItem.ToString() == "English")
             {
                 metroComboBox2.SelectedIndex = metroComboBox2.FindStringExact("English");
@@ -1878,6 +1915,7 @@ namespace Revamped_BnS_Buddy
         {
             Control.CheckForIllegalCrossThreadCalls = false;
             base.Enabled = true;
+            CheckBGFiX();
             UpdateCheck();
             MultiCheck();
             if (!is64bit)
@@ -1998,6 +2036,8 @@ namespace Revamped_BnS_Buddy
             {
                 metroComboBox9.Items.Remove(metroComboBox9.Items[0]);
             }
+            toolStrip1.Renderer = new MyRenderer();
+            toolStrip2.Renderer = new MyRenderer();
             AppStarted = true;
             if (readyclient)
             {
@@ -2021,6 +2061,15 @@ namespace Revamped_BnS_Buddy
             Show();
             base.TopMost = true;
             base.TopMost = false;
+        }
+
+        private void CheckBGFiX()
+        {
+            string pathtobgfix = modsFolderPath + "\\BGFix";
+            if (File.Exists(pathtobgfix + "\\00025242.upk") && File.Exists(pathtobgfix + "\\00025243.upk") && File.Exists(pathtobgfix + "\\00025244.upk"))
+            {
+                metroToggle41.Checked = true;
+            }
         }
 
         private void MultiCheck()
@@ -2192,6 +2241,8 @@ namespace Revamped_BnS_Buddy
             metroTile11.UseCustomBackColor = false;
             metroTile12.UseCustomBackColor = false;
             metroTile13.UseCustomBackColor = false;
+
+
             if (Themer.Style == MetroColorStyle.White)
             {
                 metroTile3.UseCustomForeColor = true;
@@ -2513,7 +2564,7 @@ namespace Revamped_BnS_Buddy
                     metroLabel47.Refresh();
                     if (Convert.ToInt32(text5) < 1000)
                     {
-                        text5 = "1000";
+                        text5 = "5000";
                     }
                     metroTrackBar1.Value = Convert.ToInt32(text5);
                     metroTrackBar1.Refresh();
@@ -2700,6 +2751,43 @@ namespace Revamped_BnS_Buddy
                     metroToolTip1.Style = Themer.Style;
                     metroToolTip1.Theme = MetroThemeStyle.Dark;
                     base.Style = Themer.Style;
+
+                    metroComboBox1.Style = Themer.Style;
+                    metroComboBox2.Style = Themer.Style;
+                    metroComboBox3.Style = Themer.Style;
+                    metroComboBox4.Style = Themer.Style;
+                    metroComboBox5.Style = Themer.Style;
+                    metroComboBox6.Style = Themer.Style;
+                    metroComboBox7.Style = Themer.Style;
+                    metroComboBox8.Style = Themer.Style;
+                    metroComboBox9.Style = Themer.Style;
+                    metroComboBox11.Style = Themer.Style;
+
+                    if (Themer.Style == MetroColorStyle.White)
+                    {
+                        metroComboBox1.Style = MetroColorStyle.Silver;
+                        metroComboBox2.Style = MetroColorStyle.Silver;
+                        metroComboBox3.Style = MetroColorStyle.Silver;
+                        metroComboBox4.Style = MetroColorStyle.Silver;
+                        metroComboBox5.Style = MetroColorStyle.Silver;
+                        metroComboBox6.Style = MetroColorStyle.Silver;
+                        metroComboBox7.Style = MetroColorStyle.Silver;
+                        metroComboBox8.Style = MetroColorStyle.Silver;
+                        metroComboBox9.Style = MetroColorStyle.Silver;
+                        metroComboBox11.Style = MetroColorStyle.Silver;
+
+                        metroComboBox1.Theme = MetroThemeStyle.Light;
+                        metroComboBox2.Theme = MetroThemeStyle.Light;
+                        metroComboBox3.Theme = MetroThemeStyle.Light;
+                        metroComboBox4.Theme = MetroThemeStyle.Light;
+                        metroComboBox5.Theme = MetroThemeStyle.Light;
+                        metroComboBox6.Theme = MetroThemeStyle.Light;
+                        metroComboBox7.Theme = MetroThemeStyle.Light;
+                        metroComboBox8.Theme = MetroThemeStyle.Light;
+                        metroComboBox9.Theme = MetroThemeStyle.Light;
+                        metroComboBox11.Theme = MetroThemeStyle.Light;
+                    }
+
                     Refresh();
                     Prompt.ColorSet = Themer.Style;
                 }
@@ -3020,7 +3108,7 @@ namespace Revamped_BnS_Buddy
             }
             else if (metroComboBox1.SelectedItem.ToString() == "Korean")
             {
-                IP = "112.175.209.114";
+                IP = "222.122.231.3";
                 regionID = "0";
                 AddTextLog("Changed RegionID to Korean!");
                 regionID = "0";
@@ -4413,6 +4501,44 @@ namespace Revamped_BnS_Buddy
             metroProgressSpinner1.Refresh();
         }
 
+        private void metroToggle41_CheckedChanged(object sender, EventArgs e)
+        {
+            BGFiX();
+        }
+
+        private void BGFiX()
+        {
+            if (metroToggle41.Checked)
+            {
+                try
+                {
+                    string pathtobgfix = modsFolderPath + "\\BGFix";
+                    Directory.CreateDirectory(pathtobgfix);
+                    string text = File.ReadAllText(AppPath + "\\Settings.ini");
+                    text = text.Replace("unattended = false", "unattended = true");
+                    File.WriteAllBytes(pathtobgfix + "\\00025242.upk", Resources._00025242);
+                    File.WriteAllBytes(pathtobgfix + "\\00025243.upk", Resources._00025243);
+                    File.WriteAllBytes(pathtobgfix + "\\00025244.upk", Resources._00025244);
+                }
+                catch
+                {
+                    AddTextLog("Could not apply battleground fix!");
+                }
+            }
+            else
+            {
+                try
+                {
+                    string pathtobgfix = modsFolderPath + "\\BGFix";
+                    Directory.Delete(pathtobgfix, true);
+                }
+                catch
+                {
+                    AddTextLog("Could not remove battleground fix!");
+                }
+            }
+        }
+
         private void metroCheckBox1_CheckedChanged(object sender, EventArgs e)
         {
             if (PathFound)
@@ -4639,35 +4765,56 @@ namespace Revamped_BnS_Buddy
             CleanMem();
         }
 
+
+        class DispoData : IDisposable
+        {
+            public void Dispose()
+            {
+                // automatically disposed.
+            }
+        }
+
         public void CleanMem()
         {
             if (GameStarted)
             {
-                AddTextLog("Cleaning Memory...");
-                GCSettings.LatencyMode = GCLatencyMode.LowLatency;
-                long totalMemory = GC.GetTotalMemory(forceFullCollection: false);
-                AddTextLog("Before: " + totalMemory / 1024 + " MB");
-                GC.AddMemoryPressure(totalMemory);
-                GC.Collect(2, GCCollectionMode.Optimized, blocking: false);
-                long totalMemory2 = GC.GetTotalMemory(forceFullCollection: false);
-                GC.RemoveMemoryPressure(totalMemory2);
-                AddTextLog("After: " + totalMemory2 / 1024 + " MB");
-                AddTextLog("Freed: " + (totalMemory - totalMemory2) / 1024 + " MB");
-                AddTextLog("Memory Cleaned");
+                /*
+                using (var Dispo = new DispoData())
+                {
+                    AddTextLog("Cleaning Memory...");
+                    GCSettings.LatencyMode = GCLatencyMode.LowLatency;
+                    long totalMemory = GC.GetTotalMemory(forceFullCollection: false);
+                    AddTextLog("Before: " + totalMemory / 1024 + " MB");
+                    GC.AddMemoryPressure(totalMemory);
+                    GC.Collect(0, GCCollectionMode.Forced, blocking: false);
+                    GC.WaitForPendingFinalizers();
+                    long totalMemory2 = GC.GetTotalMemory(forceFullCollection: false);
+                    GC.RemoveMemoryPressure(totalMemory2);
+                    AddTextLog("After: " + totalMemory2 / 1024 + " MB");
+                    AddTextLog("Freed: " + (totalMemory - totalMemory2) / 1024 + " MB");
+                    AddTextLog("Memory Cleaned");
+                    Dispo.Dispose();
+                }
+                */
             }
             else
             {
-                AddTextLog("Cleaning Memory...");
-                GCSettings.LatencyMode = GCLatencyMode.Interactive;
-                long totalMemory3 = GC.GetTotalMemory(forceFullCollection: true);
-                AddTextLog("Before: " + totalMemory3 / 1024 + " MB");
-                GC.AddMemoryPressure(totalMemory3);
-                GC.Collect(2, GCCollectionMode.Forced, blocking: false);
-                long totalMemory4 = GC.GetTotalMemory(forceFullCollection: true);
-                GC.RemoveMemoryPressure(totalMemory4);
-                AddTextLog("After: " + totalMemory4 / 1024 + " MB");
-                AddTextLog("Freed: " + (totalMemory3 - totalMemory4) / 1024 + " MB");
-                AddTextLog("Memory Cleaned");
+                using (var Dispo = new DispoData())
+                {
+                    AddTextLog("Cleaning Memory...");
+                    GCSettings.LatencyMode = GCLatencyMode.Interactive;
+                    long totalMemory3 = GC.GetTotalMemory(forceFullCollection: true);
+                    AddTextLog("Before: " + totalMemory3 / 1024 + " MB");
+                    GC.AddMemoryPressure(totalMemory3);
+                    GC.Collect(2, GCCollectionMode.Forced, blocking: false);
+                    GC.WaitForPendingFinalizers();
+                    long totalMemory4 = GC.GetTotalMemory(forceFullCollection: true);
+                    GC.RemoveMemoryPressure(totalMemory4);
+                    AddTextLog("After: " + totalMemory4 / 1024 + " MB");
+                    AddTextLog("Freed: " + (totalMemory3 - totalMemory4) / 1024 + " MB");
+                    AddTextLog("Memory Cleaned");
+                    Dispo.Dispose();
+                }
             }
         }
 
@@ -7407,7 +7554,7 @@ namespace Revamped_BnS_Buddy
                 if (dictionary.Count() > 0)
                 {
                     AddTextLog("Compiling " + item.Key);
-                    new BNSDat.BNSDat().CompressFiles(Path.Combine(DataPath, item.Key), dictionary, item.Key.Contains("64"));
+                    new BNSDat.BNSDat().CompressFiles(Path.Combine(DataPath, item.Key), dictionary, item.Key.Contains("64")); // first (full path to .dat) // second (dictionary to replace) // if .dat contains 64
                     AddTextLog("Compiled.");
                 }
                 else
@@ -7559,6 +7706,12 @@ namespace Revamped_BnS_Buddy
 
         public void StartPatching(string filename, bool undo)
         {
+            if(!File.Exists(FullAddonPath + "\\" + filename))
+            {
+                Prompt.Popup(String.Format("Skipping Addon: {0} no longer exists in the folder", filename.Replace(".patch", "")));
+                return;
+            }
+
             Search = new Dictionary<int, string>();
             Replace = new Dictionary<int, string>();
             int num = File.ReadAllLines(FullAddonPath + "\\" + filename).Count();
@@ -7585,10 +7738,15 @@ namespace Revamped_BnS_Buddy
                     {
                         if (!text2.Contains("[bit]"))
                         {
-                            AddTextLog(string.Format("Skipped addon: {0} because no bitness was selected", filename.Replace(".patch", "")));
+                            AddTextLog(string.Format("Skipped addon: {0} because it did not contain [bit] to support both 32 & 64 bit files", filename.Replace(".patch", "")));
                             return;
                         }
                         text2 = (metroRadioButton2.Checked ? text2.Replace("[bit]", "64") : text2.Replace("[bit]", ""));
+                    }
+                    else
+                    {
+                        AddTextLog(string.Format("Skipped addon: {0} because no bitness was selected", filename.Replace(".patch", "")));
+                        return;
                     }
                 }
                 catch
@@ -7716,10 +7874,15 @@ namespace Revamped_BnS_Buddy
                     {
                         if (!text12.Contains("[bit]"))
                         {
-                            AddTextLog(string.Format("Skipped addon: {0} because no bitness was selected", filename.Replace(".patch", "")));
+                            AddTextLog(string.Format("Skipped addon: {0} because it did not contain [bit] to support both 32 & 64 bit files", filename.Replace(".patch", "")));
                             return;
                         }
                         text12 = (metroRadioButton2.Checked ? text12.Replace("[bit]", "64") : text12.Replace("[bit]", ""));
+                    }
+                    else
+                    {
+                        AddTextLog(string.Format("Skipped addon: {0} because no bitness was selected", filename.Replace(".patch", "")));
+                        return;
                     }
                 }
                 catch
@@ -7740,10 +7903,7 @@ namespace Revamped_BnS_Buddy
                         AddTextLog(string.Format("Skipped addon: {0} because the file {1} is missing", filename.Replace(".patch", ""), text12));
                         return;
                     }
-                    Dictionary<string, byte[]> dictionary4 = bNSDat2.ExtractFile(text14, new List<string>
-                {
-                    text13
-                }, text12.Contains("64"));
+                    Dictionary<string, byte[]> dictionary4 = bNSDat2.ExtractFile(text14, new List<string>{text13}, text12.Contains("64"));
                     if (dictionary4.Count <= 0)
                     {
                         AddTextLog(string.Format("Skipped addon: {0} because the file {1} was not found in {2}", filename.Replace(".patch", ""), text13, text12));
@@ -8007,20 +8167,28 @@ namespace Revamped_BnS_Buddy
             }
         }
 
+        string nametofile = "";
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
             try
             {
                 if (e.Node.Name.EndsWith(".xml"))
                 {
+                    treeView1.Enabled = false;
                     metroLabel39.Text = "Loading...";
                     metroLabel39.Refresh();
                     fastColoredTextBox1.Clear();
-                    StreamReader streamReader = new StreamReader(e.Node.Name);
-                    fastColoredTextBox1.Text = streamReader.ReadToEnd();
-                    streamReader.Close();
+                    nametofile = e.Node.FullPath.Replace(ActiveDataFile + "\\", "");
+                    BNSDat.BNSDat bNSDat = new BNSDat.BNSDat();
+                    Dictionary<string, byte[]> dictionary = bNSDat.ExtractFile(myDictionary[ActiveDataFile] + "\\" + ActiveDataFile, new List<string>
+                    {
+                        nametofile
+                    }, ActiveDataFile.Contains("64"));
+                    var bytes = dictionary[nametofile]; // here
+                    fastColoredTextBox1.Text = System.Text.Encoding.UTF8.GetString(bytes);
                     metroLabel39.Text = "Done!";
                     metroLabel39.Refresh();
+                    treeView1.Enabled = true;
                 }
             }
             catch
@@ -8028,22 +8196,54 @@ namespace Revamped_BnS_Buddy
                 metroLabel39.Text = "Error: Could not open file";
             }
         }
+        
+        private TreeNode PopulateTreeNode2(string[] paths)
+        {
+            string pathSeparator = "\\";
+            TreeNode thisnode = new TreeNode();
+            TreeNode currentnode = null;
+            char[] cachedpathseparator = pathSeparator.ToCharArray();
+            for (int i = 0; i < paths.Length; i++)
+            {
+                currentnode = thisnode;
+                foreach (string subPath in paths[i].Split(cachedpathseparator))
+                {
+                    if (null == currentnode.Nodes[subPath])
+                        currentnode = currentnode.Nodes.Add(subPath, subPath);
+                    else
+                        currentnode = currentnode.Nodes[subPath];
+                }
+            }
+            return thisnode;
+        }
 
         private void metroComboBox3_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (metroComboBox3.Items[metroComboBox3.SelectedIndex].ToString().Contains(".dat") && myDictionary[metroComboBox3.Items[metroComboBox3.SelectedIndex].ToString()].Length > 0)
             {
+                metroComboBox3.Enabled = false;
+                fastColoredTextBox1.Clear();
+                metroLabel39.Text = "Loading...";
+                metroLabel39.Refresh();
                 ActiveDataFile = metroComboBox3.Items[metroComboBox3.SelectedIndex].ToString();
                 string str = myDictionary[ActiveDataFile];
                 treeView1.Nodes.Clear();
-                DirectoryInfo directoryInfo = new DirectoryInfo(str + ".\\editing\\" + ActiveDataFile + ".files\\");
-                if (directoryInfo.Exists)
-                {
-                    treeView1.AfterSelect += treeView1_AfterSelect;
-                    BuildTree(directoryInfo, treeView1.Nodes);
-                    treeView1.Nodes[0].Expand();
-                }
-                toolStripButton2.Enabled = true;
+                if (ActiveDataFile.Contains("64")) { BNSis64 = true; } else { BNSis64 = false; }
+                BNSDat.BNSDat testingpur = new BNSDat.BNSDat();
+                string[] test = testingpur.GetFileList(str + "\\" + ActiveDataFile, BNSis64);
+                treeView1.Nodes.Add(PopulateTreeNode2(test));
+                treeView1.Nodes[0].Text = ActiveDataFile;
+                treeView1.Nodes[0].Expand();
+                //toolStripButton2.Enabled = true;
+                treeView1.AfterSelect += treeView1_AfterSelect;
+                metroLabel39.Text = "Loaded list!";
+                metroLabel39.Refresh();
+                metroComboBox3.Enabled = true;
+            }
+            else if (metroComboBox3.Items[metroComboBox3.SelectedIndex].ToString() == "Select a File")
+            {
+                fastColoredTextBox1.Clear();
+                treeView1.Nodes.Clear();
             }
         }
 
@@ -8082,23 +8282,14 @@ namespace Revamped_BnS_Buddy
         {
             if (treeView1.SelectedNode != null && treeView1.SelectedNode.FullPath.ToString().Contains(".dat"))
             {
-                try
-                {
-                    XmlSavePath = DataPath + "\\editing\\" + treeView1.SelectedNode.FullPath.ToString();
-                    try
-                    {
-                        File.WriteAllText(XmlSavePath, fastColoredTextBox1.Text);
-                        metroLabel39.Text = "Saved!";
-                    }
-                    catch
-                    {
-                        metroLabel39.Text = "Failed to save file!";
-                    }
-                }
-                catch
-                {
-                    metroLabel39.Text = "No file opened in editor!";
-                }
+                metroLabel39.Text = "Saving " + nametofile + "...";
+                metroLabel39.Refresh();
+                Dictionary<string, byte[]> newdatatosave = new Dictionary<string, byte[]>();
+                var addinv2 = System.Text.Encoding.UTF8.GetBytes(fastColoredTextBox1.Text);
+                newdatatosave.Add(nametofile, addinv2);
+                new BNSDat.BNSDat().CompressFiles(myDictionary[ActiveDataFile] + "\\" + ActiveDataFile, newdatatosave, ActiveDataFile.Contains("64"));
+                metroLabel39.Text = "Saved.";
+                metroLabel39.Refresh();
             }
         }
 
@@ -8111,7 +8302,7 @@ namespace Revamped_BnS_Buddy
             if (!bw2.IsBusy)
             {
                 bw2.RunWorkerAsync();
-                toolStripButton3.Enabled = true;
+                //toolStripButton3.Enabled = true;
             }
             else
             {
@@ -8133,6 +8324,7 @@ namespace Revamped_BnS_Buddy
                         string str2 = myDictionary[str];
                         File.Copy(str2 + "\\" + str, str2 + "\\editing\\backup\\" + str, overwrite: true);
                         metroLabel39.Text = "Backed Up Data Files";
+                        toolStripButton5.Enabled = true;
                     }
                 }
             }
@@ -8142,6 +8334,7 @@ namespace Revamped_BnS_Buddy
             }
         }
 
+        /*
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
             if (!GameStarted)
@@ -8204,7 +8397,8 @@ namespace Revamped_BnS_Buddy
                 Prompt.Popup("Game is Running! Operation Cancelled.");
             }
         }
-
+        */
+        /*
         private void toolStripButton3_Click(object sender, EventArgs e)
         {
             if (!GameStarted)
@@ -8228,7 +8422,9 @@ namespace Revamped_BnS_Buddy
                 Prompt.Popup("Game is Running! Operation Cancelled.");
             }
         }
+        */
 
+        /*
         private void toolStripButton4_Click(object sender, EventArgs e)
         {
             toolStripButton4.Enabled = false;
@@ -8255,6 +8451,7 @@ namespace Revamped_BnS_Buddy
             }
             toolStripButton4.Enabled = true;
         }
+        */
 
         private void toolStripButton5_Click(object sender, EventArgs e)
         {
@@ -8277,7 +8474,7 @@ namespace Revamped_BnS_Buddy
 
         private void DefaultDatValues()
         {
-            if (metroComboBox3.Items.Count > 0)
+            if (metroComboBox3.Items.Count > 1)
             {
                 metroComboBox3.Items.Clear();
             }
@@ -8311,7 +8508,17 @@ namespace Revamped_BnS_Buddy
 
         private void toolStripButton7_Click(object sender, EventArgs e)
         {
-            Prompt.Popup("1: Backup your config files by pressing \"Backup\"" + Environment.NewLine + "2: Select your file to work on then press \"Decompile\" to extract the .dat file" + Environment.NewLine + "3: Select the file to edit in the tree then modify it with the TextBox on the right" + Environment.NewLine + "4: Save the modifications made by pressing \"Save\"" + Environment.NewLine + "5: Compile it all by pressing \"Compile\"" + Environment.NewLine + "6: Apply changes to change from your games untouched config files to the modified ones by pressing \"Apply\"" + Environment.NewLine + "Tip: Restoring your config files can be done by pressing \"Restore\"");
+            Prompt.Popup("1: Backup your config files by pressing \"Backup\"" + Environment.NewLine + "2: Select your file to work on from the drop down" + Environment.NewLine + "3: Select the file to edit in the tree then modify it with the TextBox on the right" + Environment.NewLine + "4: Save the modifications made by pressing \"Save\"" + Environment.NewLine + "Tip: Restoring your config files can be done by pressing \"Restore\"");
+        }
+
+        public class MyRenderer : ToolStripRenderer
+        {
+            protected override void OnRenderArrow(ToolStripArrowRenderEventArgs e)
+            {
+                e.ArrowColor = Color.White;
+                base.OnRenderArrow(e);
+            }
+
         }
 
         public void CleanMess()
@@ -8995,6 +9202,19 @@ namespace Revamped_BnS_Buddy
                 metroTile11.UseCustomBackColor = false;
                 metroTile12.UseCustomBackColor = false;
                 metroTile13.UseCustomBackColor = false;
+
+                metroComboBox1.Theme = MetroThemeStyle.Dark;
+                metroComboBox2.Theme = MetroThemeStyle.Dark;
+                metroComboBox3.Theme = MetroThemeStyle.Dark;
+                metroComboBox4.Theme = MetroThemeStyle.Dark;
+                metroComboBox5.Theme = MetroThemeStyle.Dark;
+                metroComboBox6.Theme = MetroThemeStyle.Dark;
+                metroComboBox7.Theme = MetroThemeStyle.Dark;
+                metroComboBox8.Theme = MetroThemeStyle.Dark;
+                metroComboBox9.Theme = MetroThemeStyle.Dark;
+                metroComboBox11.Theme = MetroThemeStyle.Dark;
+
+
                 if (metroComboBox11.SelectedItem.ToString() == "Black")
                 {
                     Themer.Style = MetroColorStyle.Black;
@@ -9077,6 +9297,43 @@ namespace Revamped_BnS_Buddy
                 {
                     Themer.Style = MetroColorStyle.Yellow;
                 }
+
+                metroComboBox1.Style = Themer.Style;
+                metroComboBox2.Style = Themer.Style;
+                metroComboBox3.Style = Themer.Style;
+                metroComboBox4.Style = Themer.Style;
+                metroComboBox5.Style = Themer.Style;
+                metroComboBox6.Style = Themer.Style;
+                metroComboBox7.Style = Themer.Style;
+                metroComboBox8.Style = Themer.Style;
+                metroComboBox9.Style = Themer.Style;
+                metroComboBox11.Style = Themer.Style;
+
+                if(Themer.Style == MetroColorStyle.White)
+                {
+                    metroComboBox1.Style = MetroColorStyle.Silver;
+                    metroComboBox2.Style = MetroColorStyle.Silver;
+                    metroComboBox3.Style = MetroColorStyle.Silver;
+                    metroComboBox4.Style = MetroColorStyle.Silver;
+                    metroComboBox5.Style = MetroColorStyle.Silver;
+                    metroComboBox6.Style = MetroColorStyle.Silver;
+                    metroComboBox7.Style = MetroColorStyle.Silver;
+                    metroComboBox8.Style = MetroColorStyle.Silver;
+                    metroComboBox9.Style = MetroColorStyle.Silver;
+                    metroComboBox11.Style = MetroColorStyle.Silver;
+
+                    metroComboBox1.Theme = MetroThemeStyle.Light;
+                    metroComboBox2.Theme = MetroThemeStyle.Light;
+                    metroComboBox3.Theme = MetroThemeStyle.Light;
+                    metroComboBox4.Theme = MetroThemeStyle.Light;
+                    metroComboBox5.Theme = MetroThemeStyle.Light;
+                    metroComboBox6.Theme = MetroThemeStyle.Light;
+                    metroComboBox7.Theme = MetroThemeStyle.Light;
+                    metroComboBox8.Theme = MetroThemeStyle.Light;
+                    metroComboBox9.Theme = MetroThemeStyle.Light;
+                    metroComboBox11.Theme = MetroThemeStyle.Light;
+                }
+
                 lineChanger("buddycolor = " + Themer.Style.ToString(), AppPath + "\\Settings.ini", 44);
                 metroToolTip1.Style = Themer.Style;
                 metroToolTip1.Theme = MetroThemeStyle.Dark;
@@ -9487,222 +9744,405 @@ namespace Revamped_BnS_Buddy
             }
         }
 
+        private bool wardenIgnoreOnce = false;
         private void metroToggle23_CheckedChanged(object sender, EventArgs e)
         {
             if (AppStarted)
             {
-                if (!metroToggle23.Checked)
+                if (!GameStarted)
                 {
-                    if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056126.upk"))
+                    if (!metroToggle23.Checked)
                     {
-                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056126.upk", AppPath + "\\backup\\00056126.upk", overwrite: true);
-                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056126.upk");
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056126.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056126.upk", AppPath + "\\backup\\00056126.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056126.upk");
+                        }
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056566.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056566.upk", AppPath + "\\backup\\00056566.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056566.upk");
+                        }
                     }
-                    if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056566.upk"))
+                    else
                     {
-                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056566.upk", AppPath + "\\backup\\00056566.upk", overwrite: true);
-                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056566.upk");
+                        if (File.Exists(AppPath + "\\backup\\00056126.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00056126.upk", RegPath + "\\contents\\bns\\CookedPC\\00056126.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00056126.upk");
+                        }
+                        if (File.Exists(AppPath + "\\backup\\00056566.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00056566.upk", RegPath + "\\contents\\bns\\CookedPC\\00056566.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00056566.upk");
+                        }
                     }
+                    CheckToggleForButtonAvailability();
                 }
                 else
                 {
-                    if (File.Exists(AppPath + "\\backup\\00056126.upk"))
+                    if (wardenIgnoreOnce)
                     {
-                        File.Copy(AppPath + "\\backup\\00056126.upk", RegPath + "\\contents\\bns\\CookedPC\\00056126.upk", overwrite: true);
-                        File.Delete(AppPath + "\\backup\\00056126.upk");
+                        wardenIgnoreOnce = false;
+                        return;
                     }
-                    if (File.Exists(AppPath + "\\backup\\00056566.upk"))
-                    {
-                        File.Copy(AppPath + "\\backup\\00056566.upk", RegPath + "\\contents\\bns\\CookedPC\\00056566.upk", overwrite: true);
-                        File.Delete(AppPath + "\\backup\\00056566.upk");
-                    }
+
+                    Prompt.Popup("Can not change value while the game is running");
+                    wardenIgnoreOnce = true;
+                    metroToggle23.Checked = !metroToggle23.Checked;
                 }
-                CheckToggleForButtonAvailability();
             }
         }
 
+        private bool assassinIgnoreOnce = false;
         private void metroToggle39_CheckedChanged(object sender, EventArgs e)
         {
             if (AppStarted)
             {
-                if (!metroToggle39.Checked)
+                if (!GameStarted)
                 {
-                    File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007916.upk", AppPath + "\\backup\\00007916.upk", overwrite: true);
-                    File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007916.upk");
+                    if (!metroToggle39.Checked)
+                    {
+                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007916.upk", AppPath + "\\backup\\00007916.upk", overwrite: true);
+                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007916.upk");
+                    }
+                    else
+                    {
+                        File.Copy(AppPath + "\\backup\\00007916.upk", RegPath + "\\contents\\bns\\CookedPC\\00007916.upk", overwrite: true);
+                        File.Delete(AppPath + "\\backup\\00007916.upk");
+                    }
+                    CheckToggleForButtonAvailability();
                 }
                 else
                 {
-                    File.Copy(AppPath + "\\backup\\00007916.upk", RegPath + "\\contents\\bns\\CookedPC\\00007916.upk", overwrite: true);
-                    File.Delete(AppPath + "\\backup\\00007916.upk");
+                    if (assassinIgnoreOnce)
+                    {
+                        assassinIgnoreOnce = false;
+                        return;
+                    }
+
+                    Prompt.Popup("Can not change value while the game is running");
+                    assassinIgnoreOnce = true;
+                    metroToggle39.Checked = !metroToggle39.Checked;
                 }
-                CheckToggleForButtonAvailability();
             }
         }
 
+        private bool summonerIgnoreOnce = false;
         private void metroToggle36_CheckedChanged(object sender, EventArgs e)
         {
             if (AppStarted)
             {
-                if (!metroToggle36.Checked)
+                if (!GameStarted)
                 {
-                    File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007917.upk", AppPath + "\\backup\\00007917.upk", overwrite: true);
-                    File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007917.upk");
+                    if (!metroToggle36.Checked)
+                    {
+                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007917.upk", AppPath + "\\backup\\00007917.upk", overwrite: true);
+                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007917.upk");
+                    }
+                    else
+                    {
+                        File.Copy(AppPath + "\\backup\\00007917.upk", RegPath + "\\contents\\bns\\CookedPC\\00007917.upk", overwrite: true);
+                        File.Delete(AppPath + "\\backup\\00007917.upk");
+                    }
+                    CheckToggleForButtonAvailability();
                 }
                 else
                 {
-                    File.Copy(AppPath + "\\backup\\00007917.upk", RegPath + "\\contents\\bns\\CookedPC\\00007917.upk", overwrite: true);
-                    File.Delete(AppPath + "\\backup\\00007917.upk");
+                    if (summonerIgnoreOnce)
+                    {
+                        summonerIgnoreOnce = false;
+                        return;
+                    }
+
+                    Prompt.Popup("Can not change value while the game is running");
+                    summonerIgnoreOnce = true;
+                    metroToggle36.Checked = !metroToggle36.Checked;
                 }
-                CheckToggleForButtonAvailability();
             }
         }
 
+        private bool kungFuMasterIgoreOnce = false;
         private void metroToggle35_CheckedChanged_1(object sender, EventArgs e)
         {
             if (AppStarted)
             {
-                if (!metroToggle35.Checked)
+                if (!GameStarted)
                 {
-                    File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007912.upk", AppPath + "\\backup\\00007912.upk", overwrite: true);
-                    File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007912.upk");
+                    if (!metroToggle35.Checked)
+                    {
+                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007912.upk", AppPath + "\\backup\\00007912.upk", overwrite: true);
+                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007912.upk");
+                    }
+                    else
+                    {
+                        File.Copy(AppPath + "\\backup\\00007912.upk", RegPath + "\\contents\\bns\\CookedPC\\00007912.upk", overwrite: true);
+                        File.Delete(AppPath + "\\backup\\00007912.upk");
+                    }
+                    CheckToggleForButtonAvailability();
                 }
                 else
                 {
-                    File.Copy(AppPath + "\\backup\\00007912.upk", RegPath + "\\contents\\bns\\CookedPC\\00007912.upk", overwrite: true);
-                    File.Delete(AppPath + "\\backup\\00007912.upk");
+                    if (kungFuMasterIgoreOnce)
+                    {
+                        kungFuMasterIgoreOnce = false;
+                        return;
+                    }
+
+                    Prompt.Popup("Can not change value while the game is running");
+                    kungFuMasterIgoreOnce = true;
+                    metroToggle35.Checked = !metroToggle35.Checked;
                 }
-                CheckToggleForButtonAvailability();
             }
         }
 
+        private bool gunnerIgnoreOnce = false;
         private void metroToggle34_CheckedChanged(object sender, EventArgs e)
         {
             if (AppStarted)
             {
-                if (!metroToggle34.Checked)
+                if (!GameStarted)
                 {
-                    File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007915.upk", AppPath + "\\backup\\00007915.upk", overwrite: true);
-                    File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007915.upk");
+                    if (!metroToggle34.Checked)
+                    {
+                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007915.upk", AppPath + "\\backup\\00007915.upk", overwrite: true);
+                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007915.upk");
+                    }
+                    else
+                    {
+                        File.Copy(AppPath + "\\backup\\00007915.upk", RegPath + "\\contents\\bns\\CookedPC\\00007915.upk", overwrite: true);
+                        File.Delete(AppPath + "\\backup\\00007915.upk");
+                    }
+                    CheckToggleForButtonAvailability();
                 }
                 else
                 {
-                    File.Copy(AppPath + "\\backup\\00007915.upk", RegPath + "\\contents\\bns\\CookedPC\\00007915.upk", overwrite: true);
-                    File.Delete(AppPath + "\\backup\\00007915.upk");
+                    if (gunnerIgnoreOnce)
+                    {
+                        gunnerIgnoreOnce = false;
+                        return;
+                    }
+
+                    Prompt.Popup("Can not change value while the game is running");
+                    gunnerIgnoreOnce = true;
+                    metroToggle34.Checked = !metroToggle34.Checked;
                 }
-                CheckToggleForButtonAvailability();
             }
         }
 
+        private bool destroyerIgnoreOnce = false;
         private void metroToggle33_CheckedChanged(object sender, EventArgs e)
         {
             if (AppStarted)
             {
-                if (!metroToggle33.Checked)
+                if (!GameStarted)
                 {
-                    File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007914.upk", AppPath + "\\backup\\00007914.upk", overwrite: true);
-                    File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007914.upk");
+                    if (!metroToggle33.Checked)
+                    {
+                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007914.upk", AppPath + "\\backup\\00007914.upk", overwrite: true);
+                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007914.upk");
+                    }
+                    else
+                    {
+                        File.Copy(AppPath + "\\backup\\00007914.upk", RegPath + "\\contents\\bns\\CookedPC\\00007914.upk", overwrite: true);
+                        File.Delete(AppPath + "\\backup\\00007914.upk");
+                    }
+                    CheckToggleForButtonAvailability();
                 }
                 else
                 {
-                    File.Copy(AppPath + "\\backup\\00007914.upk", RegPath + "\\contents\\bns\\CookedPC\\00007914.upk", overwrite: true);
-                    File.Delete(AppPath + "\\backup\\00007914.upk");
+                    if (destroyerIgnoreOnce)
+                    {
+                        destroyerIgnoreOnce = false;
+                        return;
+                    }
+
+                    Prompt.Popup("Can not change value while the game is running");
+                    destroyerIgnoreOnce = true;
+                    metroToggle33.Checked = !metroToggle33.Checked;
                 }
-                CheckToggleForButtonAvailability();
             }
         }
 
+        private bool forceMasterIgnoreOnce = false;
         private void metroToggle32_CheckedChanged(object sender, EventArgs e)
         {
             if (AppStarted)
             {
-                if (!metroToggle32.Checked)
+                if (!GameStarted)
                 {
-                    File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007913.upk", AppPath + "\\backup\\00007913.upk", overwrite: true);
-                    File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007913.upk");
+                    if (!metroToggle32.Checked)
+                    {
+                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007913.upk", AppPath + "\\backup\\00007913.upk", overwrite: true);
+                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007913.upk");
+                    }
+
+                    else
+                    {
+                        File.Copy(AppPath + "\\backup\\00007913.upk", RegPath + "\\contents\\bns\\CookedPC\\00007913.upk", overwrite: true);
+                        File.Delete(AppPath + "\\backup\\00007913.upk");
+                    }
+                    CheckToggleForButtonAvailability();
                 }
                 else
                 {
-                    File.Copy(AppPath + "\\backup\\00007913.upk", RegPath + "\\contents\\bns\\CookedPC\\00007913.upk", overwrite: true);
-                    File.Delete(AppPath + "\\backup\\00007913.upk");
+                    if (forceMasterIgnoreOnce)
+                    {
+                        forceMasterIgnoreOnce = false;
+                        return;
+                    }
+
+                    Prompt.Popup("Can not change value while the game is running");
+                    forceMasterIgnoreOnce = true;
+                    metroToggle32.Checked = !metroToggle32.Checked;
                 }
-                CheckToggleForButtonAvailability();
             }
         }
 
+        private bool bladeMasterIgnoreOnce = false;
         private void metroToggle31_CheckedChanged(object sender, EventArgs e)
         {
             if (AppStarted)
             {
-                if (!metroToggle31.Checked)
+                if (!GameStarted)
                 {
-                    File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007911.upk", AppPath + "\\backup\\00007911.upk", overwrite: true);
-                    File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007911.upk");
+                    if (!metroToggle31.Checked)
+                    {
+                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007911.upk", AppPath + "\\backup\\00007911.upk", overwrite: true);
+                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007911.upk");
+                    }
+                    else
+                    {
+                        File.Copy(AppPath + "\\backup\\00007911.upk", RegPath + "\\contents\\bns\\CookedPC\\00007911.upk", overwrite: true);
+                        File.Delete(AppPath + "\\backup\\00007911.upk");
+                    }
+                    CheckToggleForButtonAvailability();
                 }
                 else
                 {
-                    File.Copy(AppPath + "\\backup\\00007911.upk", RegPath + "\\contents\\bns\\CookedPC\\00007911.upk", overwrite: true);
-                    File.Delete(AppPath + "\\backup\\00007911.upk");
+                    if (bladeMasterIgnoreOnce)
+                    {
+                        bladeMasterIgnoreOnce = false;
+                        return;
+                    }
+
+                    Prompt.Popup("Can not change value while the game is running");
+                    bladeMasterIgnoreOnce = true;
+                    metroToggle31.Checked = !metroToggle31.Checked;
                 }
-                CheckToggleForButtonAvailability();
             }
         }
 
+        private bool bladeDancerIgnoreOnce = false;
         private void metroToggle30_CheckedChanged(object sender, EventArgs e)
         {
             if (AppStarted)
             {
-                if (!metroToggle30.Checked)
+                if (!GameStarted)
                 {
-                    File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00018601.upk", AppPath + "\\backup\\00018601.upk", overwrite: true);
-                    File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00018601.upk");
+                    if (!metroToggle30.Checked)
+                    {
+                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00018601.upk", AppPath + "\\backup\\00018601.upk", overwrite: true);
+                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00018601.upk");
+                    }
+                    else
+                    {
+                        File.Copy(AppPath + "\\backup\\00018601.upk", RegPath + "\\contents\\bns\\CookedPC\\00018601.upk", overwrite: true);
+                        File.Delete(AppPath + "\\backup\\00018601.upk");
+                    }
+                    CheckToggleForButtonAvailability();
                 }
                 else
                 {
-                    File.Copy(AppPath + "\\backup\\00018601.upk", RegPath + "\\contents\\bns\\CookedPC\\00018601.upk", overwrite: true);
-                    File.Delete(AppPath + "\\backup\\00018601.upk");
+                    if (bladeDancerIgnoreOnce)
+                    {
+                        bladeDancerIgnoreOnce = false;
+                        return;
+                    }
+
+                    Prompt.Popup("Can not change value while the game is running");
+                    bladeDancerIgnoreOnce = true;
+                    metroToggle30.Checked = !metroToggle30.Checked;
                 }
-                CheckToggleForButtonAvailability();
             }
         }
 
+        private bool warlockIgnoreOnce = false;
         private void metroToggle29_CheckedChanged(object sender, EventArgs e)
         {
             if (AppStarted)
             {
-                if (!metroToggle29.Checked)
+                if (!GameStarted)
                 {
-                    File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00023439.upk", AppPath + "\\backup\\00023439.upk", overwrite: true);
-                    File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00023439.upk");
+                    if (!metroToggle29.Checked)
+                    {
+                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00023439.upk", AppPath + "\\backup\\00023439.upk", overwrite: true);
+                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00023439.upk");
+                    }
+                    else
+                    {
+                        File.Copy(AppPath + "\\backup\\00023439.upk", RegPath + "\\contents\\bns\\CookedPC\\00023439.upk", overwrite: true);
+                        File.Delete(AppPath + "\\backup\\00023439.upk");
+                    }
+                    CheckToggleForButtonAvailability();
                 }
                 else
                 {
-                    File.Copy(AppPath + "\\backup\\00023439.upk", RegPath + "\\contents\\bns\\CookedPC\\00023439.upk", overwrite: true);
-                    File.Delete(AppPath + "\\backup\\00023439.upk");
+                    if (warlockIgnoreOnce)
+                    {
+                        warlockIgnoreOnce = false;
+                        return;
+                    }
+
+                    Prompt.Popup("Can not change value while the game is running");
+                    warlockIgnoreOnce = true;
+                    metroToggle29.Checked = !metroToggle29.Checked;
                 }
-                CheckToggleForButtonAvailability();
             }
         }
 
+        private bool soulFighterIgnoreOnce = false;
         private void metroToggle37_CheckedChanged(object sender, EventArgs e)
         {
             if (AppStarted)
             {
-                if (!metroToggle37.Checked)
+                if (!GameStarted)
                 {
-                    File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00034408.upk", AppPath + "\\backup\\00034408.upk", overwrite: true);
-                    File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00034408.upk");
+                    if (!metroToggle37.Checked)
+                    {
+                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00034408.upk", AppPath + "\\backup\\00034408.upk", overwrite: true);
+                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00034408.upk");
+                    }
+                    else
+                    {
+                        File.Copy(AppPath + "\\backup\\00034408.upk", RegPath + "\\contents\\bns\\CookedPC\\00034408.upk", overwrite: true);
+                        File.Delete(AppPath + "\\backup\\00034408.upk");
+                    }
+                    CheckToggleForButtonAvailability();
                 }
                 else
                 {
-                    File.Copy(AppPath + "\\backup\\00034408.upk", RegPath + "\\contents\\bns\\CookedPC\\00034408.upk", overwrite: true);
-                    File.Delete(AppPath + "\\backup\\00034408.upk");
+                    if (soulFighterIgnoreOnce)
+                    {
+                        soulFighterIgnoreOnce = false;
+                        return;
+                    }
+
+                    Prompt.Popup("Can not change value while the game is running");
+                    soulFighterIgnoreOnce = true;
+                    metroToggle37.Checked = !metroToggle37.Checked;
                 }
-                CheckToggleForButtonAvailability();
             }
         }
 
         private void metroButton36_Click(object sender, EventArgs e)
         {
+            if(GameStarted)
+            {
+                Prompt.Popup("Can not change value while the game is running");
+                return;
+            }
+
             if (metroToggle39.Checked && metroToggle39.Enabled)
             {
                 metroToggle39.Checked = false;
@@ -9753,6 +10193,12 @@ namespace Revamped_BnS_Buddy
 
         private void metroButton37_Click(object sender, EventArgs e)
         {
+            if (GameStarted)
+            {
+                Prompt.Popup("Can not change value while the game is running");
+                return;
+            }
+
             if (!metroToggle39.Checked && metroToggle39.Enabled)
             {
                 metroToggle39.Checked = true;
@@ -10044,12 +10490,14 @@ namespace Revamped_BnS_Buddy
                         {
                             string text = key2.Replace("HKEY_CURRENT_USER\\", "");
                             RegistryKey registryKey = Registry.CurrentUser.OpenSubKey(text, writable: true);
+                            Prompt.Popup(text);
                             registryKey.DeleteValue(ToClearReg[key2], throwOnMissingValue: false);
                         }
                         if (key2.Contains("HKEY_LOCAL_MACHINE\\"))
                         {
                             string text2 = key2.Replace("HKEY_LOCAL_MACHINE\\", "");
                             RegistryKey registryKey2 = Registry.LocalMachine.OpenSubKey(text2, writable: true);
+                            Prompt.Popup(text2);
                             registryKey2.DeleteValue(ToClearReg[key2], throwOnMissingValue: false);
                         }
                         num++;
@@ -10619,11 +11067,13 @@ namespace Revamped_BnS_Buddy
                                 if (reply == "ErrAccountNotFound")
                                 {
                                     Prompt.Popup("The provided email address wasn't found");
+                                    metroButton1.Enabled = true;
                                     termConnection();
                                 }
                                 else
                                 {
                                     Prompt.Popup("Invalidly formated email");
+                                    metroButton1.Enabled = true;
                                     termConnection();
                                 }
                             }
@@ -10651,11 +11101,13 @@ namespace Revamped_BnS_Buddy
                                 if (reply == "ErrBadPasswd")
                                 {
                                     Prompt.Popup("Wrong Password");
+                                    metroButton1.Enabled = true;
                                     termConnection();
                                 }
                                 else
                                 {
                                     Prompt.Popup("Unknown Error: " + reply);
+                                    metroButton1.Enabled = true;
                                     termConnection();
                                 }
                             }
@@ -10680,6 +11132,7 @@ namespace Revamped_BnS_Buddy
                                 {
                                     Prompt.Popup("Negotiation Failed, please try again.");
                                     key = null;
+                                    metroButton1.Enabled = true;
                                     termConnection();
                                 }
                             }
@@ -10748,6 +11201,7 @@ namespace Revamped_BnS_Buddy
                                 else
                                 {
                                     Prompt.Popup("Unknown Error: " + reply);
+                                    metroButton1.Enabled = true;
                                     termConnection();
                                 }
                             }
@@ -10998,7 +11452,41 @@ namespace Revamped_BnS_Buddy
 
         private void Launcher_Click(object sender, EventArgs e)
         {
+        }
 
+        private void treeView1_Click(object sender, EventArgs e)
+        {
+        }
+
+        public PictureBox exitlag = new PictureBox();
+        bool trigger = false;
+        private void PicSwap_Tick(object sender, EventArgs e)
+        {
+            if (exitlag.Image == null)
+            {
+                exitlag.Image = pictureBox2.Image;
+            }
+
+            if (metroProgressBar1.Maximum == metroProgressBar1.Value)
+            {
+                if (!trigger)
+                {
+                    pictureBox2.Image = Resources.ad2;
+                    urltobrowseto = "https://discord.gg/ZpsmCZA";
+                    trigger = !trigger;
+                }
+                else
+                {
+                    pictureBox2.Image = exitlag.Image;
+                    exitlag.Image = null;
+                    urltobrowseto = "https://www.exitlag.com/refer/443658";
+                    trigger = !trigger;
+                }
+                metroProgressBar1.Value = 0;
+            }
+            
+            if (AppStarted)
+                metroProgressBar1.PerformStep();
         }
     }
 }

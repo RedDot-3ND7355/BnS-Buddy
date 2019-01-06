@@ -39,11 +39,12 @@ namespace Revamped_BnS_Buddy
             // metroLabel1
             // 
             this.metroLabel1.AutoSize = true;
-            this.metroLabel1.Location = new System.Drawing.Point(44, 64);
+            this.metroLabel1.Location = new System.Drawing.Point(50, 70);
             this.metroLabel1.Name = "metroLabel1";
             this.metroLabel1.Size = new System.Drawing.Size(203, 19);
             this.metroLabel1.TabIndex = 1;
             this.metroLabel1.Text = "Enter the code sent to your email";
+            this.metroLabel1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.metroLabel1.Theme = MetroFramework.MetroThemeStyle.Dark;
             // 
             // metroTextBox1
@@ -52,7 +53,7 @@ namespace Revamped_BnS_Buddy
             // 
             // 
             this.metroTextBox1.CustomButton.Image = null;
-            this.metroTextBox1.CustomButton.Location = new System.Drawing.Point(181, 1);
+            this.metroTextBox1.CustomButton.Location = new System.Drawing.Point(236, 1);
             this.metroTextBox1.CustomButton.Name = "";
             this.metroTextBox1.CustomButton.Size = new System.Drawing.Size(21, 21);
             this.metroTextBox1.CustomButton.Style = MetroFramework.MetroColorStyle.Blue;
@@ -61,7 +62,7 @@ namespace Revamped_BnS_Buddy
             this.metroTextBox1.CustomButton.UseSelectable = true;
             this.metroTextBox1.CustomButton.Visible = false;
             this.metroTextBox1.Lines = new string[0];
-            this.metroTextBox1.Location = new System.Drawing.Point(44, 92);
+            this.metroTextBox1.Location = new System.Drawing.Point(21, 92);
             this.metroTextBox1.MaxLength = 6;
             this.metroTextBox1.Name = "metroTextBox1";
             this.metroTextBox1.PasswordChar = '\0';
@@ -70,7 +71,7 @@ namespace Revamped_BnS_Buddy
             this.metroTextBox1.SelectionLength = 0;
             this.metroTextBox1.SelectionStart = 0;
             this.metroTextBox1.ShortcutsEnabled = true;
-            this.metroTextBox1.Size = new System.Drawing.Size(203, 23);
+            this.metroTextBox1.Size = new System.Drawing.Size(258, 23);
             this.metroTextBox1.TabIndex = 0;
             this.metroTextBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.metroTextBox1.Theme = MetroFramework.MetroThemeStyle.Dark;
@@ -78,7 +79,8 @@ namespace Revamped_BnS_Buddy
             this.metroTextBox1.UseStyleColors = true;
             this.metroTextBox1.WaterMarkColor = System.Drawing.Color.FromArgb(((int)(((byte)(109)))), ((int)(((byte)(109)))), ((int)(((byte)(109)))));
             this.metroTextBox1.WaterMarkFont = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Pixel);
-            this.metroTextBox1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.metroTextBox1_KeyPress);
+            this.metroTextBox1.Click += new System.EventHandler(this.metroTextBox1_Click);
+            this.metroTextBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.metroTextBox1_KeyPress);
             // 
             // metroButton1
             // 
@@ -94,7 +96,7 @@ namespace Revamped_BnS_Buddy
             // metroButton2
             // 
             this.metroButton2.Highlight = true;
-            this.metroButton2.Location = new System.Drawing.Point(251, 15);
+            this.metroButton2.Location = new System.Drawing.Point(249, 22);
             this.metroButton2.Name = "metroButton2";
             this.metroButton2.Size = new System.Drawing.Size(30, 30);
             this.metroButton2.TabIndex = 4;

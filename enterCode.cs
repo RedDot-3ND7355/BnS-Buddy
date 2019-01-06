@@ -114,16 +114,26 @@ namespace Revamped_BnS_Buddy
             f1.submitCode();
         }
 
-        private void metroTextBox1_KeyPress(object sender, KeyPressEventArgs e)
+        private void metroTextBox1_KeyPress(object sender, KeyEventArgs e)
         {
-            if ((e.KeyChar >= '0' && e.KeyChar <= '9') || e.KeyChar == (Char)Keys.Delete || e.KeyChar == (Char)Keys.Back) //The  character represents a backspace
+            if (e.KeyValue == (char)Keys.Return)
             {
-                e.Handled = false; //Do not reject the input
+                f1.submitCode();
+            }
+
+            if ((e.KeyValue >= '0' && e.KeyValue <= '9') || e.KeyValue == (Char)Keys.Delete || e.KeyValue == (Char)Keys.Back || e.Control && e.KeyValue == (Char)Keys.V) //The  character represents a backspace
+            {
+                e.SuppressKeyPress = false; //Do not reject the input
             }
             else
             {
-                e.Handled = true; //Reject the input
+                e.SuppressKeyPress = true; //Reject the input
             }
+        }
+
+        private void metroTextBox1_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

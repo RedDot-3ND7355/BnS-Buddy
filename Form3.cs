@@ -93,63 +93,63 @@ namespace Revamped_BnS_Buddy
                 .Replace("buddycolor = ", "");
             if (a == "Black")
             {
-                Themer.Style = MetroColorStyle.White;
+                Themer.Style = MetroColorStyle.Black;
             }
             else if (a == "Red")
             {
-                Themer.Style = MetroColorStyle.Yellow;
+                Themer.Style = MetroColorStyle.Red;
             }
             else if (a == "Purple")
             {
-                Themer.Style = MetroColorStyle.Red;
+                Themer.Style = MetroColorStyle.Purple;
             }
             else if (a == "Pink")
             {
-                Themer.Style = MetroColorStyle.Magenta;
+                Themer.Style = MetroColorStyle.Pink;
             }
             else if (a == "Orange")
             {
-                Themer.Style = MetroColorStyle.Brown;
+                Themer.Style = MetroColorStyle.Orange;
             }
             else if (a == "Magenta")
             {
-                Themer.Style = MetroColorStyle.Purple;
+                Themer.Style = MetroColorStyle.Magenta;
             }
             else if (a == "Lime")
             {
-                Themer.Style = MetroColorStyle.Teal;
+                Themer.Style = MetroColorStyle.Lime;
             }
             else if (a == "Green")
             {
-                Themer.Style = MetroColorStyle.Lime;
+                Themer.Style = MetroColorStyle.Green;
             }
             else if (a == "Default")
             {
-                Themer.Style = MetroColorStyle.Black;
+                Themer.Style = MetroColorStyle.Blue;
             }
             else if (a == "Brown")
             {
-                Themer.Style = MetroColorStyle.Pink;
+                Themer.Style = MetroColorStyle.Brown;
             }
             else if (a == "Blue")
             {
-                Themer.Style = MetroColorStyle.Green;
+                Themer.Style = MetroColorStyle.Blue;
             }
             else if (a == "Silver")
             {
-                Themer.Style = MetroColorStyle.Blue;
+                Themer.Style = MetroColorStyle.Silver;
             }
             else if (a == "Teal")
             {
-                Themer.Style = MetroColorStyle.Orange;
+                Themer.Style = MetroColorStyle.Teal;
             }
             else if (a == "White")
             {
-                Themer.Style = MetroColorStyle.Silver;
+                Themer.Style = MetroColorStyle.White;
             }
             else if (a == "Yellow")
             {
-                Themer.Style = (MetroColorStyle)14;
+                Themer.Style = MetroColorStyle.Yellow;
             }
             Prompt.ColorSet = Themer.Style;
             base.Style = Themer.Style;

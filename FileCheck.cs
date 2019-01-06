@@ -143,48 +143,14 @@ namespace Revamped_BnS_Buddy
 
         public FileCheck()
 		{
-			bool flag = false;
-			if (!File.Exists(AppPath + "\\MetroFramework.dll"))
-			{
-				try
-				{
-					//File.WriteAllBytes(AppPath + "\\MetroFramework.dll", Resources.MetroFramework);
-				}
-				catch
-				{
-					flag = true;
-				}
-			}
-			if (!flag)
-			{
-                
-				mutex = new Mutex(true, "BnSBuddy", out bool createdNew);
-				if (!createdNew)
-				{
-					Prompt.Popup("BnS Buddy is already running! Closing...");
-					KillApp();
-				}
-				Application.Run(new Form1());
-				Dispose();
-			}
-			else
-			{
-				ProcessStartInfo startInfo = new ProcessStartInfo("cmd", "/c timeout 2 && \"" + Application.ExecutablePath + "\"")
-				{
-					Verb = "runas",
-					RedirectStandardError = false,
-					RedirectStandardOutput = false,
-					UseShellExecute = true,
-					CreateNoWindow = true,
-					WindowStyle = ProcessWindowStyle.Hidden
-				};
-				using (Process process = new Process())
-				{
-					process.StartInfo = startInfo;
-					process.Start();
-				}
-				KillApp();
-			}
+            mutex = new Mutex(true, "BnSBuddy", out bool createdNew);
+            if (!createdNew)
+            {
+                Prompt.Popup("BnS Buddy is already running! Closing...");
+                KillApp();
+            }
+            Application.Run(new Form1());
+            //Dispose();
 		}
 
 		public void KillApp()
@@ -203,20 +169,14 @@ namespace Revamped_BnS_Buddy
 
 		private void InitializeComponent()
 		{
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FileCheck));
-            this.SuspendLayout();
-            // 
-            // FileCheck
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(120, 0);
-            this.ControlBox = false;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "FileCheck";
-            this.Text = "FileCheck";
-            this.ResumeLayout(false);
-
+			SuspendLayout();
+			base.AutoScaleDimensions = new System.Drawing.SizeF(6f, 13f);
+			base.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			base.ClientSize = new System.Drawing.Size(120, 0);
+			base.ControlBox = false;
+			base.Name = "FileCheck";
+			Text = "FileCheck";
+			ResumeLayout(false);
 		}
 	}
 }

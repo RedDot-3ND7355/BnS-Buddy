@@ -226,6 +226,63 @@ namespace BNSDat
             fileStream = null;
         }
 
+        public string[] GetFileList(string FileName, bool is64 = false)
+        {
+            string[] toreturn;
+            FileStream fileStream = new FileStream(FileName, FileMode.Open);
+            BinaryReader binaryReader = new BinaryReader(fileStream);
+            binaryReader.ReadBytes(8);
+            binaryReader.ReadUInt32();
+            binaryReader.ReadBytes(5);
+            if (!is64)
+            {
+                binaryReader.ReadInt32();
+            }
+            else
+            {
+                binaryReader.ReadInt64();
+            }
+            int num = (int)(is64 ? binaryReader.ReadInt64() : binaryReader.ReadInt32());
+            toreturn = new string[num];
+            bool isCompressed = binaryReader.ReadByte() == 1;
+            bool isEncrypted = binaryReader.ReadByte() == 1;
+            binaryReader.ReadBytes(62);
+            int num2 = (int)(is64 ? binaryReader.ReadInt64() : binaryReader.ReadInt32());
+            int sizeUnpacked = (int)(is64 ? binaryReader.ReadInt64() : binaryReader.ReadInt32());
+            byte[] buffer = binaryReader.ReadBytes(num2);
+            int num3 = (int)(is64 ? binaryReader.ReadInt64() : binaryReader.ReadInt32());
+            num3 = (int)binaryReader.BaseStream.Position;
+            byte[] buffer2 = Unpack(buffer, num2, num2, sizeUnpacked, isEncrypted, isCompressed);
+            buffer = null;
+            MemoryStream memoryStream = new MemoryStream(buffer2);
+            BinaryReader binaryReader2 = new BinaryReader(memoryStream);
+            for (int i = 0; i < num; i++)
+            {
+                BPKG_FTE bPKG_FTE = new BPKG_FTE();
+                bPKG_FTE.FilePathLength = (int)(is64 ? binaryReader2.ReadInt64() : binaryReader2.ReadInt32());
+                bPKG_FTE.FilePath = Encoding.Unicode.GetString(binaryReader2.ReadBytes(bPKG_FTE.FilePathLength * 2));
+                bPKG_FTE.Unknown_001 = binaryReader2.ReadByte();
+                bPKG_FTE.IsCompressed = (binaryReader2.ReadByte() == 1);
+                bPKG_FTE.IsEncrypted = (binaryReader2.ReadByte() == 1);
+                bPKG_FTE.Unknown_002 = binaryReader2.ReadByte();
+                bPKG_FTE.FileDataSizeUnpacked = (int)(is64 ? binaryReader2.ReadInt64() : binaryReader2.ReadInt32());
+                bPKG_FTE.FileDataSizeSheared = (int)(is64 ? binaryReader2.ReadInt64() : binaryReader2.ReadInt32());
+                bPKG_FTE.FileDataSizeStored = (int)(is64 ? binaryReader2.ReadInt64() : binaryReader2.ReadInt32());
+                bPKG_FTE.FileDataOffset = (int)(is64 ? binaryReader2.ReadInt64() : binaryReader2.ReadInt32()) + num3;
+                bPKG_FTE.Padding = binaryReader2.ReadBytes(60);
+                toreturn[i] = bPKG_FTE.FilePath;
+            }
+            binaryReader2.Close();
+            memoryStream.Close();
+            binaryReader2 = null;
+            memoryStream = null;
+            binaryReader.Close();
+            fileStream.Close();
+            binaryReader = null;
+            fileStream = null;
+            return toreturn; 
+        }
+
         public Dictionary<string, byte[]> ExtractFile(string FileName, List<string> filesToExtract, bool is64 = false)
         {
             Dictionary<string, byte[]> dictionary = new Dictionary<string, byte[]>();
