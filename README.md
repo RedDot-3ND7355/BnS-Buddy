@@ -19,6 +19,7 @@ Credits:
 + ronny1982 - For bnsdat tool 
 + LokiReborn - For porting bnsdat to C# and adding AuthToken
 + Yevvie - For Icons, Splash art and BnS Buddy Forum images
++ Airix - For providing a battleground fix
 
 
 Requirements:
