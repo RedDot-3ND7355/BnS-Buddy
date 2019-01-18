@@ -101,6 +101,16 @@ namespace Revamped_BnS_Buddy.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] BnS_Buddy_Updater {
+            get {
+                object obj = ResourceManager.GetObject("BnS_Buddy_Updater", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap buddysplash_big {

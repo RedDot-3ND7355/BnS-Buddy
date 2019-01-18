@@ -166,7 +166,6 @@ namespace Revamped_BnS_Buddy
                 };
                 metroButton.TabStop = false;
                 metroComboBox.Items.Add("Choose Default Installation");
-                //metroComboBox.Text = "Choose Default Installation";
                 if (installs.ContainsKey("NA/EU") && installs["NA/EU"].ToString().Length > 1)
                 {
                     metroComboBox.Items.Add("NA/EU");
@@ -924,15 +923,27 @@ namespace Revamped_BnS_Buddy
 
         private Dictionary<string, Dictionary<string, string[]>> filesToEdit;
 
+        private static Mutex mutex;
+        public void FileCheck()
+        {
+            mutex = new Mutex(true, "BnSBuddy", out bool createdNew);
+            if (!createdNew)
+            {
+                Prompt.Popup("BnS Buddy is already running! Closing...");
+                KillApp();
+            }
+        }
+
         public Form1()
         {
             CurrentForm = this;
             InitializeComponent();
-            Unhandler();
+            //Unhandler();
             initControlsRecursive(base.Controls);
-            ValidateBuddy(); // Readded
+            ValidateBuddy();
             SetUniqueKey();
             CheckTab();
+            FileCheck();
             OSCheck();
             AdminChecker();
             FirstTimeUse();
@@ -1632,6 +1643,8 @@ namespace Revamped_BnS_Buddy
             SetDefaultLanguage(metroComboBox5.SelectedItem.ToString());
         }
 
+        public string fl_wlng = "";
+        public string fh_lang = "";
         public void AutoDirFinder()
         {
             string text = "";
@@ -2062,7 +2075,7 @@ namespace Revamped_BnS_Buddy
             base.TopMost = true;
             base.TopMost = false;
         }
-
+        
         private void CheckBGFiX()
         {
             string pathtobgfix = modsFolderPath + "\\BGFix";
@@ -2395,6 +2408,7 @@ namespace Revamped_BnS_Buddy
             }
         }
 
+        TextBox virtualverify = new TextBox();
         public void CheckTab()
         {
             try
@@ -2403,6 +2417,7 @@ namespace Revamped_BnS_Buddy
                 {
                     File.WriteAllText(AppPath + "\\Settings.ini", DefaultValues);
                 }
+                // Check if updated
                 if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("menuslidereffect"))
                 {
                     if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("customlang"))
@@ -2423,6 +2438,45 @@ namespace Revamped_BnS_Buddy
                         File.Delete(AppPath + "\\Settings.ini");
                         File.WriteAllText(AppPath + "\\Settings.ini", DefaultValues);
                     }
+                }
+                try
+                {
+                    string[] array3 = File.ReadAllLines(AppPath + "\\Settings.ini");
+                    virtualverify.Text = DefaultValues;
+                    string[] array4 = virtualverify.Lines;
+                    int linesfixed = 0;
+                    for (int i = 0; i < array4.Length; i++)
+                    {
+                        string o_o = "";
+                        string i_i = "";
+                        int index = array3[i].IndexOf("=");
+                        if (index > 0)
+                        {
+                            o_o = array3[i].Substring(0, index);
+                        }
+                        int index2 = array4[i].IndexOf("=");
+                        if (index2 > 0)
+                        {
+                            i_i = array4[i].Substring(0, index);
+                        }
+                        if (o_o != i_i)
+                        {
+                            array3[i] = array4[i];
+                            linesfixed++;
+                        }
+                    }
+                    if (linesfixed > 0)
+                    {
+                        File.WriteAllLines(AppPath + "\\Settings.ini", array3);
+                        Prompt.Popup($"BnS Buddy Detected {linesfixed} broken settings and fixed them for you.");
+                    }
+                }
+                catch
+                {
+                    virtualverify.Text = "";
+                    File.Delete(AppPath + "\\Settings.ini");
+                    File.WriteAllText(AppPath + "\\Settings.ini", DefaultValues);
+                    Prompt.Popup("Resetted Settings.ini due to bad config");
                 }
                 if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("savelogs = true"))
                 {
@@ -2835,6 +2889,7 @@ namespace Revamped_BnS_Buddy
             }
             catch
             {
+                Prompt.Popup("Error reading Settings.ini");
             }
         }
 
@@ -3147,6 +3202,11 @@ namespace Revamped_BnS_Buddy
             {
                 metroLabel65.Visible = false;
             }
+            if (metroComboBox1.SelectedItem == null)
+            {
+                metroButton1.Enabled = false;
+                metroToolTip1.SetToolTip(metroButton1, "No Server Selected!");
+            } else { metroButton1.Enabled = true; }
         }
 
         public void CheckServer()
@@ -3638,7 +3698,7 @@ namespace Revamped_BnS_Buddy
                 AddTextLog("Checking system.config2.xml if modded");
                 metroButton2.Enabled = true;
                 string value = "<option name=\"use-web-launching\" value=\"false\" />";
-                if (File.ReadAllText(DataPath + "\\" + usedfile + ".files\\system.config2.xml").Contains(value))
+                if (virtualtext.Text.Contains(value))
                 {
                     AddTextLog(usedfile + " is Modded");
                     metroLabel14.Text = "Patched!";
@@ -3656,13 +3716,15 @@ namespace Revamped_BnS_Buddy
                     metroButton2.Enabled = false;
                     metroButton2.Enabled = false;
                 }
+                virtualtext.Text = "";
             }
             catch
             {
-                AddTextLog("Error: Could not verify system.config2.xml (" + usedfile + " in use)");
+                AddTextLog("Error: Could not verify system.config2.xml (" + usedfile + " in use or corrupted?)");
             }
         }
 
+        TextBox virtualtext = new TextBox();
         public void CheckConfigBackup()
         {
             FileInfo[] files = new DirectoryInfo(DataPath).GetFiles("*.dat");
@@ -3673,11 +3735,19 @@ namespace Revamped_BnS_Buddy
                 {
                     usedfile = fileInfo.ToString();
                     usedfilepath = DataPath + "\\" + usedfile;
-                    AddTextLog("Extracting " + usedfile + " for verification");
+                    AddTextLog("Extracting system.config2.xml for verification from " + fileInfo.ToString());
                     metroButton2.Enabled = true;
                     try
                     {
-                        Extractor(usedfile);
+                        virtualtext = new TextBox();
+                        nametofile = "system.config2.xml";
+                        BNSDat.BNSDat bNSDat = new BNSDat.BNSDat();
+                        Dictionary<string, byte[]> dictionary = bNSDat.ExtractFile(usedfilepath, new List<string>
+                        {
+                        nametofile
+                        }, usedfile.Contains("64"));
+                        var bytes = dictionary[nametofile];
+                        virtualtext.Text = System.Text.Encoding.UTF8.GetString(bytes);
                         DoBackupCheck();
                     }
                     catch (Exception ex)
@@ -3925,6 +3995,7 @@ namespace Revamped_BnS_Buddy
                         {
                             AddTextLog("Update available.");
                             bool autoUpdate = AutoUpdate;
+                            metroButton3.Visible = true;
                         }
                         else if (online == "Error")
                         {
@@ -4058,7 +4129,7 @@ namespace Revamped_BnS_Buddy
             AddTextLog("Getting Ping From Server...");
             try
             {
-                if (metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("North America") || metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("Europe") || metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("Taiwan"))
+                if (metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("North America") || metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("Europe") || metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("Taiwan") || metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("Korean"))
                 {
                     Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                     socket.Blocking = true;
@@ -4108,14 +4179,14 @@ namespace Revamped_BnS_Buddy
             BackgroundWorker backgroundWorker = (BackgroundWorker)Sender;
             while (!backgroundWorker.CancellationPending)
             {
-                if (metroComboBox1.SelectedIndex != metroComboBox1.FindStringExact("North America") && metroComboBox1.SelectedIndex != metroComboBox1.FindStringExact("Europe") && metroComboBox1.SelectedIndex != metroComboBox1.FindStringExact("Taiwan"))
+                if (metroComboBox1.SelectedIndex != metroComboBox1.FindStringExact("North America") && metroComboBox1.SelectedIndex != metroComboBox1.FindStringExact("Europe") && metroComboBox1.SelectedIndex != metroComboBox1.FindStringExact("Taiwan") || metroComboBox1.SelectedIndex != metroComboBox1.FindStringExact("Korean"))
                 {
                     backgroundWorker.ReportProgress(0);
                 }
                 Thread.Sleep(wakeywakey);
                 try
                 {
-                    if (metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("North America") || metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("Europe") || metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("Taiwan"))
+                    if (metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("North America") || metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("Europe") || metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("Taiwan") || metroComboBox1.SelectedIndex == metroComboBox1.FindStringExact("Korean"))
                     {
                         Socket socket2 = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                         socket2.Blocking = true;
@@ -4514,8 +4585,8 @@ namespace Revamped_BnS_Buddy
                 {
                     string pathtobgfix = modsFolderPath + "\\BGFix";
                     Directory.CreateDirectory(pathtobgfix);
-                    string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                    text = text.Replace("unattended = false", "unattended = true");
+                    metroCheckBox1.Checked = true;
+                    Unattended = "-UNATTENDED";
                     File.WriteAllBytes(pathtobgfix + "\\00025242.upk", Resources._00025242);
                     File.WriteAllBytes(pathtobgfix + "\\00025243.upk", Resources._00025243);
                     File.WriteAllBytes(pathtobgfix + "\\00025244.upk", Resources._00025244);
@@ -4659,6 +4730,7 @@ namespace Revamped_BnS_Buddy
                 {
                     File.Delete(AppPath + "\\BnS Buddy Updater.exe");
                 }
+                File.WriteAllBytes(AppPath + "\\BnS Buddy Updater.exe", Revamped_BnS_Buddy.Properties.Resources.BnS_Buddy_Updater);
                 Process process = new Process();
                 process.StartInfo.FileName = AppPath + "\\BnS Buddy Updater.exe";
                 process.Start();
@@ -6027,7 +6099,6 @@ namespace Revamped_BnS_Buddy
                 tmpnode = fileName.ToString();
                 newbackuppath = backupFolderPath + "\\" + tmpnode;
                 DirectoryInfo directoryInfo = new DirectoryInfo(RealModPath);
-                BackgroundWorker backgroundWorker = sender as BackgroundWorker;
                 string empty = string.Empty;
                 int num = 0;
                 int num2 = 0;
@@ -6036,9 +6107,13 @@ namespace Revamped_BnS_Buddy
                 int num4 = 0;
                 if (num3 != 0)
                 {
+                    metroProgressBar2.Value = 0;
                     string[] files = Directory.GetFiles(RealModPath);
                     for (int i = 0; i < files.Length; i++)
                     {
+                        metroProgressBar2.Maximum = files.Length;
+                        metroProgressBar2.PerformStep();
+                        metroProgressBar2.Refresh();
                         string text2 = files[i].Split(Path.DirectorySeparatorChar).Last();
                         if (text2 != "description.txt" && (text2.EndsWith(".upk") || text2.EndsWith(".umap")))
                         {
@@ -6064,13 +6139,13 @@ namespace Revamped_BnS_Buddy
                             num++;
                             num2++;
                             num4 = num2 * 100 / num3;
-                            if (backgroundWorker.CancellationPending)
+                            if (bw.CancellationPending)
                             {
                                 e.Cancel = true;
                                 break;
                             }
                             Thread.Sleep(50);
-                            backgroundWorker.ReportProgress(num4);
+                            bw.ReportProgress(num4);
                         }
                     }
                     if (num > 0)
@@ -6138,16 +6213,19 @@ namespace Revamped_BnS_Buddy
                 num5 = directoryInfo3.GetFiles("*.upk").Count();
                 num5 += directoryInfo3.GetFiles("*.umap").Count();
             }
-            BackgroundWorker backgroundWorker2 = sender as BackgroundWorker;
             string empty2 = string.Empty;
             int num6 = 0;
             int num7 = 0;
             int num8 = 0;
             if (!flag)
             {
+                metroProgressBar2.Value = 0;
                 string[] files2 = Directory.GetFiles(RealModPath);
                 for (int j = 0; j < files2.Length; j++)
                 {
+                    metroProgressBar2.Maximum = files2.Length;
+                    metroProgressBar2.PerformStep();
+                    metroProgressBar2.Refresh();
                     string text3 = files2[j].Split(Path.DirectorySeparatorChar).Last();
                     string text4 = name.Replace(" (Installed)", "");
                     Control.CheckForIllegalCrossThreadCalls = false;
@@ -6169,13 +6247,13 @@ namespace Revamped_BnS_Buddy
                             num6++;
                             num7++;
                             num8 = num7 * 100 / num5;
-                            if (backgroundWorker2.CancellationPending)
+                            if (bw.CancellationPending)
                             {
                                 e.Cancel = true;
                                 goto IL_0650;
                             }
                             Thread.Sleep(50);
-                            backgroundWorker2.ReportProgress(num8);
+                            bw.ReportProgress(num8);
                         }
                     }
                     catch
@@ -6188,9 +6266,13 @@ namespace Revamped_BnS_Buddy
             IL_0650:
             if (flag)
             {
+                metroProgressBar2.Value = 0;
                 string[] files3 = Directory.GetFiles(newbackuppath);
                 for (int k = 0; k < files3.Length; k++)
                 {
+                    metroProgressBar2.Maximum = files3.Length;
+                    metroProgressBar2.PerformStep();
+                    metroProgressBar2.Refresh();
                     string text5 = files3[k].Split(Path.DirectorySeparatorChar).Last();
                     Control.CheckForIllegalCrossThreadCalls = false;
                     AddTextBoxLog(Environment.NewLine);
@@ -6245,13 +6327,13 @@ namespace Revamped_BnS_Buddy
                     num6++;
                     num7++;
                     num8 = num7 * 100 / num5;
-                    if (backgroundWorker2.CancellationPending)
+                    if (bw.CancellationPending)
                     {
                         e.Cancel = true;
                         break;
                     }
                     Thread.Sleep(50);
-                    backgroundWorker2.ReportProgress(num8);
+                    bw.ReportProgress(num8);
                 }
             }
             if (Directory.Exists(newbackuppath) && Directory.GetFiles(newbackuppath).Length == 0)
@@ -6288,9 +6370,12 @@ namespace Revamped_BnS_Buddy
 
         private void bw_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            metroProgressBar2.Maximum = 100;
-            metroProgressBar2.Value = e.ProgressPercentage;
-            metroProgressBar2.Refresh();
+            var maxint = metroProgressBar2.Maximum;
+            var curint = metroProgressBar2.Value;
+            if (curint == maxint)
+            {
+                metroProgressBar2.Value = 0;
+            }
         }
 
         private void bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -8172,7 +8257,7 @@ namespace Revamped_BnS_Buddy
         {
             try
             {
-                if (e.Node.Name.EndsWith(".xml"))
+                if (!e.Node.Name.EndsWith(".bin"))
                 {
                     treeView1.Enabled = false;
                     metroLabel39.Text = "Loading...";
@@ -8184,7 +8269,7 @@ namespace Revamped_BnS_Buddy
                     {
                         nametofile
                     }, ActiveDataFile.Contains("64"));
-                    var bytes = dictionary[nametofile]; // here
+                    var bytes = dictionary[nametofile];
                     fastColoredTextBox1.Text = System.Text.Encoding.UTF8.GetString(bytes);
                     metroLabel39.Text = "Done!";
                     metroLabel39.Refresh();
@@ -8221,24 +8306,33 @@ namespace Revamped_BnS_Buddy
         {
             if (metroComboBox3.Items[metroComboBox3.SelectedIndex].ToString().Contains(".dat") && myDictionary[metroComboBox3.Items[metroComboBox3.SelectedIndex].ToString()].Length > 0)
             {
-                metroComboBox3.Enabled = false;
-                fastColoredTextBox1.Clear();
-                metroLabel39.Text = "Loading...";
-                metroLabel39.Refresh();
-                ActiveDataFile = metroComboBox3.Items[metroComboBox3.SelectedIndex].ToString();
-                string str = myDictionary[ActiveDataFile];
-                treeView1.Nodes.Clear();
-                if (ActiveDataFile.Contains("64")) { BNSis64 = true; } else { BNSis64 = false; }
-                BNSDat.BNSDat testingpur = new BNSDat.BNSDat();
-                string[] test = testingpur.GetFileList(str + "\\" + ActiveDataFile, BNSis64);
-                treeView1.Nodes.Add(PopulateTreeNode2(test));
-                treeView1.Nodes[0].Text = ActiveDataFile;
-                treeView1.Nodes[0].Expand();
-                //toolStripButton2.Enabled = true;
-                treeView1.AfterSelect += treeView1_AfterSelect;
-                metroLabel39.Text = "Loaded list!";
-                metroLabel39.Refresh();
-                metroComboBox3.Enabled = true;
+                try
+                {
+                    metroComboBox3.Enabled = false;
+                    fastColoredTextBox1.Clear();
+                    metroLabel39.Text = "Loading...";
+                    metroLabel39.Refresh();
+                    ActiveDataFile = metroComboBox3.Items[metroComboBox3.SelectedIndex].ToString();
+                    string str = myDictionary[ActiveDataFile];
+                    treeView1.Nodes.Clear();
+                    if (ActiveDataFile.Contains("64")) { BNSis64 = true; } else { BNSis64 = false; }
+                    BNSDat.BNSDat testingpur = new BNSDat.BNSDat();
+                    string[] test = testingpur.GetFileList(str + "\\" + ActiveDataFile, BNSis64);
+                    treeView1.Nodes.Add(PopulateTreeNode2(test));
+                    treeView1.Nodes[0].Text = ActiveDataFile;
+                    treeView1.Nodes[0].Expand();
+                    treeView1.AfterSelect += treeView1_AfterSelect;
+                    treeView1.Enabled = true;
+                    metroLabel39.Text = "Loaded list!";
+                    metroLabel39.Refresh();
+                    metroComboBox3.Enabled = true;
+                }
+                catch
+                {
+                    metroLabel39.Text = "Corrupted file!";
+                    metroLabel39.Refresh();
+                    Prompt.Popup("Error: The file " + ActiveDataFile + " is corrupted! Please do a file repair using NCLauncher.");
+                }
             }
             else if (metroComboBox3.Items[metroComboBox3.SelectedIndex].ToString() == "Select a File")
             {
@@ -8484,14 +8578,42 @@ namespace Revamped_BnS_Buddy
             }
             string text = "";
             string text2 = "";
-            FileInfo[] files = new DirectoryInfo(DataPath).GetFiles("*.dat");
-            foreach (FileInfo fileInfo in files)
+            if (Directory.Exists(DataPath))
             {
-                text = fileInfo.ToString();
-                text2 = Path.GetDirectoryName(fileInfo.FullName);
-                text2.Replace("\\\\", "\\");
-                myDictionary.Add(fileInfo.Name, text2);
-                metroComboBox3.Items.Add(text);
+                FileInfo[] files = new DirectoryInfo(DataPath).GetFiles("*.dat");
+                foreach (FileInfo fileInfo in files)
+                {
+                    if (fileInfo != null)
+                    {
+                        text = fileInfo.ToString();
+                        text2 = Path.GetDirectoryName(fileInfo.FullName);
+                        text2.Replace("\\\\", "\\");
+                        if (!myDictionary.ContainsKey(fileInfo.Name))
+                        {
+                            myDictionary.Add(fileInfo.Name, text2);
+                            metroComboBox3.Items.Add(text);
+                        }
+                    }
+                }
+            }
+            fh_lang = modsFolderPath.Replace("\\CookedPC\\mod", "\\data");
+            if (Directory.Exists(fh_lang))
+            {
+                FileInfo[] files = new DirectoryInfo(fh_lang).GetFiles("*.dat");
+                foreach (FileInfo fileInfo in files)
+                {
+                    if (fileInfo != null)
+                    {
+                        text = fileInfo.ToString();
+                        text2 = Path.GetDirectoryName(fileInfo.FullName);
+                        text2.Replace("\\\\", "\\");
+                        if (!myDictionary.ContainsKey(fileInfo.Name))
+                        {
+                            myDictionary.Add(fileInfo.Name, text2);
+                            metroComboBox3.Items.Add(text);
+                        }
+                    }
+                }
             }
             if (metroComboBox3.Items.Count > 0)
             {
@@ -11266,6 +11388,7 @@ namespace Revamped_BnS_Buddy
                             backgroundWorker.DoWork += delegate
                             {
                                 enterCodePrompt.ShowDialog();
+                                metroButton1.Enabled = true;
                             };
                             backgroundWorker.RunWorkerAsync();
                         }
@@ -11309,11 +11432,11 @@ namespace Revamped_BnS_Buddy
                 case "Korean":
                     if (metroComboBox8.SelectedItem.ToString() == "Live")
                     {
-                        process.StartInfo.Arguments = "/LaunchByLauncher /AuthnToken:" + FinalToken + " /SessKey:" + FinalToken + " /ServiceRegion:" + LoginId + " /AuthProviderCode:np /ServiceNetwork:live /NPServerAddr:" + LoginIp + ":" + LoginPort + " -lite:8 /PresenceId:BNS_KOR " + UseAllCores + " " + Unattended + " " + NoTextureStreaming + " " + metroTextBox5.Text;
+                        process.StartInfo.Arguments = "/LaunchByLauncher /UidHash:\"\" /UserAge:21 /AuthnToken:" + FinalToken + " /SessKey:" + FinalToken + " /ServiceRegion:" + LoginId + " /AuthProviderCode:np /ServiceNetwork:live /NPServerAddr:\"https://api.ncsoft.com:443\" -lite:8 /PresenceId:BNS_KOR " + UseAllCores + " " + Unattended + " " + NoTextureStreaming + " " + metroTextBox5.Text;
                     }
                     else
                     {
-                        process.StartInfo.Arguments = "/LaunchByLauncher /AuthnToken:" + FinalToken + " /SessKey:" + FinalToken + " /ServiceRegion:" + LoginId + " /AuthProviderCode:np /ServiceNetwork:live /NPServerAddr:" + LoginIp + ":" + LoginPort + " -lite:8 /PresenceId:BNS_KOR_TEST " + UseAllCores + " " + Unattended + " " + NoTextureStreaming + " " + metroTextBox5.Text;
+                        process.StartInfo.Arguments = "/LaunchByLauncher /UidHash:\"\" /UserAge:21 /AuthnToken:" + FinalToken + " /SessKey:" + FinalToken + " /ServiceRegion:" + LoginId + " /AuthProviderCode:np /ServiceNetwork:live /NPServerAddr:\"https://api.ncsoft.com:443\" -lite:8 /PresenceId:BNS_KOR_TEST " + UseAllCores + " " + Unattended + " " + NoTextureStreaming + " " + metroTextBox5.Text;
                     }
                     break;
                 case "Taiwan":

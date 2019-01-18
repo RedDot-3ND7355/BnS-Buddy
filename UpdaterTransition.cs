@@ -36,9 +36,6 @@ namespace Revamped_BnS_Buddy
 
             public static void Popup(string Message)
             {
-                File.ReadLines(AppPath + "\\Settings.ini").Skip(43).Take(1)
-                    .First()
-                    .Replace("buddycolor = ", "");
                 ComponentResourceManager componentResourceManager = new ComponentResourceManager(typeof(Form1));
                 MetroForm metroForm = new MetroForm();
                 metroForm.ShadowType = MetroFormShadowType.AeroShadow;
@@ -276,63 +273,63 @@ namespace Revamped_BnS_Buddy
                     .Replace("buddycolor = ", "");
                 if (a == "Black")
                 {
-                    metroStyleManager1.Style = MetroColorStyle.White;
+                    metroStyleManager1.Style = MetroColorStyle.Black;
                 }
                 else if (a == "Red")
                 {
-                    metroStyleManager1.Style = MetroColorStyle.Yellow;
+                    metroStyleManager1.Style = MetroColorStyle.Red;
                 }
                 else if (a == "Purple")
                 {
-                    metroStyleManager1.Style = MetroColorStyle.Red;
+                    metroStyleManager1.Style = MetroColorStyle.Purple;
                 }
                 else if (a == "Pink")
                 {
-                    metroStyleManager1.Style = MetroColorStyle.Magenta;
+                    metroStyleManager1.Style = MetroColorStyle.Pink;
                 }
                 else if (a == "Orange")
                 {
-                    metroStyleManager1.Style = MetroColorStyle.Brown;
+                    metroStyleManager1.Style = MetroColorStyle.Orange;
                 }
                 else if (a == "Magenta")
                 {
-                    metroStyleManager1.Style = MetroColorStyle.Purple;
+                    metroStyleManager1.Style = MetroColorStyle.Magenta;
                 }
                 else if (a == "Lime")
                 {
-                    metroStyleManager1.Style = MetroColorStyle.Teal;
+                    metroStyleManager1.Style = MetroColorStyle.Lime;
                 }
                 else if (a == "Green")
                 {
-                    metroStyleManager1.Style = MetroColorStyle.Lime;
+                    metroStyleManager1.Style = MetroColorStyle.Green;
                 }
                 else if (a == "Default")
                 {
-                    metroStyleManager1.Style = MetroColorStyle.Black;
+                    metroStyleManager1.Style = MetroColorStyle.Default;
                 }
                 else if (a == "Brown")
                 {
-                    metroStyleManager1.Style = MetroColorStyle.Pink;
+                    metroStyleManager1.Style = MetroColorStyle.Brown;
                 }
                 else if (a == "Blue")
                 {
-                    metroStyleManager1.Style = MetroColorStyle.Green;
+                    metroStyleManager1.Style = MetroColorStyle.Blue;
                 }
                 else if (a == "Silver")
                 {
-                    metroStyleManager1.Style = MetroColorStyle.Blue;
+                    metroStyleManager1.Style = MetroColorStyle.Silver;
                 }
                 else if (a == "Teal")
                 {
-                    metroStyleManager1.Style = MetroColorStyle.Orange;
+                    metroStyleManager1.Style = MetroColorStyle.Teal;
                 }
                 else if (a == "White")
                 {
-                    metroStyleManager1.Style = MetroColorStyle.Silver;
+                    metroStyleManager1.Style = MetroColorStyle.White;
                 }
                 else if (a == "Yellow")
                 {
-                    metroStyleManager1.Style = (MetroColorStyle)14;
+                    metroStyleManager1.Style = MetroColorStyle.Yellow;
                 }
                 base.Style = metroStyleManager1.Style;
                 Refresh();
