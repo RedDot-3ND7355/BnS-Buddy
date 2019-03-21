@@ -79,6 +79,7 @@ namespace Revamped_BnS_Buddy
             this.metroTextBox1.UseStyleColors = true;
             this.metroTextBox1.WaterMarkColor = System.Drawing.Color.FromArgb(((int)(((byte)(109)))), ((int)(((byte)(109)))), ((int)(((byte)(109)))));
             this.metroTextBox1.WaterMarkFont = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Pixel);
+            this.metroTextBox1.TextChanged += new System.EventHandler(this.metroTextBox1_TextChanged);
             this.metroTextBox1.Click += new System.EventHandler(this.metroTextBox1_Click);
             this.metroTextBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.metroTextBox1_KeyPress);
             // 
@@ -159,8 +160,6 @@ namespace Revamped_BnS_Buddy
         }
         private MetroLabel metroLabel1;
 
-        private MetroButton metroButton1;
-
         private MetroButton metroButton2;
 
         private MetroToolTip metroToolTip1;
@@ -170,5 +169,6 @@ namespace Revamped_BnS_Buddy
         public MetroCheckBox metroCheckBox1;
 
         public MetroTextBox metroTextBox1;
+        public MetroButton metroButton1;
     }
 }

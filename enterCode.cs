@@ -116,12 +116,12 @@ namespace Revamped_BnS_Buddy
 
         private void metroTextBox1_KeyPress(object sender, KeyEventArgs e)
         {
-            if (e.KeyValue == (char)Keys.Return)
+            if (e.KeyValue == (char)Keys.Return && metroTextBox1.Text.Length == 6)
             {
                 f1.submitCode();
             }
 
-            if ((e.KeyValue >= '0' && e.KeyValue <= '9') || e.KeyValue == (Char)Keys.Delete || e.KeyValue == (Char)Keys.Back || e.Control && e.KeyValue == (Char)Keys.V) //The  character represents a backspace
+            if ((e.KeyValue >= '0' && e.KeyValue <= '9') || e.KeyValue == (Char)Keys.Delete || e.KeyValue == (Char)Keys.Back || e.Control && e.KeyValue == (Char)Keys.V || e.KeyValue >= 96 && e.KeyValue <= 105 || e.KeyValue == 37 || e.KeyValue == 39 || (e.Control && e.KeyValue == (Char)Keys.A)) //The  character represents a backspace
             {
                 e.SuppressKeyPress = false; //Do not reject the input
             }
@@ -134,6 +134,14 @@ namespace Revamped_BnS_Buddy
         private void metroTextBox1_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void metroTextBox1_TextChanged(object sender, EventArgs e)
+        {
+            if (metroTextBox1.Text.Length == 6)
+                metroButton1.Enabled = true;
+            else
+                metroButton1.Enabled = false;
         }
     }
 }

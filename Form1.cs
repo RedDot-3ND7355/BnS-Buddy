@@ -8,6 +8,7 @@ using MetroFramework.Drawing;
 using MetroFramework.Forms;
 using Microsoft.Win32;
 using Mono.Math;
+using Newtonsoft.Json.Linq;
 using Revamped_BnS_Buddy;
 using Revamped_BnS_Buddy.Properties;
 using System;
@@ -331,7 +332,7 @@ namespace Revamped_BnS_Buddy
                     StartPosition = FormStartPosition.CenterScreen
                 };
                 MetroLabel metroLabel = new MetroLabel();
-                metroLabel.Text = "You are about to restore configuration files back to normal" + Environment.NewLine + "Please make sure the files are dated from this patch." + Environment.NewLine + "Are you willing to continue?";
+                metroLabel.Text = "You are about to restore the selected file back to normal" + Environment.NewLine + "Please make sure the file is dated from this patch." + Environment.NewLine + "Are you willing to continue?";
                 metroLabel.AutoSize = true;
                 metroLabel.Left = 5;
                 metroLabel.Top = 20;
@@ -1569,6 +1570,23 @@ namespace Revamped_BnS_Buddy
                     else
                     {
                         KoreanTestInstalled = false;
+                    }
+                }
+            }
+            // last server used default
+            if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("lastserver = "))
+            {
+                string text99 = File.ReadLines(AppPath + "\\Settings.ini").Skip(44).Take(1)
+                    .First();
+                text99 = text99.Replace("lastserver = ", "");
+                if (text99.Length > 0)
+                {
+                    metroComboBox1.SelectedIndex = metroComboBox1.FindString(text99);
+                    if (Installs.ContainsKey(text99) || ((text99 == "Europe" || text99 == "North America") && Installs.ContainsKey("NA/EU")))
+                    {
+                        AddTextLog("Last used server: " + text99);
+                        PathFound = true;
+                        workedSRV = true;
                     }
                 }
             }
@@ -3084,6 +3102,10 @@ namespace Revamped_BnS_Buddy
                     RegPath = Installs[region].ToString();
                     flag = true;
                 }
+
+                // Save last server
+                lineChanger("lastserver = " + region, AppPath + "\\Settings.ini", 45);
+
                 if (flag)
                 {
                     bool flag2 = false;
@@ -3216,6 +3238,7 @@ namespace Revamped_BnS_Buddy
                 AddTextLog("Reading Registry...");
                 if (Installs.ContainsKey("NA/EU"))
                 {
+                    bool oldshit = true;
                     if (Installs["NA/EU"].ToString() == RegPath && Reg64)
                     {
                         if (!workedSRV)
@@ -3223,13 +3246,14 @@ namespace Revamped_BnS_Buddy
                             try
                             {
                                 RegistryKey localMachine = Registry.LocalMachine;
-                                localMachine = localMachine.OpenSubKey("SOFTWARE\\Wow6432Node\\NCWest\\NCLauncher\\");
+                                localMachine = localMachine.OpenSubKey("SOFTWARE\\Wow6432Node\\PlayNC\\NCLauncherW\\");
                                 if (localMachine != null)
                                 {
                                     RegPathlol = localMachine.GetValue("BaseDir").ToString();
                                     AddTextLog(RegPathlol);
                                     AddTextLog("Reg Key Valid!");
                                     workedSRV = true;
+                                    oldshit = false;
                                 }
                             }
                             catch
@@ -3243,18 +3267,63 @@ namespace Revamped_BnS_Buddy
                         try
                         {
                             RegistryKey localMachine2 = Registry.LocalMachine;
-                            localMachine2 = localMachine2.OpenSubKey("SOFTWARE\\NCWest\\NCLauncher\\");
+                            localMachine2 = localMachine2.OpenSubKey("SOFTWARE\\PlayNC\\NCLauncherW\\");
                             if (localMachine2 != null)
                             {
                                 RegPathlol = localMachine2.GetValue("BaseDir").ToString();
                                 AddTextLog(RegPathlol);
                                 AddTextLog("Reg Key Valid!");
                                 workedSRV = true;
+                                oldshit = false;
                             }
                         }
                         catch
                         {
                             AddTextLog("Null Value of RegKey");
+                        }
+                    }
+                    if (oldshit)
+                    {
+                        if (Installs["NA/EU"].ToString() == RegPath && Reg64)
+                        {
+                            if (!workedSRV)
+                            {
+                                try
+                                {
+                                    RegistryKey localMachine = Registry.LocalMachine;
+                                    localMachine = localMachine.OpenSubKey("SOFTWARE\\Wow6432Node\\NCWest\\NCLauncher\\");
+                                    if (localMachine != null)
+                                    {
+                                        RegPathlol = localMachine.GetValue("BaseDir").ToString();
+                                        AddTextLog(RegPathlol);
+                                        AddTextLog("Reg Key Valid!");
+                                        workedSRV = true;
+                                    }
+                                }
+                                catch
+                                {
+                                    AddTextLog("Null Value of RegKey");
+                                }
+                            }
+                        }
+                        else if (Installs["NA/EU"].ToString() == RegPath && !Reg64 && !workedSRV)
+                        {
+                            try
+                            {
+                                RegistryKey localMachine2 = Registry.LocalMachine;
+                                localMachine2 = localMachine2.OpenSubKey("SOFTWARE\\NCWest\\NCLauncher\\");
+                                if (localMachine2 != null)
+                                {
+                                    RegPathlol = localMachine2.GetValue("BaseDir").ToString();
+                                    AddTextLog(RegPathlol);
+                                    AddTextLog("Reg Key Valid!");
+                                    workedSRV = true;
+                                }
+                            }
+                            catch
+                            {
+                                AddTextLog("Null Value of RegKey");
+                            }
                         }
                     }
                 }
@@ -3432,6 +3501,32 @@ namespace Revamped_BnS_Buddy
             {
                 try
                 {
+                    if (File.Exists(RegPathlol + "\\UserSettings.config"))
+                    {
+                        XmlDocument document = new XmlDocument();
+                        document.Load(RegPathlol + "\\UserSettings.config");
+                        foreach (XmlNode nodes in document)
+                        {
+                            foreach (XmlNode node in nodes)
+                            {
+                                XmlAttributeCollection nodeAtt = node.Attributes;
+                                if (nodeAtt["key"].Value.ToString() == "GameRegionSettings")
+                                {
+                                    string settings = nodeAtt["value"].Value.ToString();
+                                    settings = settings.Replace("[", "").Replace("]", "");
+                                    var settingsholder = JObject.Parse(@settings);
+                                    if (settingsholder["GameRegionCode"].ToString() == "na")
+                                    {
+                                        metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("North America");
+                                    }
+                                    else
+                                    {
+                                        metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Europe");
+                                    }
+                                }
+                            }
+                        }
+                    }
                     if (File.Exists(RegPathlol + "\\NCLauncher.ini"))
                     {
                         string text = File.ReadAllText(RegPathlol + "\\NCLauncher.ini");
@@ -4150,7 +4245,7 @@ namespace Revamped_BnS_Buddy
             {
                 ping = 0;
             }
-            if (Regex.IsMatch(ping.ToString(), "^\\d+$"))
+            if (Regex.IsMatch(ping.ToString(), "^[0-9]+$"))
             {
                 if (ping != 0)
                 {
@@ -4405,6 +4500,34 @@ namespace Revamped_BnS_Buddy
                         enableButtons();
                     }
                 }
+            }
+            else
+            {
+                metroPanel6.Visible = false;
+                foreach (string key2 in ClientHandler.Keys)
+                {
+                    if (!ProcessExists(ClientHandler[key2]))
+                    {
+                        metroComboBox9.SelectedIndex = -1;
+                        metroComboBox9.Items.Remove(key2);
+                        ClearClient.Add(key2, key2);
+                        if (metroComboBox9.Items.Count > 1)
+                        {
+                            metroComboBox9.SelectedIndex = 1;
+                        }
+                        else
+                        {
+                            metroComboBox9.SelectedIndex = -1;
+                            metroPanel6.Visible = false;
+                        }
+                        AddTextLog(key2 + "'s Game Process Died");
+                    }
+                }
+                foreach (string key3 in ClearClient.Keys)
+                {
+                    ClientHandler.Remove(key3);
+                }
+                ClearClient = new Dictionary<string, string>();
             }
         }
 
@@ -7378,6 +7501,25 @@ namespace Revamped_BnS_Buddy
             RegPathlol = metroTextBox4.Text;
             try
             {
+                if (File.Exists(RegPathlol + "\\UserSettings.config"))
+                {
+                    XmlDocument document = new XmlDocument();
+                    document.LoadXml(RegPathlol + "\\UserSettings.config");
+                    XmlNodeList nodes = document.SelectNodes("AppSettings");
+                    foreach (XmlNode node in nodes)
+                    {
+                        Prompt.Popup(node.Attributes.ToString());
+                        XmlAttributeCollection nodeAtt = node.Attributes;
+                        if (nodeAtt["key"].Value.ToString() == "SavedGames")
+                        {
+                            //return childNode.SelectSingleNode("key/value").InnerText;
+                        }
+                        else
+                        {
+                            //return "did not match any documents";
+                        }
+                    }
+                }
                 if (File.Exists(RegPathlol + "\\NCLauncher.ini"))
                 {
                     string text2 = File.ReadAllText(RegPathlol + "\\NCLauncher.ini");
@@ -8257,7 +8399,7 @@ namespace Revamped_BnS_Buddy
         {
             try
             {
-                if (!e.Node.Name.EndsWith(".bin"))
+                if (!e.Node.Name.EndsWith(".bin") && e.Node.Name.Contains("."))
                 {
                     treeView1.Enabled = false;
                     metroLabel39.Text = "Loading...";
@@ -9591,147 +9733,208 @@ namespace Revamped_BnS_Buddy
             {
                 Directory.CreateDirectory(AppPath + "\\backup");
             }
-            if (File.Exists(AppPath + "\\backup\\00007916.upk"))
+            // ASS v
+            if (File.Exists(AppPath + "\\backup\\00007916.upk") || File.Exists(AppPath + "\\backup\\00056572.upk"))
             {
                 if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007916.upk"))
                 {
                     File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007916.upk", AppPath + "\\backup\\00007916.upk", overwrite: true);
                     File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007916.upk");
                 }
+                if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056572.upk"))
+                {
+                    File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056572.upk", AppPath + "\\backup\\00056572.upk", overwrite: true);
+                    File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056572.upk");
+                }
                 metroToggle39.Checked = false;
             }
-            else if (!File.Exists(AppPath + "\\backup\\00007916.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007916.upk"))
+            else if (!File.Exists(AppPath + "\\backup\\00007916.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007916.upk") && !File.Exists(AppPath + "\\backup\\00056572.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056572.upk"))
             {
                 metroToggle39.Enabled = false;
                 metroToggle39.Checked = false;
             }
-            if (File.Exists(AppPath + "\\backup\\00007917.upk"))
+            // SUM v
+            if (File.Exists(AppPath + "\\backup\\00007917.upk") || File.Exists(AppPath + "\\backup\\00056573.upk"))
             {
                 if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007917.upk"))
                 {
                     File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007917.upk", AppPath + "\\backup\\00007917.upk", overwrite: true);
                     File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007917.upk");
                 }
+                if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056573.upk"))
+                {
+                    File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056573.upk", AppPath + "\\backup\\00056573.upk", overwrite: true);
+                    File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056573.upk");
+                }
                 metroToggle36.Checked = false;
             }
-            else if (!File.Exists(AppPath + "\\backup\\00007917.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007917.upk"))
+            else if (!File.Exists(AppPath + "\\backup\\00007917.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007917.upk") && !File.Exists(AppPath + "\\backup\\00056573.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056573.upk"))
             {
                 metroToggle36.Enabled = false;
                 metroToggle36.Checked = false;
             }
-            if (File.Exists(AppPath + "\\backup\\00007915.upk"))
+            // GUN v
+            if (File.Exists(AppPath + "\\backup\\00007915.upk") || File.Exists(AppPath + "\\backup\\00056571.upk"))
             {
                 if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007915.upk"))
                 {
                     File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007915.upk", AppPath + "\\backup\\00007915.upk", overwrite: true);
                     File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007915.upk");
                 }
+                if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056571.upk"))
+                {
+                    File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056571.upk", AppPath + "\\backup\\00056571.upk", overwrite: true);
+                    File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056571.upk");
+                }
                 metroToggle34.Checked = false;
             }
-            else if (!File.Exists(AppPath + "\\backup\\00007915.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007915.upk"))
+            else if (!File.Exists(AppPath + "\\backup\\00007915.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007915.upk") && !File.Exists(AppPath + "\\backup\\00056571.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056571.upk"))
             {
                 metroToggle34.Enabled = false;
                 metroToggle34.Checked = false;
             }
-            if (File.Exists(AppPath + "\\backup\\00007914.upk"))
+            // DES v
+            if (File.Exists(AppPath + "\\backup\\00007914.upk") || File.Exists(AppPath + "\\backup\\00056570.upk"))
             {
                 if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007914.upk"))
                 {
                     File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007914.upk", AppPath + "\\backup\\00007914.upk", overwrite: true);
                     File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007914.upk");
                 }
+                if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056570.upk"))
+                {
+                    File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056570.upk", AppPath + "\\backup\\00056570.upk", overwrite: true);
+                    File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056570.upk");
+                }
                 metroToggle33.Checked = false;
             }
-            else if (!File.Exists(AppPath + "\\backup\\00007914.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007914.upk"))
+            else if (!File.Exists(AppPath + "\\backup\\00007914.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007914.upk") && !File.Exists(AppPath + "\\backup\\00056570.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056570.upk"))
             {
                 metroToggle33.Enabled = false;
                 metroToggle33.Checked = false;
             }
-            if (File.Exists(AppPath + "\\backup\\00007913.upk"))
+            // FM v
+            if (File.Exists(AppPath + "\\backup\\00007913.upk") || File.Exists(AppPath + "\\backup\\00056569.upk"))
             {
                 if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007913.upk"))
                 {
                     File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007913.upk", AppPath + "\\backup\\00007913.upk", overwrite: true);
                     File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007913.upk");
                 }
+                if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056569.upk"))
+                {
+                    File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056569.upk", AppPath + "\\backup\\00056569.upk", overwrite: true);
+                    File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056569.upk");
+                }
                 metroToggle32.Checked = false;
             }
-            else if (!File.Exists(AppPath + "\\backup\\00007913.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007913.upk"))
+            else if (!File.Exists(AppPath + "\\backup\\00007913.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007913.upk") && !File.Exists(AppPath + "\\backup\\00056569.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056569.upk"))
             {
                 metroToggle32.Enabled = false;
                 metroToggle32.Checked = false;
             }
-            if (File.Exists(AppPath + "\\backup\\00007912.upk"))
+            // KFM v
+            if (File.Exists(AppPath + "\\backup\\00007912.upk") || File.Exists(AppPath + "\\backup\\00056568.upk"))
             {
                 if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007912.upk"))
                 {
                     File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007912.upk", AppPath + "\\backup\\00007912.upk", overwrite: true);
                     File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007912.upk");
                 }
+                if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056568.upk"))
+                {
+                    File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056568.upk", AppPath + "\\backup\\00056568.upk", overwrite: true);
+                    File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056568.upk");
+                }
                 metroToggle35.Checked = false;
             }
-            else if (!File.Exists(AppPath + "\\backup\\00007912.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007912.upk"))
+            else if (!File.Exists(AppPath + "\\backup\\00007912.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007912.upk") && !File.Exists(AppPath + "\\backup\\00056568.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056568.upk"))
             {
                 metroToggle35.Enabled = false;
                 metroToggle35.Checked = false;
             }
-            if (File.Exists(AppPath + "\\backup\\00007911.upk"))
+            // BM v
+            if (File.Exists(AppPath + "\\backup\\00007911.upk") || File.Exists(AppPath + "\\backup\\00056567.upk"))
             {
                 if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007911.upk"))
                 {
                     File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007911.upk", AppPath + "\\backup\\00007911.upk", overwrite: true);
                     File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007911.upk");
                 }
+                if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056567.upk"))
+                {
+                    File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056567.upk", AppPath + "\\backup\\00056567.upk", overwrite: true);
+                    File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056567.upk");
+                }
                 metroToggle31.Checked = false;
             }
-            else if (!File.Exists(AppPath + "\\backup\\00007911.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007911.upk"))
+            else if (!File.Exists(AppPath + "\\backup\\00007911.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007911.upk") && !File.Exists(AppPath + "\\backup\\00056567.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056567.upk"))
             {
                 metroToggle31.Enabled = false;
                 metroToggle31.Checked = false;
             }
-            if (File.Exists(AppPath + "\\backup\\00023439.upk"))
+            // WL v
+            if (File.Exists(AppPath + "\\backup\\00023439.upk") || File.Exists(AppPath + "\\backup\\00056575.upk"))
             {
                 if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00023439.upk"))
                 {
                     File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00023439.upk", AppPath + "\\backup\\00023439.upk", overwrite: true);
                     File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00023439.upk");
                 }
+                if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056575.upk"))
+                {
+                    File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056575.upk", AppPath + "\\backup\\00056575.upk", overwrite: true);
+                    File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056575.upk");
+                }
                 metroToggle29.Checked = false;
             }
-            else if (!File.Exists(AppPath + "\\backup\\00023439.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00023439.upk"))
+            else if (!File.Exists(AppPath + "\\backup\\00023439.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00023439.upk") && !File.Exists(AppPath + "\\backup\\00056575.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056575.upk"))
             {
                 metroToggle29.Enabled = false;
                 metroToggle29.Checked = false;
             }
-            if (File.Exists(AppPath + "\\backup\\00034408.upk"))
+            // SF v
+            if (File.Exists(AppPath + "\\backup\\00034408.upk") || File.Exists(AppPath + "\\backup\\00056576.upk"))
             {
                 if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00034408.upk"))
                 {
                     File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00034408.upk", AppPath + "\\backup\\00034408.upk", overwrite: true);
                     File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00034408.upk");
                 }
+                if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056576.upk"))
+                {
+                    File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056576.upk", AppPath + "\\backup\\00056576.upk", overwrite: true);
+                    File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056576.upk");
+                }
                 metroToggle37.Checked = false;
             }
-            else if (!File.Exists(AppPath + "\\backup\\00034408.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00034408.upk"))
+            else if (!File.Exists(AppPath + "\\backup\\00034408.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00034408.upk") && !File.Exists(AppPath + "\\backup\\00056576.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056576.upk"))
             {
                 metroToggle37.Enabled = false;
                 metroToggle37.Checked = false;
             }
-            if (File.Exists(AppPath + "\\backup\\00018601.upk"))
+            // BD v
+            if (File.Exists(AppPath + "\\backup\\00018601.upk") || File.Exists(AppPath + "\\backup\\00056574.upk"))
             {
                 if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00018601.upk"))
                 {
                     File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00018601.upk", AppPath + "\\backup\\00018601.upk", overwrite: true);
                     File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00018601.upk");
                 }
+                if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056574.upk"))
+                {
+                    File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056574.upk", AppPath + "\\backup\\00056574.upk", overwrite: true);
+                    File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056574.upk");
+                }
                 metroToggle30.Checked = false;
             }
-            else if (!File.Exists(AppPath + "\\backup\\00018601.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00018601.upk"))
+            else if (!File.Exists(AppPath + "\\backup\\00018601.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00018601.upk") && !File.Exists(AppPath + "\\backup\\00056574.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056574.upk"))
             {
                 metroToggle30.Enabled = false;
                 metroToggle30.Checked = false;
             }
-            if (File.Exists(AppPath + "\\backup\\00056126.upk") || File.Exists(AppPath + "\\backup\\00056566.upk"))
+            // WAR v
+            if (File.Exists(AppPath + "\\backup\\00056126.upk") || File.Exists(AppPath + "\\backup\\00056566.upk") || File.Exists(AppPath + "\\backup\\00056577.upk"))
             {
                 if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056126.upk"))
                 {
@@ -9743,9 +9946,14 @@ namespace Revamped_BnS_Buddy
                     File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056566.upk", AppPath + "\\backup\\00056566.upk", overwrite: true);
                     File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056566.upk");
                 }
+                if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056577.upk"))
+                {
+                    File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056577.upk", AppPath + "\\backup\\00056577.upk", overwrite: true);
+                    File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056577.upk");
+                }
                 metroToggle23.Checked = false;
             }
-            else if (!File.Exists(AppPath + "\\backup\\00056126.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056126.upk") && !File.Exists(AppPath + "\\backup\\00056566.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056566.upk"))
+            else if (!File.Exists(AppPath + "\\backup\\00056126.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056126.upk") && !File.Exists(AppPath + "\\backup\\00056566.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056566.upk") && !File.Exists(AppPath + "\\backup\\00056577.upk") && !File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056577.upk"))
             {
                 metroToggle23.Enabled = false;
                 metroToggle23.Checked = false;
@@ -9880,6 +10088,11 @@ namespace Revamped_BnS_Buddy
                             File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056126.upk", AppPath + "\\backup\\00056126.upk", overwrite: true);
                             File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056126.upk");
                         }
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056577.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056577.upk", AppPath + "\\backup\\00056577.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056577.upk");
+                        }
                         if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056566.upk"))
                         {
                             File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056566.upk", AppPath + "\\backup\\00056566.upk", overwrite: true);
@@ -9892,6 +10105,11 @@ namespace Revamped_BnS_Buddy
                         {
                             File.Copy(AppPath + "\\backup\\00056126.upk", RegPath + "\\contents\\bns\\CookedPC\\00056126.upk", overwrite: true);
                             File.Delete(AppPath + "\\backup\\00056126.upk");
+                        }
+                        if (File.Exists(AppPath + "\\backup\\00056577.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00056577.upk", RegPath + "\\contents\\bns\\CookedPC\\00056577.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00056577.upk");
                         }
                         if (File.Exists(AppPath + "\\backup\\00056566.upk"))
                         {
@@ -9925,13 +10143,29 @@ namespace Revamped_BnS_Buddy
                 {
                     if (!metroToggle39.Checked)
                     {
-                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007916.upk", AppPath + "\\backup\\00007916.upk", overwrite: true);
-                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007916.upk");
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007916.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007916.upk", AppPath + "\\backup\\00007916.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007916.upk");
+                        }
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056572.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056572.upk", AppPath + "\\backup\\00056572.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056572.upk");
+                        }
                     }
                     else
                     {
-                        File.Copy(AppPath + "\\backup\\00007916.upk", RegPath + "\\contents\\bns\\CookedPC\\00007916.upk", overwrite: true);
-                        File.Delete(AppPath + "\\backup\\00007916.upk");
+                        if (File.Exists(AppPath + "\\backup\\00007916.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00007916.upk", RegPath + "\\contents\\bns\\CookedPC\\00007916.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00007916.upk");
+                        }
+                        if (File.Exists(AppPath + "\\backup\\00056572.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00056572.upk", RegPath + "\\contents\\bns\\CookedPC\\00056572.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00056572.upk");
+                        }
                     }
                     CheckToggleForButtonAvailability();
                 }
@@ -9959,13 +10193,29 @@ namespace Revamped_BnS_Buddy
                 {
                     if (!metroToggle36.Checked)
                     {
-                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007917.upk", AppPath + "\\backup\\00007917.upk", overwrite: true);
-                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007917.upk");
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007917.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007917.upk", AppPath + "\\backup\\00007917.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007917.upk");
+                        }
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056573.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056573.upk", AppPath + "\\backup\\00056573.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056573.upk");
+                        }
                     }
                     else
                     {
-                        File.Copy(AppPath + "\\backup\\00007917.upk", RegPath + "\\contents\\bns\\CookedPC\\00007917.upk", overwrite: true);
-                        File.Delete(AppPath + "\\backup\\00007917.upk");
+                        if (File.Exists(AppPath + "\\backup\\00007917.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00007917.upk", RegPath + "\\contents\\bns\\CookedPC\\00007917.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00007917.upk");
+                        }
+                        if (File.Exists(AppPath + "\\backup\\00056573.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00056573.upk", RegPath + "\\contents\\bns\\CookedPC\\00056573.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00056573.upk");
+                        }
                     }
                     CheckToggleForButtonAvailability();
                 }
@@ -9993,13 +10243,29 @@ namespace Revamped_BnS_Buddy
                 {
                     if (!metroToggle35.Checked)
                     {
-                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007912.upk", AppPath + "\\backup\\00007912.upk", overwrite: true);
-                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007912.upk");
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007912.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007912.upk", AppPath + "\\backup\\00007912.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007912.upk");
+                        }
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056568.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056568.upk", AppPath + "\\backup\\00056568.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056568.upk");
+                        }
                     }
                     else
                     {
-                        File.Copy(AppPath + "\\backup\\00007912.upk", RegPath + "\\contents\\bns\\CookedPC\\00007912.upk", overwrite: true);
-                        File.Delete(AppPath + "\\backup\\00007912.upk");
+                        if (File.Exists(AppPath + "\\backup\\00007912.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00007912.upk", RegPath + "\\contents\\bns\\CookedPC\\00007912.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00007912.upk");
+                        }
+                        if (File.Exists(AppPath + "\\backup\\00056568.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00056568.upk", RegPath + "\\contents\\bns\\CookedPC\\00056568.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00056568.upk");
+                        }
                     }
                     CheckToggleForButtonAvailability();
                 }
@@ -10027,13 +10293,29 @@ namespace Revamped_BnS_Buddy
                 {
                     if (!metroToggle34.Checked)
                     {
-                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007915.upk", AppPath + "\\backup\\00007915.upk", overwrite: true);
-                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007915.upk");
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007915.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007915.upk", AppPath + "\\backup\\00007915.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007915.upk");
+                        }
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056571.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056571.upk", AppPath + "\\backup\\00056571.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056571.upk");
+                        }
                     }
                     else
                     {
-                        File.Copy(AppPath + "\\backup\\00007915.upk", RegPath + "\\contents\\bns\\CookedPC\\00007915.upk", overwrite: true);
-                        File.Delete(AppPath + "\\backup\\00007915.upk");
+                        if (File.Exists(AppPath + "\\backup\\00007915.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00007915.upk", RegPath + "\\contents\\bns\\CookedPC\\00007915.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00007915.upk");
+                        }
+                        if (File.Exists(AppPath + "\\backup\\00056571.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00056571.upk", RegPath + "\\contents\\bns\\CookedPC\\00056571.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00056571.upk");
+                        }
                     }
                     CheckToggleForButtonAvailability();
                 }
@@ -10061,13 +10343,29 @@ namespace Revamped_BnS_Buddy
                 {
                     if (!metroToggle33.Checked)
                     {
-                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007914.upk", AppPath + "\\backup\\00007914.upk", overwrite: true);
-                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007914.upk");
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007914.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007914.upk", AppPath + "\\backup\\00007914.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007914.upk");
+                        }
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056570.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056570.upk", AppPath + "\\backup\\00056570.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056570.upk");
+                        }
                     }
                     else
                     {
-                        File.Copy(AppPath + "\\backup\\00007914.upk", RegPath + "\\contents\\bns\\CookedPC\\00007914.upk", overwrite: true);
-                        File.Delete(AppPath + "\\backup\\00007914.upk");
+                        if (File.Exists(AppPath + "\\backup\\00007914.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00007914.upk", RegPath + "\\contents\\bns\\CookedPC\\00007914.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00007914.upk");
+                        }
+                        if (File.Exists(AppPath + "\\backup\\00056570.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00056570.upk", RegPath + "\\contents\\bns\\CookedPC\\00056570.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00056570.upk");
+                        }
                     }
                     CheckToggleForButtonAvailability();
                 }
@@ -10095,14 +10393,30 @@ namespace Revamped_BnS_Buddy
                 {
                     if (!metroToggle32.Checked)
                     {
-                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007913.upk", AppPath + "\\backup\\00007913.upk", overwrite: true);
-                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007913.upk");
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007913.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007913.upk", AppPath + "\\backup\\00007913.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007913.upk");
+                        }
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056569.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056569.upk", AppPath + "\\backup\\00056569.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056569.upk");
+                        }
                     }
 
                     else
                     {
-                        File.Copy(AppPath + "\\backup\\00007913.upk", RegPath + "\\contents\\bns\\CookedPC\\00007913.upk", overwrite: true);
-                        File.Delete(AppPath + "\\backup\\00007913.upk");
+                        if (File.Exists(AppPath + "\\backup\\00007913.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00007913.upk", RegPath + "\\contents\\bns\\CookedPC\\00007913.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00007913.upk");
+                        }
+                        if (File.Exists(AppPath + "\\backup\\00056569.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00056569.upk", RegPath + "\\contents\\bns\\CookedPC\\00056569.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00056569.upk");
+                        }
                     }
                     CheckToggleForButtonAvailability();
                 }
@@ -10130,13 +10444,29 @@ namespace Revamped_BnS_Buddy
                 {
                     if (!metroToggle31.Checked)
                     {
-                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007911.upk", AppPath + "\\backup\\00007911.upk", overwrite: true);
-                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007911.upk");
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00007911.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00007911.upk", AppPath + "\\backup\\00007911.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00007911.upk");
+                        }
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056567.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056567.upk", AppPath + "\\backup\\00056567.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056567.upk");
+                        }
                     }
                     else
                     {
-                        File.Copy(AppPath + "\\backup\\00007911.upk", RegPath + "\\contents\\bns\\CookedPC\\00007911.upk", overwrite: true);
-                        File.Delete(AppPath + "\\backup\\00007911.upk");
+                        if (File.Exists(AppPath + "\\backup\\00007911.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00007911.upk", RegPath + "\\contents\\bns\\CookedPC\\00007911.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00007911.upk");
+                        }
+                        if (File.Exists(AppPath + "\\backup\\00056567.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00056567.upk", RegPath + "\\contents\\bns\\CookedPC\\00056567.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00056567.upk");
+                        }
                     }
                     CheckToggleForButtonAvailability();
                 }
@@ -10164,13 +10494,29 @@ namespace Revamped_BnS_Buddy
                 {
                     if (!metroToggle30.Checked)
                     {
-                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00018601.upk", AppPath + "\\backup\\00018601.upk", overwrite: true);
-                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00018601.upk");
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00018601.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00018601.upk", AppPath + "\\backup\\00018601.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00018601.upk");
+                        }
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056574.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056574.upk", AppPath + "\\backup\\00056574.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056574.upk");
+                        }
                     }
                     else
                     {
-                        File.Copy(AppPath + "\\backup\\00018601.upk", RegPath + "\\contents\\bns\\CookedPC\\00018601.upk", overwrite: true);
-                        File.Delete(AppPath + "\\backup\\00018601.upk");
+                        if (File.Exists(AppPath + "\\backup\\00018601.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00018601.upk", RegPath + "\\contents\\bns\\CookedPC\\00018601.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00018601.upk");
+                        }
+                        if (File.Exists(AppPath + "\\backup\\00056574.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00056574.upk", RegPath + "\\contents\\bns\\CookedPC\\00056574.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00056574.upk");
+                        }
                     }
                     CheckToggleForButtonAvailability();
                 }
@@ -10198,13 +10544,29 @@ namespace Revamped_BnS_Buddy
                 {
                     if (!metroToggle29.Checked)
                     {
-                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00023439.upk", AppPath + "\\backup\\00023439.upk", overwrite: true);
-                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00023439.upk");
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00023439.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00023439.upk", AppPath + "\\backup\\00023439.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00023439.upk");
+                        }
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056575.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056575.upk", AppPath + "\\backup\\00056575.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056575.upk");
+                        }
                     }
                     else
                     {
-                        File.Copy(AppPath + "\\backup\\00023439.upk", RegPath + "\\contents\\bns\\CookedPC\\00023439.upk", overwrite: true);
-                        File.Delete(AppPath + "\\backup\\00023439.upk");
+                        if (File.Exists(AppPath + "\\backup\\00023439.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00023439.upk", RegPath + "\\contents\\bns\\CookedPC\\00023439.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00023439.upk");
+                        }
+                        if (File.Exists(AppPath + "\\backup\\00056575.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00056575.upk", RegPath + "\\contents\\bns\\CookedPC\\00056575.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00056575.upk");
+                        }
                     }
                     CheckToggleForButtonAvailability();
                 }
@@ -10232,13 +10594,29 @@ namespace Revamped_BnS_Buddy
                 {
                     if (!metroToggle37.Checked)
                     {
-                        File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00034408.upk", AppPath + "\\backup\\00034408.upk", overwrite: true);
-                        File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00034408.upk");
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00034408.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00034408.upk", AppPath + "\\backup\\00034408.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00034408.upk");
+                        }
+                        if (File.Exists(RegPath + "\\contents\\bns\\CookedPC\\00056576.upk"))
+                        {
+                            File.Copy(RegPath + "\\contents\\bns\\CookedPC\\00056576.upk", AppPath + "\\backup\\00056576.upk", overwrite: true);
+                            File.Delete(RegPath + "\\contents\\bns\\CookedPC\\00056576.upk");
+                        }
                     }
                     else
                     {
-                        File.Copy(AppPath + "\\backup\\00034408.upk", RegPath + "\\contents\\bns\\CookedPC\\00034408.upk", overwrite: true);
-                        File.Delete(AppPath + "\\backup\\00034408.upk");
+                        if (File.Exists(AppPath + "\\backup\\00034408.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00034408.upk", RegPath + "\\contents\\bns\\CookedPC\\00034408.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00034408.upk");
+                        }
+                        if (File.Exists(AppPath + "\\backup\\00056576.upk"))
+                        {
+                            File.Copy(AppPath + "\\backup\\00056576.upk", RegPath + "\\contents\\bns\\CookedPC\\00056576.upk", overwrite: true);
+                            File.Delete(AppPath + "\\backup\\00056576.upk");
+                        }
                     }
                     CheckToggleForButtonAvailability();
                 }
@@ -11387,6 +11765,9 @@ namespace Revamped_BnS_Buddy
                             backgroundWorker.WorkerSupportsCancellation = true;
                             backgroundWorker.DoWork += delegate
                             {
+                                enterCodePrompt.metroButton1.Enabled = false;
+                                enterCodePrompt.metroTextBox1.Text = "";
+                                enterCodePrompt = new enterCode(this);
                                 enterCodePrompt.ShowDialog();
                                 metroButton1.Enabled = true;
                             };
@@ -11582,7 +11963,8 @@ namespace Revamped_BnS_Buddy
         }
 
         public PictureBox exitlag = new PictureBox();
-        bool trigger = false;
+        int adscount = 1;
+        int currentad = 2;
         private void PicSwap_Tick(object sender, EventArgs e)
         {
             if (exitlag.Image == null)
@@ -11592,24 +11974,36 @@ namespace Revamped_BnS_Buddy
 
             if (metroProgressBar1.Maximum == metroProgressBar1.Value)
             {
-                if (!trigger)
-                {
-                    pictureBox2.Image = Resources.ad2;
-                    urltobrowseto = "https://discord.gg/ZpsmCZA";
-                    trigger = !trigger;
-                }
-                else
+
+                if (currentad == 1)
                 {
                     pictureBox2.Image = exitlag.Image;
                     exitlag.Image = null;
                     urltobrowseto = "https://www.exitlag.com/refer/443658";
-                    trigger = !trigger;
                 }
+                if (currentad == 2)
+                {
+                    pictureBox2.Image = Resources.ad2;
+                    urltobrowseto = "https://discord.gg/ZpsmCZA";
+                }
+                if (currentad >= adscount)
+                {
+                    currentad = 0;
+                }
+                currentad++;
                 metroProgressBar1.Value = 0;
             }
-            
-            if (AppStarted)
-                metroProgressBar1.PerformStep();
+
+            if (adscount > 1)
+            {
+                metroProgressBar1.Visible = true;
+                if (AppStarted)
+                    metroProgressBar1.PerformStep();
+            }
+            else
+            {
+                metroProgressBar1.Visible = false;
+            }
         }
     }
 }

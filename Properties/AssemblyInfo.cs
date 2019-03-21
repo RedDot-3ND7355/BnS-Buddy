@@ -18,6 +18,6 @@ using System.Security.Permissions;
 [assembly: AssemblyTrademark("Endless")]
 [assembly: ComVisible(false)]
 [assembly: Guid("1cb5fea7-827a-46a5-8bb7-72c86b8fa78f")]
-[assembly: AssemblyFileVersion("5.9.0.9")]
-[assembly: AssemblyVersion("5.9.0.9")]
+[assembly: AssemblyFileVersion("5.9.1.5")]
+[assembly: AssemblyVersion("5.9.1.5")]
 [module: UnverifiableCode]

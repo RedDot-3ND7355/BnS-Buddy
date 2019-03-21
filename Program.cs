@@ -19,7 +19,8 @@ namespace Revamped_BnS_Buddy
 			EmbeddedAssembly.Load("Revamped_BnS_Buddy.Resources.FastColoredTextBox.dll", "FastColoredTextBox.dll");
 			EmbeddedAssembly.Load("Revamped_BnS_Buddy.Resources.Ionic.Zlib.dll", "Ionic.Zlib.dll");
 			EmbeddedAssembly.Load("Revamped_BnS_Buddy.Resources.BigInteger.dll", "BigInteger.dll");
-			AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(Program.CurrentDomain_AssemblyResolve);
+            EmbeddedAssembly.Load("Revamped_BnS_Buddy.Resources.Newtonsoft.Json.dll", "Newtonsoft.Json.dll");
+            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(Program.CurrentDomain_AssemblyResolve);
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			Application.Run(new Preload());

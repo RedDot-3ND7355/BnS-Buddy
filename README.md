@@ -31,6 +31,56 @@ Requirements:
 
 Change Log:
 
+Version 5.9.1.5
++ Added: Support for NCLauncher 2
++ Added: Numpad support for Code Entry
++ Removed: an Ad from ads
++ Updated: Upk numbers for new skills
++ Updated: Regex for ping check
++ Fixed Bug: last used server was not remembered
++ Fixed Bug: Context for restoring via dat editor was wrong
++ Fixed Bug: Panel for multiclient would stay even if no game session was on
+
+Version 5.9.1.0
++ Fixed Bug: Clicking on a folder in dat editor would lock file list
++ Fixed Bug: Previously used data in code verification wouldn't be discarded
+
+Version 5.9.0.9
++ Fixed Bug: Changelog was not appearing when updating via BnS Buddy
+
+Version 5.9.0.8
++ Reworked: Autofix for Settings.ini
++ Fixed Bug: The trigger for the autofix was incomplete
+
+Version 5.9.0.7
++ Updated: Credits in about
++ Updated: A proper check for Settings.ini autofix
++ Fixed Bug: A check for the local files if directory does not exist
++ Fixed Bug: A check for existing dat files in the dictionary
++ Fixed Bug: Ping check for Korean server
++ Fixed Bug: Update Button wasn't available when an update was
++ Fixed Bug: Closing the verification form locks the play button
+
+Updater 2.5.1.8
++ Fixed Bug: Overwriting an existing BnS Buddy when updating would crash the updater
+
+Version 5.9.0.6
++ Added: Auto fix for Settings.ini
++ Added: Corruption detection of dat files in dat editor
++ Added: local dat files were added to dat editor
++ Updated: Internal updater
++ Updated: KR Arguments for client
++ Reworked: Routine to check if game is patched or clean
++ Fixed Bug: Progress tracker for Mod Manager
++ Fixed Bug: Dependecy fix for some pc
++ Fixed Bug: Dependecy collision check
++ Fixed Bug: Bad Coloring on Update Transition Form
++ Fixed Bug: Auto-extracting of BnS Buddy Updater
+
+Updater 2.5.1.7
++ Fixed Bug: Dependecy fix for some pc
++ Fixed Bug: Dependecy collision check
+
 Version 5.9.0.5
 + Added: New ad in Ads page (rotated)
 + Added: Toggle for Battleground crash fix
