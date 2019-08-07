@@ -1,17 +1,8 @@
 ﻿using MetroFramework;
-using MetroFramework.Components;
-using MetroFramework.Controls;
 using MetroFramework.Forms;
-using Microsoft.Win32;
-using Security;
 using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Web.Security;
 using System.Windows.Forms;
 
 namespace Revamped_BnS_Buddy
@@ -36,9 +27,13 @@ namespace Revamped_BnS_Buddy
 
         private void GetColor()
         {
-            string a = File.ReadLines(AppPath + "\\Settings.ini").Skip(43).Take(1)
+            string a = "Blue";
+            if (File.Exists(AppPath + "\\Settings.ini"))
+            {
+                a = File.ReadLines(AppPath + "\\Settings.ini").Skip(43).Take(1)
                 .First()
                 .Replace("buddycolor = ", "");
+            }
             if (a == "Black")
             {
                 Themer.Style = MetroColorStyle.Black;
@@ -116,9 +111,12 @@ namespace Revamped_BnS_Buddy
 
         private void metroTextBox1_KeyPress(object sender, KeyEventArgs e)
         {
-            if (e.KeyValue == (char)Keys.Return && metroTextBox1.Text.Length == 6)
+            if (metroTextBox1.Text.Length == 6)
             {
-                f1.submitCode();
+                if (e.KeyValue == (char)Keys.Return)
+                {
+                    f1.submitCode();
+                }
             }
 
             if ((e.KeyValue >= '0' && e.KeyValue <= '9') || e.KeyValue == (Char)Keys.Delete || e.KeyValue == (Char)Keys.Back || e.Control && e.KeyValue == (Char)Keys.V || e.KeyValue >= 96 && e.KeyValue <= 105 || e.KeyValue == 37 || e.KeyValue == 39 || (e.Control && e.KeyValue == (Char)Keys.A)) //The  character represents a backspace

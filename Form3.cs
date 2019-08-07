@@ -1,6 +1,4 @@
-﻿using FastColoredTextBoxNS;
-using MetroFramework;
-using MetroFramework.Components;
+﻿using MetroFramework;
 using MetroFramework.Controls;
 using MetroFramework.Forms;
 using System;
@@ -88,9 +86,13 @@ namespace Revamped_BnS_Buddy
         private void GetColor()
         {
             Prompt.AppPath = AppPath;
-            string a = File.ReadLines(AppPath + "\\Settings.ini").Skip(43).Take(1)
-                .First()
-                .Replace("buddycolor = ", "");
+            string a = "Blue";
+            if (File.Exists(AppPath + "\\Settings.ini"))
+            {
+                a = File.ReadLines(AppPath + "\\Settings.ini").Skip(43).Take(1)
+                    .First()
+                    .Replace("buddycolor = ", "");
+            }
             if (a == "Black")
             {
                 Themer.Style = MetroColorStyle.Black;

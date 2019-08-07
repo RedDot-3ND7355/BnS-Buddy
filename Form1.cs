@@ -1,15 +1,11 @@
-﻿using BNSDat;
-using FastColoredTextBoxNS;
+﻿using FastColoredTextBoxNS;
 using Ionic.Zlib;
 using MetroFramework;
-using MetroFramework.Components;
 using MetroFramework.Controls;
-using MetroFramework.Drawing;
 using MetroFramework.Forms;
 using Microsoft.Win32;
 using Mono.Math;
 using Newtonsoft.Json.Linq;
-using Revamped_BnS_Buddy;
 using Revamped_BnS_Buddy.Properties;
 using System;
 using System.Collections.Generic;
@@ -32,8 +28,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Automation;
 using System.Windows.Forms;
 using System.Xml;
+using WMI_ProcessorInformation;
 
 namespace Revamped_BnS_Buddy
 {
@@ -225,10 +223,11 @@ namespace Revamped_BnS_Buddy
                 };
                 MetroLabel value = new MetroLabel
                 {
+                    Dock = DockStyle.Fill,
                     AutoSize = true,
                     Left = 5,
-                    Top = 20,
-                    Text = Message,
+                    Top = 0,
+                    Text = Message + Environment.NewLine + Environment.NewLine,
                     Width = 270,
                     Height = 40,
                     TextAlign = ContentAlignment.MiddleCenter,
@@ -236,10 +235,11 @@ namespace Revamped_BnS_Buddy
                 };
                 MetroButton metroButton = new MetroButton
                 {
+                    Dock = DockStyle.Bottom,
                     Text = "Ok",
                     Left = 5,
                     Width = 100,
-                    Top = 130,
+                    Top = obj.Height - 20,
                     DialogResult = DialogResult.OK,
                     Theme = MetroThemeStyle.Dark
                 };
@@ -574,7 +574,7 @@ namespace Revamped_BnS_Buddy
 
         public string CustomClientPath = "";
 
-        public string DefaultValues = "unattended = false" + Environment.NewLine + "notexturestreaming = false" + Environment.NewLine + "savelogs = false" + Environment.NewLine + "showlogs = true" + Environment.NewLine + "variables = false" + Environment.NewLine + "tooltips = true" + Environment.NewLine + "customgame = false" + Environment.NewLine + "customclient = false" + Environment.NewLine + "admincheck = true" + Environment.NewLine + "ncsoftlogin = false" + Environment.NewLine + "showdonate = true" + Environment.NewLine + "minimize = true" + Environment.NewLine + "launcherlogs = false" + Environment.NewLine + "modmanlogs = false" + Environment.NewLine + "customclientpath = " + Environment.NewLine + "customgamepath = " + Environment.NewLine + "updatechecker = true" + Environment.NewLine + "pingchecker = true" + Environment.NewLine + "gamekiller = true" + Environment.NewLine + "useallcores = false" + Environment.NewLine + "arguments = " + Environment.NewLine + "prtime = 5000" + Environment.NewLine + "autoupdate = true" + Environment.NewLine + "firsttime = true" + Environment.NewLine + "default = " + Environment.NewLine + "defaultset = false" + Environment.NewLine + "defaultclient = " + Environment.NewLine + "priority = Normal" + Environment.NewLine + "modfolder = " + Environment.NewLine + "modfolderset = false" + Environment.NewLine + "rememberme = false" + Environment.NewLine + "automemorycleanup = false" + Environment.NewLine + "langset = false" + Environment.NewLine + "langpath = " + Environment.NewLine + "boostprocess = true" + Environment.NewLine + "cleanint = OFF" + Environment.NewLine + "uniquepass = " + Environment.NewLine + "gcdshow = false" + Environment.NewLine + "igpshow = false" + Environment.NewLine + "autologin = false" + Environment.NewLine + "usercountcheck = true" + Environment.NewLine + "showcount = true" + Environment.NewLine + "customclientname = " + Environment.NewLine + "buddycolor = Blue" + Environment.NewLine + "lastserver = " + Environment.NewLine + "menuslidereffect = true";
+        public string DefaultValues = "unattended = false" + Environment.NewLine + "notexturestreaming = false" + Environment.NewLine + "savelogs = false" + Environment.NewLine + "showlogs = true" + Environment.NewLine + "variables = false" + Environment.NewLine + "tooltips = true" + Environment.NewLine + "customgame = false" + Environment.NewLine + "customclient = false" + Environment.NewLine + "admincheck = true" + Environment.NewLine + "ncsoftlogin = false" + Environment.NewLine + "showdonate = true" + Environment.NewLine + "minimize = true" + Environment.NewLine + "launcherlogs = false" + Environment.NewLine + "modmanlogs = false" + Environment.NewLine + "customclientpath = " + Environment.NewLine + "customgamepath = " + Environment.NewLine + "updatechecker = true" + Environment.NewLine + "pingchecker = true" + Environment.NewLine + "gamekiller = true" + Environment.NewLine + "useallcores = false" + Environment.NewLine + "arguments = " + Environment.NewLine + "prtime = 5000" + Environment.NewLine + "autoupdate = true" + Environment.NewLine + "firsttime = true" + Environment.NewLine + "default = " + Environment.NewLine + "defaultset = false" + Environment.NewLine + "defaultclient = " + Environment.NewLine + "priority = Normal" + Environment.NewLine + "modfolder = " + Environment.NewLine + "modfolderset = false" + Environment.NewLine + "rememberme = false" + Environment.NewLine + "automemorycleanup = false" + Environment.NewLine + "langset = false" + Environment.NewLine + "langpath = " + Environment.NewLine + "boostprocess = true" + Environment.NewLine + "cleanint = OFF" + Environment.NewLine + "uniquepass = " + Environment.NewLine + "gcdshow = false" + Environment.NewLine + "igpshow = false" + Environment.NewLine + "autologin = false" + Environment.NewLine + "usercountcheck = true" + Environment.NewLine + "showcount = true" + Environment.NewLine + "customclientname = " + Environment.NewLine + "buddycolor = Blue" + Environment.NewLine + "lastserver = " + Environment.NewLine + "menuslidereffect = true" + Environment.NewLine + "affinityproc = All" + Environment.NewLine + "keepintray = false";
 
         public string ActiveDataFile = "";
 
@@ -764,8 +764,6 @@ namespace Revamped_BnS_Buddy
 
         public bool ncsoftFolderIsSet = true;
 
-        public bool installFlag = true;
-
         private string tmpdir = "";
 
         private string NewPath = "";
@@ -930,16 +928,76 @@ namespace Revamped_BnS_Buddy
             mutex = new Mutex(true, "BnSBuddy", out bool createdNew);
             if (!createdNew)
             {
-                Prompt.Popup("BnS Buddy is already running! Closing...");
+                Process[] pl = Process.GetProcessesByName("BnS Buddy");
+                Process p = null;
+                int current = Process.GetCurrentProcess().Id;
+                foreach (Process ps in pl)
+                {
+                    if (ps.Id != current)
+                        p = ps;
+                }
+                if (p != null)
+                {
+                    if (p.MainWindowHandle != null && p.MainWindowHandle != IntPtr.Zero)
+                    {
+                        var element = AutomationElement.FromHandle(p.MainWindowHandle);
+                        if (element != null)
+                        {
+                            var pattern = element.GetCurrentPattern(WindowPattern.Pattern) as WindowPattern;
+                            if (pattern != null)
+                                pattern.SetWindowVisualState(WindowVisualState.Normal);
+                        }
+                    }
+                    else
+                    {
+                        IntPtr t = FindWindow();
+                        if (t != null && t != IntPtr.Zero)
+                        {
+                            var element = AutomationElement.FromHandle(t);
+                            if (element != null)
+                            {
+                                var pattern = element.GetCurrentPattern(WindowPattern.Pattern) as WindowPattern;
+                                if (pattern != null)
+                                    pattern.SetWindowVisualState(WindowVisualState.Normal);
+                            }
+                        }
+                        else
+                        {
+                            Prompt.Popup("BnS Buddy is already running! Closing...");
+                        }
+                    }
+                }
+                else
+                {
+                    Prompt.Popup("BnS Buddy is already running! Closing...");
+                }
                 KillApp();
             }
+        }
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern IntPtr GetParent(IntPtr hWnd);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        static extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr childAfter, string lclassName, string windowTitle);
+
+        public static IntPtr FindWindow()
+        {
+            IntPtr thisPtr = FindWindow(null, "BnS Buddy");
+            IntPtr parentPtr = GetParent(thisPtr);
+            thisPtr = FindWindowEx(parentPtr, IntPtr.Zero, null, "BnS Buddy");
+            thisPtr = FindWindowEx(parentPtr, thisPtr, null, "BnS Buddy");
+            return thisPtr;
         }
 
         public Form1()
         {
             CurrentForm = this;
             InitializeComponent();
-            //Unhandler();
+            Unhandler();
             initControlsRecursive(base.Controls);
             ValidateBuddy();
             SetUniqueKey();
@@ -1270,27 +1328,19 @@ namespace Revamped_BnS_Buddy
                 {
                     case DialogResult.Yes:
                         {
-                            string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                            text2 = text2.Replace("firsttime = true", "firsttime = false");
-                            File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                            lineChanger("firsttime = false", AppPath + "\\Settings.ini", 24);
                             if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("autoupdate = false"))
                             {
-                                text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                                text2 = text2.Replace("autoupdate = false", "autoupdate = true");
-                                File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                                lineChanger("autoupdate = true", AppPath + "\\Settings.ini", 23);
                             }
                             break;
                         }
                     case DialogResult.No:
                         {
-                            string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                            text = text.Replace("firsttime = true", "firsttime = false");
-                            File.WriteAllText(AppPath + "\\Settings.ini", text);
+                            lineChanger("firsttime = false", AppPath + "\\Settings.ini", 24);
                             if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("autoupdate = true"))
                             {
-                                text = File.ReadAllText(AppPath + "\\Settings.ini");
-                                text = text.Replace("autoupdate = true", "autoupdate = false");
-                                File.WriteAllText(AppPath + "\\Settings.ini", text);
+                                lineChanger("autoupdate = false", AppPath + "\\Settings.ini", 23);
                             }
                             break;
                         }
@@ -1609,9 +1659,7 @@ namespace Revamped_BnS_Buddy
         {
             try
             {
-                string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                text = text.Replace("defaultset = false", "defaultset = true");
-                File.WriteAllText(AppPath + "\\Settings.ini", text);
+                lineChanger("defaultset = true", AppPath + "\\Settings.ini", 26);
                 lineChanger("default = " + val, AppPath + "\\Settings.ini", 25);
                 metroLabel48.Text = val;
             }
@@ -1723,9 +1771,7 @@ namespace Revamped_BnS_Buddy
                         MultipleLangFound = true;
                         if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("langset = false"))
                         {
-                            string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                            text2 = text2.Replace("langset = false", "langset = true");
-                            File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                            lineChanger("langset = true", AppPath + "\\Settings.ini", 33);
                         }
                     }
                     metroLabel56.Text = RegPath;
@@ -1942,13 +1988,35 @@ namespace Revamped_BnS_Buddy
             }
         }
 
+        public int cpuCount = 0;
+
+        public int CPUINIT()
+        {
+            if (cpuCount == 0)
+            {
+                return WMI_Processor_Information.GetCpuNumberOfLogicalProcessors();
+            }
+            else
+            {
+                return cpuCount;
+            }
+        }
+
         public void EnableForm1()
         {
             Control.CheckForIllegalCrossThreadCalls = false;
             base.Enabled = true;
+            AddScrollBars();
             CheckBGFiX();
-            UpdateCheck();
+            Task.Delay(1000).ContinueWith(delegate
+            {
+                UpdateCheck();
+            });
             MultiCheck();
+            Task.Delay(1000).ContinueWith(delegate
+            {
+                cpuCount = CPUINIT();
+            });
             if (!is64bit)
             {
                 metroComboBox4.Items.Remove("64bit");
@@ -2094,6 +2162,11 @@ namespace Revamped_BnS_Buddy
             base.TopMost = false;
         }
         
+        private void AddScrollBars()
+        {
+            
+        }
+
         private void CheckBGFiX()
         {
             string pathtobgfix = modsFolderPath + "\\BGFix";
@@ -2436,7 +2509,7 @@ namespace Revamped_BnS_Buddy
                     File.WriteAllText(AppPath + "\\Settings.ini", DefaultValues);
                 }
                 // Check if updated
-                if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("menuslidereffect"))
+                if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("keepintray"))
                 {
                     if (!File.ReadAllText(AppPath + "\\Settings.ini").Contains("customlang"))
                     {
@@ -2904,11 +2977,30 @@ namespace Revamped_BnS_Buddy
                 {
                     metroToggle25.Checked = true;
                 }
+                if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("affinityproc = "))
+                {
+                    string text8 = File.ReadLines(AppPath + "\\Settings.ini").Skip(46).Take(1)
+                        .First()
+                        .Replace("affinityproc = ", "");
+                    metroLabel85.Text += text8;
+                }
+                if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("keepintray = true"))
+                {
+                    metroToggle42.Checked = true;
+                    AlwaysOnTray = true;
+                    ActivateTray();
+                }
             }
             catch
             {
                 Prompt.Popup("Error reading Settings.ini");
             }
+        }
+
+        private void ActivateTray()
+        {
+            ConfigureContext();
+            notifyIcon1.Visible = true;
         }
 
         private void metroComboBox6_SelectedIndexChanged(object sender, EventArgs e)
@@ -2961,11 +3053,7 @@ namespace Revamped_BnS_Buddy
             }
             if (AppStarted)
             {
-                string oldValue = File.ReadLines(AppPath + "\\Settings.ini").Skip(27).Take(1)
-                    .First()
-                    .Replace("priority = ", "");
-                string contents = File.ReadAllText(AppPath + "\\Settings.ini").Replace(oldValue, Priority.ToString());
-                File.WriteAllText(AppPath + "\\Settings.ini", contents);
+                lineChanger("priority = " + Priority.ToString(), AppPath + "\\Settings.ini", 28);
             }
         }
 
@@ -3153,7 +3241,7 @@ namespace Revamped_BnS_Buddy
             }
             else if (metroComboBox1.SelectedItem.ToString() == "North America")
             {
-                IP = "64.25.37.236";
+                IP = "64.25.37.235";
                 regionID = "0";
                 AddTextLog("Changed RegionID to NA!");
                 regionID = "0";
@@ -3182,6 +3270,7 @@ namespace Revamped_BnS_Buddy
                 metroButton1.Text = "Patch!";
                 metroToolTip1.SetToolTip(metroButton1, "Patch! and/or Play!");
                 PreSavedPaths("Japanese");
+                LauncherInfo();
             }
             else if (metroComboBox1.SelectedItem.ToString() == "Korean")
             {
@@ -3228,7 +3317,8 @@ namespace Revamped_BnS_Buddy
             {
                 metroButton1.Enabled = false;
                 metroToolTip1.SetToolTip(metroButton1, "No Server Selected!");
-            } else { metroButton1.Enabled = true; }
+            }
+            else { metroButton1.Enabled = true; }
         }
 
         public void CheckServer()
@@ -3505,6 +3595,7 @@ namespace Revamped_BnS_Buddy
                     {
                         XmlDocument document = new XmlDocument();
                         document.Load(RegPathlol + "\\UserSettings.config");
+                        bool found = false;
                         foreach (XmlNode nodes in document)
                         {
                             foreach (XmlNode node in nodes)
@@ -3512,19 +3603,38 @@ namespace Revamped_BnS_Buddy
                                 XmlAttributeCollection nodeAtt = node.Attributes;
                                 if (nodeAtt["key"].Value.ToString() == "GameRegionSettings")
                                 {
+                                    found = true;
                                     string settings = nodeAtt["value"].Value.ToString();
                                     settings = settings.Replace("[", "").Replace("]", "");
                                     var settingsholder = JObject.Parse(@settings);
-                                    if (settingsholder["GameRegionCode"].ToString() == "na")
+                                    if (settingsholder["GameRegionCode"].ToString() != null)
                                     {
-                                        metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("North America");
+                                        if (settingsholder["GameRegionCode"].ToString() != "")
+                                        {
+                                            if (settingsholder["GameRegionCode"].ToString() == "na")
+                                            {
+                                                metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("North America");
+                                            }
+                                            else
+                                            {
+                                                metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Europe");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("North America");
+                                        }
                                     }
                                     else
                                     {
-                                        metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("Europe");
+                                        metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("North America");
                                     }
                                 }
                             }
+                        }
+                        if (!found)
+                        {
+                            metroComboBox1.SelectedIndex = metroComboBox1.FindStringExact("North America");
                         }
                     }
                     if (File.Exists(RegPathlol + "\\NCLauncher.ini"))
@@ -3845,6 +3955,20 @@ namespace Revamped_BnS_Buddy
                         virtualtext.Text = System.Text.Encoding.UTF8.GetString(bytes);
                         DoBackupCheck();
                     }
+                    catch (IOException)
+                    {
+                        AddTextLog("Skipped checking " + usedfile + ", game is already running!");
+                        GameStarted = true;
+                        string clientname = "Client";
+                        if (customclientname != "") { clientname = customclientname.Replace(".exe", ""); }
+                        Process[] processesByName = Process.GetProcessesByName(clientname);
+                        for (int i = 0; i < processesByName.Length; i++)
+                        {
+                            ClientHandler.Add("UNKNOWN-" + i, processesByName[i].Id);
+                        }
+                        // Add Client process id here to kill
+                        Prompt.Popup("BnS is already running! Please close the game before applying any changes.");
+                    }
                     catch (Exception ex)
                     {
                         Prompt.Popup(ex.ToString());
@@ -3929,7 +4053,7 @@ namespace Revamped_BnS_Buddy
                 bnsdat.WorkerSupportsCancellation = true;
                 bnsdat.WorkerReportsProgress = true;
                 bnsdat.DoWork += bnsdat_DoWork;
-                bnsdat.RunWorkerAsync();
+                bnsdat.RunWorkerAsync(qwerty);
                 waitbw.WaitOne();
                 waitbw.Reset();
             }
@@ -3941,15 +4065,16 @@ namespace Revamped_BnS_Buddy
 
         private void bnsdat_DoWork(object sender, DoWorkEventArgs e)
         {
+            string file = (string)e.Argument;
             Control.CheckForIllegalCrossThreadCalls = false;
-            if (File.Exists(usedfilepath))
+            if (File.Exists(file)) // usedfilepath
             {
-                new BNSDat.BNSDat().Extract(usedfilepath, BNSis64);
+                new BNSDat.BNSDat().Extract(file, BNSis64);
                 waitbw.Set();
             }
             else
             {
-                Prompt.Popup("File: " + usedfilepath + " Does not exist!");
+                Prompt.Popup("File: " + file + " Does not exist!");
                 waitbw.Set();
             }
         }
@@ -4364,171 +4489,271 @@ namespace Revamped_BnS_Buddy
             return false;
         }
 
+        bool busytimer = false;
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (GameStarted)
+            if (!busytimer)
             {
-                GameStarted = false;
-                foreach (string key2 in ClientHandler.Keys)
+                busytimer = true;
+                if (GameStarted)
                 {
-                    if (!ProcessExists(ClientHandler[key2]))
+                    GameStarted = false;
+                    foreach (string key2 in ClientHandler.Keys)
                     {
-                        metroComboBox9.SelectedIndex = -1;
-                        metroComboBox9.Items.Remove(key2);
-                        ClearClient.Add(key2, key2);
-                        if (metroComboBox9.Items.Count > 1)
-                        {
-                            metroComboBox9.SelectedIndex = 1;
-                        }
-                        else
+                        if (!ProcessExists(ClientHandler[key2]))
                         {
                             metroComboBox9.SelectedIndex = -1;
-                            metroPanel6.Visible = false;
-                        }
-                        AddTextLog(key2 + "'s Game Process Died");
-                    }
-                }
-                foreach (string key3 in ClearClient.Keys)
-                {
-                    ClientHandler.Remove(key3);
-                }
-                ClearClient = new Dictionary<string, string>();
-                Process[] processesByName = Process.GetProcessesByName((!(customclientname != "")) ? "Client" : customclientname.Replace(".exe", ""));
-                Process[] array = processesByName;
-                foreach (Process process in array)
-                {
-                    metroLabel57.Text = "Running";
-                    try
-                    {
-                        if (metroComboBox6.SelectedItem != null && process.PriorityClass != Priority)
-                        {
-                            process.PriorityClass = Priority;
-                            AddTextLog("Changed Priority.");
-                        }
-                        metroLabel60.Text = process.PriorityClass.ToString();
-                        if (metroToggle20.Checked && !prioboost)
-                        {
-                            prioboost = true;
-                            process.PriorityBoostEnabled = true;
-                            AddTextLog("Priority Boost Enabled.");
-                        }
-                    }
-                    catch
-                    {
-                    }
-                    GameStarted = true;
-                    metroButton1.Enabled = true;
-                    metroButton1.Text = "Kill Game";
-                    metroToolTip1.SetToolTip(metroButton1, "Kill The Current Game Instance");
-                }
-                if (!GameStarted)
-                {
-                    processesByName = Process.GetProcessesByName("Client");
-                    for (int j = 0; j < processesByName.Length; j++)
-                    {
-                        Process process2 = processesByName[j];
-                        GameStarted = true;
-                    }
-                    if (customclientname != "")
-                    {
-                        processesByName = Process.GetProcessesByName(customclientname.Replace(".exe", ""));
-                        for (int k = 0; k < processesByName.Length; k++)
-                        {
-                            Process process3 = processesByName[k];
-                            GameStarted = true;
-                        }
-                    }
-                    if (GameStarted)
-                    {
-                        foreach (string key4 in ClientHandler.Keys)
-                        {
-                            if (!ProcessExists(ClientHandler[key4]))
+                            metroComboBox9.Items.Remove(key2);
+                            ClearClient.Add(key2, key2);
+                            if (metroComboBox9.Items.Count > 1)
+                            {
+                                metroComboBox9.SelectedIndex = 1;
+                            }
+                            else
                             {
                                 metroComboBox9.SelectedIndex = -1;
-                                metroComboBox9.Items.Remove(key4);
-                                ClearClient.Add(key4, key4);
-                                if (metroComboBox9.Items.Count > 1)
+                                metroPanel6.Visible = false;
+                            }
+                            AddTextLog(key2 + "'s Game Process Died");
+                        }
+                    }
+                    foreach (string key3 in ClearClient.Keys)
+                    {
+                        ClientHandler.Remove(key3);
+                    }
+                    ClearClient = new Dictionary<string, string>();
+                    Process[] processesByName = Process.GetProcessesByName((!(customclientname != "")) ? "Client" : customclientname.Replace(".exe", ""));
+                    Process[] array = processesByName;
+                    foreach (Process process in array)
+                    {
+                        metroLabel57.Text = "Running";
+                        // Process affinity
+                        try
+                        {
+                            if (cpuCount != 0)
+                            {
+                                bool modified = false;
+                                int allCpu = (int)Math.Pow(2, cpuCount) - 1;
+                                int firstHalf = (int)Math.Pow(2, cpuCount / 2) - 1;
+                                int secondHalf = allCpu - firstHalf;
+                                int odd = 0;
+                                for (int i = 1; i < cpuCount; i++) { if (i % 2 != 0) { odd += (int)Math.Pow(2, i - 1); } };
+                                int even = allCpu - odd;
+                                string toswitch = metroLabel85.Text.Replace("Affinity: ", "");
+                                switch (toswitch)
                                 {
-                                    metroComboBox9.SelectedIndex = 1;
+                                    case "All":
+                                        if (process.ProcessorAffinity != (IntPtr)allCpu)
+                                        {
+                                            process.ProcessorAffinity = (IntPtr)allCpu;
+                                            modified = true;
+                                        }
+                                        break;
+                                    case "Odd":
+                                        if (process.ProcessorAffinity != (IntPtr)odd)
+                                        {
+                                            process.ProcessorAffinity = (IntPtr)odd;
+                                            modified = true;
+                                        }
+                                        break;
+                                    case "Even":
+                                        if (process.ProcessorAffinity != (IntPtr)even)
+                                        {
+                                            process.ProcessorAffinity = (IntPtr)even;
+                                            modified = true;
+                                        }
+                                        break;
+                                    case "First Half":
+                                        if (process.ProcessorAffinity != (IntPtr)firstHalf)
+                                        {
+                                            process.ProcessorAffinity = (IntPtr)firstHalf;
+                                            modified = true;
+                                        }
+                                        break;
+                                    case "Second Half":
+                                        if (process.ProcessorAffinity != (IntPtr)secondHalf)
+                                        {
+                                            process.ProcessorAffinity = (IntPtr)secondHalf;
+                                            modified = true;
+                                        }
+                                        break;
+
                                 }
-                                else
+                                if (modified)
                                 {
-                                    metroComboBox9.SelectedIndex = -1;
-                                    metroPanel6.Visible = false;
+                                    AddTextLog("Changed Affinity.");
                                 }
-                                AddTextLog(key4 + "'s Game Process Died");
                             }
                         }
-                        foreach (string key5 in ClearClient.Keys)
+                        catch
                         {
-                            ClientHandler.Remove(key5);
                         }
-                        ClearClient = new Dictionary<string, string>();
+                        // Process priority
+                        try
+                        {
+                            if (metroComboBox6.SelectedItem != null && process.PriorityClass != Priority)
+                            {
+                                process.PriorityClass = Priority;
+                                AddTextLog("Changed Priority.");
+                            }
+                            metroLabel60.Text = process.PriorityClass.ToString();
+                            if (metroToggle20.Checked && !prioboost)
+                            {
+                                prioboost = true;
+                                process.PriorityBoostEnabled = true;
+                                AddTextLog("Priority Boost Enabled.");
+                            }
+                        }
+                        catch
+                        {
+                        }
+                        GameStarted = true;
+                        metroButton1.Enabled = true;
+                        metroButton1.Text = "Kill Game";
+                        metroToolTip1.SetToolTip(metroButton1, "Kill The Current Game Instance");
                     }
                     if (!GameStarted)
                     {
-                        metroLabel57.Text = "Closed";
-                        metroLabel60.Text = "-";
-                        foreach (TreeNode node in treeView2.Nodes)
+                        processesByName = Process.GetProcessesByName("Client");
+                        for (int j = 0; j < processesByName.Length; j++)
                         {
-                            if (node != null)
+                            Process process2 = processesByName[j];
+                            GameStarted = true;
+                        }
+                        if (customclientname != "")
+                        {
+                            processesByName = Process.GetProcessesByName(customclientname.Replace(".exe", ""));
+                            for (int k = 0; k < processesByName.Length; k++)
                             {
-                                RealModPath = FullModPathMan + "\\" + node.FullPath.ToString();
-                                if (Directory.Exists(RealModPath))
-                                {
-                                    checkButtons(output: true);
-                                }
-                                else
-                                {
-                                    node.Remove();
-                                }
+                                Process process3 = processesByName[k];
+                                GameStarted = true;
                             }
                         }
-                        metroButton1.Enabled = true;
-                        metroButton1.Text = "Play!";
-                        metroToolTip1.SetToolTip(metroButton1, "Patch! and/or Play!");
-                        Show();
-                        base.WindowState = FormWindowState.Normal;
-                        notifyIcon1.Visible = false;
-                        AddTextLog("Game Closed!");
-                        AddTextLog("Restored UI!");
-                        if (!metroLabel14.Text.Contains("Clean"))
+                        if (GameStarted)
                         {
-                            metroButton2.Enabled = true;
+                            foreach (string key4 in ClientHandler.Keys)
+                            {
+                                if (!ProcessExists(ClientHandler[key4]))
+                                {
+                                    metroComboBox9.SelectedIndex = -1;
+                                    metroComboBox9.Items.Remove(key4);
+                                    ClearClient.Add(key4, key4);
+                                    if (metroComboBox9.Items.Count > 1)
+                                    {
+                                        metroComboBox9.SelectedIndex = 1;
+                                    }
+                                    else
+                                    {
+                                        metroComboBox9.SelectedIndex = -1;
+                                        metroPanel6.Visible = false;
+                                    }
+                                    AddTextLog(key4 + "'s Game Process Died");
+                                }
+                            }
+                            foreach (string key5 in ClearClient.Keys)
+                            {
+                                ClientHandler.Remove(key5);
+                            }
+                            ClearClient = new Dictionary<string, string>();
                         }
-                        CClock.Stop();
-                        enableButtons();
+                        if (!GameStarted)
+                        {
+                            metroLabel57.Text = "Closed";
+                            metroLabel60.Text = "-";
+                            foreach (TreeNode node in treeView2.Nodes)
+                            {
+                                if (node != null)
+                                {
+                                    if (node.Nodes.Count > 0)
+                                    {
+                                        foreach (TreeNode subnode in node.Nodes)
+                                        {
+                                            if (subnode != null)
+                                            {
+                                                RealModPath = FullModPathMan + "\\" + subnode.FullPath.ToString().Replace(" (Installed)", "");
+                                                if (Directory.Exists(RealModPath))
+                                                {
+                                                    checkButtons(output: true);
+                                                }
+                                                else
+                                                {
+                                                    subnode.Remove();
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (node.Nodes.Count == 0)
+                                    {
+                                        RealModPath = FullModPathMan + "\\" + node.FullPath.ToString().Replace(" (Installed)", "");
+                                        if (Directory.Exists(RealModPath))
+                                        {
+                                            checkButtons(output: true);
+                                        }
+                                        else
+                                        {
+                                            node.Remove();
+                                        }
+                                    }
+                                }
+                            }
+                            metroButton1.Enabled = true;
+                            metroButton1.Text = "Play!";
+                            metroToolTip1.SetToolTip(metroButton1, "Patch! and/or Play!");
+                            Show();
+                            base.WindowState = FormWindowState.Normal;
+                            notifyIcon1.Visible = false;
+                            AddTextLog("Game Closed!");
+                            AddTextLog("Restored UI!");
+                            if (!metroLabel14.Text.Contains("Clean"))
+                            {
+                                metroButton2.Enabled = true;
+                            }
+                            CClock.Stop();
+                            enableButtons();
+                        }
                     }
+                    MenuHandler(false);
                 }
-            }
-            else
-            {
-                metroPanel6.Visible = false;
-                foreach (string key2 in ClientHandler.Keys)
+                else
                 {
-                    if (!ProcessExists(ClientHandler[key2]))
+                    metroPanel6.Visible = false;
+                    foreach (string key2 in ClientHandler.Keys)
                     {
-                        metroComboBox9.SelectedIndex = -1;
-                        metroComboBox9.Items.Remove(key2);
-                        ClearClient.Add(key2, key2);
-                        if (metroComboBox9.Items.Count > 1)
-                        {
-                            metroComboBox9.SelectedIndex = 1;
-                        }
-                        else
+                        if (!ProcessExists(ClientHandler[key2]))
                         {
                             metroComboBox9.SelectedIndex = -1;
-                            metroPanel6.Visible = false;
+                            metroComboBox9.Items.Remove(key2);
+                            ClearClient.Add(key2, key2);
+                            if (metroComboBox9.Items.Count > 1)
+                            {
+                                metroComboBox9.SelectedIndex = 1;
+                            }
+                            else
+                            {
+                                metroComboBox9.SelectedIndex = -1;
+                                metroPanel6.Visible = false;
+                            }
+                            AddTextLog(key2 + "'s Game Process Died");
                         }
-                        AddTextLog(key2 + "'s Game Process Died");
                     }
+                    foreach (string key3 in ClearClient.Keys)
+                    {
+                        ClientHandler.Remove(key3);
+                    }
+                    ClearClient = new Dictionary<string, string>();
+                    MenuHandler(true);
                 }
-                foreach (string key3 in ClearClient.Keys)
-                {
-                    ClientHandler.Remove(key3);
-                }
-                ClearClient = new Dictionary<string, string>();
+                busytimer = false;
             }
+        }
+
+        private void MenuHandler(bool change)
+        {
+            metroTile4.Enabled = change;
+            metroTile5.Enabled = change;
+            metroTile7.Enabled = change;
+            metroTile8.Enabled = change;
+            metroTile9.Enabled = change;
         }
 
         private void metroLabel11_TextChanged(object sender, EventArgs e)
@@ -4742,9 +4967,7 @@ namespace Revamped_BnS_Buddy
                     Unattended = "-UNATTENDED";
                     try
                     {
-                        string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text = text.Replace("unattended = false", "unattended = true");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text);
+                        lineChanger("unattended = true", AppPath + "\\Settings.ini", 1);
                     }
                     catch
                     {
@@ -4756,9 +4979,7 @@ namespace Revamped_BnS_Buddy
                     Unattended = "";
                     try
                     {
-                        string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text2 = text2.Replace("unattended = true", "unattended = false");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                        lineChanger("unattended = false", AppPath + "\\Settings.ini", 1);
                     }
                     catch
                     {
@@ -4777,9 +4998,7 @@ namespace Revamped_BnS_Buddy
                     UseAllCores = "-USEALLAVAILABLECORES";
                     try
                     {
-                        string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text = text.Replace("useallcores = false", "useallcores = true");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text);
+                        lineChanger("useallcores = true", AppPath + "\\Settings.ini", 20);
                     }
                     catch
                     {
@@ -4791,9 +5010,7 @@ namespace Revamped_BnS_Buddy
                     UseAllCores = "";
                     try
                     {
-                        string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text2 = text2.Replace("useallcores = true", "useallcores = false");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                        lineChanger("useallcores = false", AppPath + "\\Settings.ini", 20);
                     }
                     catch
                     {
@@ -4812,9 +5029,7 @@ namespace Revamped_BnS_Buddy
                     NoTextureStreaming = "-NOTEXTURESTREAMING";
                     try
                     {
-                        string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text = text.Replace("notexturestreaming = false", "notexturestreaming = true");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text);
+                        lineChanger("notexturestreaming = true", AppPath + "\\Settings.ini", 2);
                     }
                     catch
                     {
@@ -4826,9 +5041,7 @@ namespace Revamped_BnS_Buddy
                     NoTextureStreaming = "";
                     try
                     {
-                        string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text2 = text2.Replace("notexturestreaming = true", "notexturestreaming = false");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                        lineChanger("notexturestreaming = false", AppPath + "\\Settings.ini", 2);
                     }
                     catch
                     {
@@ -5015,7 +5228,17 @@ namespace Revamped_BnS_Buddy
 
         private void metroButton1_Click(object sender, EventArgs e)
         {
-            PlayGame(pressed: true);
+            if (metroComboBox2.SelectedItem != null)
+            {
+                if (metroComboBox2.SelectedItem.ToString() != "")
+                    PlayGame(pressed: true);
+                else
+                    Prompt.Popup("Please select the region of your currently installed client before playing!");
+            }
+            else
+            {
+                Prompt.Popup("Please select the region of your currently installed client before playing!");
+            }
         }
 
         private void PlayGame(bool pressed)
@@ -5032,14 +5255,20 @@ namespace Revamped_BnS_Buddy
                 {
                     if (metroToggle22.Checked)
                     {
-                        text = metroComboBox9.SelectedItem.ToString();
+                        if (metroComboBox9.SelectedItem != null)
+                        {
+                            text = metroComboBox9.SelectedItem.ToString();
+                        }
                         foreach (string key2 in ClientHandler.Keys)
                         {
-                            if (text == key2)
+                            if (text == key2 || key2.Contains("UNKNOWN-"))
                             {
                                 Process.GetProcessById(ClientHandler[key2]).Kill();
                                 metroComboBox9.SelectedIndex = -1;
-                                metroComboBox9.Items.Remove(text);
+                                if (metroComboBox9.Items.Contains(text))
+                                {
+                                    metroComboBox9.Items.Remove(text);
+                                }
                                 ClearClient.Add(key2, key2);
                                 if (metroComboBox9.Items.Count > 1)
                                 {
@@ -5087,6 +5316,20 @@ namespace Revamped_BnS_Buddy
                                 appuniqueid = 0;
                             }
                         }
+                        foreach (string tokillc in ClientHandler.Keys)
+                        {
+                            if (tokillc.Contains("UNKNOWN-"))
+                            {
+                                ClearClient.Add(tokillc, tokillc);
+                                Process.GetProcessById(ClientHandler[tokillc]).Kill();
+                                AddTextLog("Killed Game Process");
+                            }
+                        }
+                        foreach (string key3 in ClearClient.Keys)
+                        {
+                            ClientHandler.Remove(key3);
+                        }
+                        ClearClient = new Dictionary<string, string>();
                     }
                 }
                 catch
@@ -5204,6 +5447,10 @@ namespace Revamped_BnS_Buddy
                         Extractor(usedfile);
                         DoPatchingProcess();
                     }
+                }
+                catch (IOException)
+                {
+                    Prompt.Popup("BnS is already running! Please close the game before applying any changes.");
                 }
                 catch (Exception ex)
                 {
@@ -5439,14 +5686,35 @@ namespace Revamped_BnS_Buddy
                         {
                             if (node2 != null)
                             {
-                                RealModPath = FullModPathMan + "\\" + node2.FullPath.ToString();
-                                if (Directory.Exists(RealModPath))
+                                if (node2.Nodes.Count > 0)
                                 {
-                                    checkButtons(output: true);
+                                    foreach (TreeNode subnode in node2.Nodes)
+                                    {
+                                        if (subnode != null)
+                                        {
+                                            RealModPath = FullModPathMan + "\\" + subnode.FullPath.ToString().Replace(" (Installed)", "");
+                                            if (Directory.Exists(RealModPath))
+                                            {
+                                                checkButtons(output: true);
+                                            }
+                                            else
+                                            {
+                                                subnode.Remove();
+                                            }
+                                        }
+                                    }
                                 }
-                                else
+                                if (node2.Nodes.Count == 0)
                                 {
-                                    node2.Remove();
+                                    RealModPath = FullModPathMan + "\\" + node2.FullPath.ToString().Replace(" (Installed)", "");
+                                    if (Directory.Exists(RealModPath))
+                                    {
+                                        checkButtons(output: true);
+                                    }
+                                    else
+                                    {
+                                        node2.Remove();
+                                    }
                                 }
                             }
                         }
@@ -5508,14 +5776,35 @@ namespace Revamped_BnS_Buddy
                         {
                             if (node3 != null)
                             {
-                                RealModPath = FullModPathMan + "\\" + node3.FullPath.ToString();
-                                if (Directory.Exists(RealModPath))
+                                if (node3.Nodes.Count > 0)
                                 {
-                                    checkButtons(output: true);
+                                    foreach (TreeNode subnode in node3.Nodes)
+                                    {
+                                        if (subnode != null)
+                                        {
+                                            RealModPath = FullModPathMan + "\\" + subnode.FullPath.ToString().Replace(" (Installed)", "");
+                                            if (Directory.Exists(RealModPath))
+                                            {
+                                                checkButtons(output: true);
+                                            }
+                                            else
+                                            {
+                                                subnode.Remove();
+                                            }
+                                        }
+                                    }
                                 }
-                                else
+                                if (node3.Nodes.Count == 0)
                                 {
-                                    node3.Remove();
+                                    RealModPath = FullModPathMan + "\\" + node3.FullPath.ToString().Replace(" (Installed)", "");
+                                    if (Directory.Exists(RealModPath))
+                                    {
+                                        checkButtons(output: true);
+                                    }
+                                    else
+                                    {
+                                        node3.Remove();
+                                    }
                                 }
                             }
                         }
@@ -5595,18 +5884,30 @@ namespace Revamped_BnS_Buddy
             }
             if (notifyIcon1.Visible)
             {
-                notifyIcon1.Visible = false;
+                if (!AlwaysOnTray)
+                {
+                    notifyIcon1.Visible = false;
+                }
             }
         }
 
+        public bool AlwaysOnTray = false;
         private void Form1_Resize(object sender, EventArgs e)
         {
             if (AllowMinimize && base.WindowState == FormWindowState.Minimized)
             {
-                ConfigureContext();
+                if (!AlwaysOnTray)
+                {
+                    ConfigureContext();
+                    notifyIcon1.Visible = true;
+                    notifyIcon1.ShowBalloonTip(50, "BnS Buddy", "Minimized to tray.", ToolTipIcon.Info);
+                }
                 Hide();
-                notifyIcon1.Visible = true;
-                notifyIcon1.ShowBalloonTip(50, "BnS Buddy", "Minimized to tray.", ToolTipIcon.Info);
+            }
+            else if (WindowState == FormWindowState.Normal && notifyIcon1.Visible == true)
+            {
+                NotifAction();
+                Focus();
             }
         }
 
@@ -5951,6 +6252,46 @@ namespace Revamped_BnS_Buddy
             }
         }
 
+        /* CreateHardLink(@"c:\temp\New Link", @"c:\temp\Original File",IntPtr.Zero); 
+        [DllImport("Kernel32.dll", CharSet = CharSet.Unicode)]
+        static extern bool CreateHardLink(
+            string lpFileName,
+            string lpExistingFileName,
+            IntPtr lpSecurityAttributes
+        );
+        */
+
+        [DllImport("kernel32.dll")]
+        static extern bool CreateSymbolicLink(
+        string lpSymlinkFileName, string lpTargetFileName, SymbolicLink dwFlags);
+
+        enum SymbolicLink
+        {
+            File = 0,
+            Directory = 1
+        }
+
+        private bool IsSymbolic(string path)
+        {
+            if (Directory.Exists(path))
+            {
+                DirectoryInfo directoryInfo = new DirectoryInfo(path);
+                if (directoryInfo.Attributes.HasFlag(FileAttributes.Directory))
+                {
+                    return directoryInfo.Attributes.HasFlag(FileAttributes.ReparsePoint);
+                }
+            }
+            if (File.Exists(path))
+            {
+                FileInfo pathInfo = new FileInfo(path);
+                if (pathInfo.Attributes.HasFlag(FileAttributes.Normal))
+                {
+                    return pathInfo.Attributes.HasFlag(FileAttributes.ReparsePoint);
+                }
+            }
+            return false;
+        }
+
         public void InitializeManager()
         {
             FullPath = FullPath.Replace("\\\\", "\\");
@@ -5988,14 +6329,36 @@ namespace Revamped_BnS_Buddy
             {
                 if (node != null)
                 {
-                    RealModPath = FullModPathMan + "\\" + node.FullPath.ToString();
-                    if (Directory.Exists(RealModPath))
+                    if (node.Nodes.Count > 0)
                     {
-                        checkButtons(output: true);
+                        foreach (TreeNode subnode in node.Nodes)
+                        {
+                            if (subnode != null)
+                            {
+                                RealModPath = FullModPathMan + "\\" + subnode.FullPath.ToString().Replace(" (Installed)", "");
+                                if (Directory.Exists(RealModPath))
+                                {
+                                    checkButtons(output: true);
+                                }
+                                else
+                                {
+                                    Prompt.Popup("Removed: " + subnode.FullPath);
+                                    subnode.Remove();
+                                }
+                            }
+                        }
                     }
-                    else
+                    if (node.Nodes.Count == 0)
                     {
-                        node.Remove();
+                        RealModPath = FullModPathMan + "\\" + node.FullPath.ToString().Replace(" (Installed)", "");
+                        if (Directory.Exists(RealModPath))
+                        {
+                            checkButtons(output: true);
+                        }
+                        else
+                        {
+                            node.Remove();
+                        }
                     }
                 }
             }
@@ -6018,7 +6381,7 @@ namespace Revamped_BnS_Buddy
             FileInfo[] files = new DirectoryInfo(RealModPath).GetFiles("*.*");
             for (int i = 0; i < files.Length; i++)
             {
-                if (!files[i].Name.Contains(".txt"))
+                if (files[i].Name.Contains(".upk") || files[i].Name.Contains(".umap"))
                 {
                     num++;
                 }
@@ -6026,7 +6389,7 @@ namespace Revamped_BnS_Buddy
             files = new DirectoryInfo(backupFolderPath).GetFiles("*.*");
             for (int j = 0; j < files.Length; j++)
             {
-                if (!files[j].Name.Contains(".txt"))
+                if (files[j].Name.Contains(".bak"))
                 {
                     num2++;
                 }
@@ -6182,41 +6545,74 @@ namespace Revamped_BnS_Buddy
             {
                 if (node != null)
                 {
-                    RealModPath = FullModPathMan + "\\" + node.FullPath.ToString();
-                    if (Directory.Exists(RealModPath))
+                    if (node.Nodes.Count > 0)
                     {
-                        checkButtons();
+                        foreach (TreeNode subnode in node.Nodes)
+                        {
+                            if (subnode != null)
+                            {
+                                RealModPath = FullModPathMan + "\\" + subnode.FullPath.ToString().Replace(" (Installed)", "");
+                                if (Directory.Exists(RealModPath))
+                                {
+                                    checkButtons();
+                                }
+                                else
+                                {
+                                    subnode.Remove();
+                                }
+                            }
+                        }
                     }
-                    else
+                    if (node.Nodes.Count == 0)
                     {
-                        node.Remove();
+                        RealModPath = FullModPathMan + "\\" + node.FullPath.ToString().Replace(" (Installed)", "");
+                        if (Directory.Exists(RealModPath))
+                        {
+                            checkButtons();
+                        }
+                        else
+                        {
+                            node.Remove();
+                        }
                     }
                 }
             }
         }
 
-        private void doFileSwap(string obj)
+        private void doFileSwapV2(string obj, bool InstallFlag)
         {
+            List<object> arguments = new List<object>();
+            arguments.Add(obj);
+            arguments.Add(InstallFlag);
             RealModPath = obj;
-            bw = new BackgroundWorker();
-            bw.WorkerSupportsCancellation = true;
-            bw.WorkerReportsProgress = true;
-            bw.DoWork += bw_DoWork;
-            bw.ProgressChanged += bw_ProgressChanged;
-            bw.RunWorkerCompleted += bw_RunWorkerCompleted;
             disableButtons();
-            if (!bw.IsBusy)
+            bw_DoWorkV2(arguments);
+        }
+
+        private void bw_ProgressChangedV2()
+        {
+            var maxint = metroProgressBar2.Maximum;
+            var curint = metroProgressBar2.Value;
+            if (curint == maxint)
             {
-                bw.RunWorkerAsync(RealModPath);
+                metroProgressBar2.Value = 0;
             }
         }
 
-        private void bw_DoWork(object sender, DoWorkEventArgs e)
+        private void bw_RunWorkerCompletedV2()
         {
-            string text = e.Argument.ToString();
+            metroProgressBar2.Refresh();
+            enableButtons();
+        }
+
+        private void bw_DoWorkV2(object Arguments)
+        {
+            List<object> genericlist = Arguments as List<object>;
+            string text = (string)genericlist[0];
+            bool installFlag = (bool)genericlist[1];
             string fileName = Path.GetFileName(text);
             string name = new DirectoryInfo(text).Name;
-            if (installFlag && !fileName.Contains("(Installed)"))
+            if (installFlag)
             {
                 RealModPath = text.ToString();
                 tmpnode = fileName.ToString();
@@ -6238,7 +6634,7 @@ namespace Revamped_BnS_Buddy
                         metroProgressBar2.PerformStep();
                         metroProgressBar2.Refresh();
                         string text2 = files[i].Split(Path.DirectorySeparatorChar).Last();
-                        if (text2 != "description.txt" && (text2.EndsWith(".upk") || text2.EndsWith(".umap")))
+                        if (text2 != "preview.png" && text2 != "description.txt" && (text2.EndsWith(".upk") || text2.EndsWith(".umap")))
                         {
                             Control.CheckForIllegalCrossThreadCalls = false;
                             AddTextBoxLog(Environment.NewLine);
@@ -6246,13 +6642,15 @@ namespace Revamped_BnS_Buddy
                             {
                                 if (File.Exists(RealModPath + "\\" + text2))
                                 {
-                                    AddTextBoxLog(Environment.NewLine + "[Copying] " + text2 + " [modded] to CookedPC/mod");
+                                    AddTextBoxLog(Environment.NewLine + "[Creating] " + name + " [folder] at CookedPC/mod");
                                     if (!Directory.Exists(modsFolderPath + "\\" + name))
                                     {
                                         Directory.CreateDirectory(modsFolderPath + "\\" + name);
                                     }
-                                    File.Copy(RealModPath + "\\" + text2, modsFolderPath + "\\" + name + "\\" + text2, overwrite: true);
-                                    AddTextBoxLog(Environment.NewLine + "[Copied] " + text2 + " [modded] to CookedPC/mod");
+                                    AddTextBoxLog(Environment.NewLine + "[Created] " + name + " [folder] at CookedPC/mod");
+                                    AddTextBoxLog(Environment.NewLine + "[Linking] " + text2 + " [modded] to CookedPC/mod");
+                                    CreateSymbolicLink(modsFolderPath + "\\" + name + "\\" + text2, RealModPath + "\\" + text2, SymbolicLink.File);
+                                    AddTextBoxLog(Environment.NewLine + "[Linked] " + text2 + " [modded] to CookedPC/mod");
                                 }
                             }
                             catch
@@ -6262,13 +6660,7 @@ namespace Revamped_BnS_Buddy
                             num++;
                             num2++;
                             num4 = num2 * 100 / num3;
-                            if (bw.CancellationPending)
-                            {
-                                e.Cancel = true;
-                                break;
-                            }
-                            Thread.Sleep(50);
-                            bw.ReportProgress(num4);
+                            bw_ProgressChangedV2();
                         }
                     }
                     if (num > 0)
@@ -6281,242 +6673,164 @@ namespace Revamped_BnS_Buddy
                         AddTextBoxLog(Environment.NewLine);
                         AddTextBoxLog("[Log] Done! No files were moved.");
                     }
-                    try
-                    {
-                        AddTextBoxLog(Environment.NewLine);
-                        AddTextBoxLog("[Log] Creating new folder.");
-                        if (!Directory.Exists(FullModPathMan + "\\" + tmpnode + " (Installed)"))
-                        {
-                            string sourceDirName = FullModPathMan + "\\" + tmpnode;
-                            string destDirName = FullModPathMan + "\\" + tmpnode + " (Installed)";
-                            Directory.Move(sourceDirName, destDirName);
-                            AddTextBoxLog(Environment.NewLine);
-                            AddTextBoxLog("[Log] Created.");
-                            _workerCompleted.Set();
-                        }
-                        else
-                        {
-                            AddTextBoxLog(Environment.NewLine);
-                            AddTextBoxLog("[Log] Skipped Creation.");
-                        }
-                        AddTextBoxLog(Environment.NewLine);
-                    }
-                    catch (Exception ex)
-                    {
-                        Prompt.Popup("Error: " + ex.Message);
-                    }
                 }
                 else
                 {
                     AddTextBoxLog(Environment.NewLine);
                     AddTextBoxLog("[Notice] Can't install an empty mod folder");
-                    _workerCompleted.Set();
                 }
-                return;
             }
-            if (installFlag || !fileName.Contains("(Installed)"))
+            if (!installFlag)
             {
-                return;
-            }
-            bool flag = false;
-            int num5 = 0;
-            RealModPath = text.ToString();
-            tmpnode = fileName.ToString();
-            newbackuppath = backupFolderPath + "\\" + tmpnode.Replace(" (Installed)", "");
-            if (Directory.Exists(newbackuppath))
-            {
-                DirectoryInfo directoryInfo2 = new DirectoryInfo(newbackuppath);
-                num5 = directoryInfo2.GetFiles("*.upk").Count();
-                num5 += directoryInfo2.GetFiles("*.umap").Count();
-                flag = true;
-            }
-            else
-            {
-                DirectoryInfo directoryInfo3 = new DirectoryInfo(RealModPath);
-                num5 = directoryInfo3.GetFiles("*.upk").Count();
-                num5 += directoryInfo3.GetFiles("*.umap").Count();
-            }
-            string empty2 = string.Empty;
-            int num6 = 0;
-            int num7 = 0;
-            int num8 = 0;
-            if (!flag)
-            {
-                metroProgressBar2.Value = 0;
-                string[] files2 = Directory.GetFiles(RealModPath);
-                for (int j = 0; j < files2.Length; j++)
+                bool flag = false;
+                int num5 = 0;
+                RealModPath = text.ToString();
+                tmpnode = fileName.ToString();
+                newbackuppath = backupFolderPath + "\\" + tmpnode.Replace(" (Installed)", "");
+                if (Directory.Exists(newbackuppath))
                 {
-                    metroProgressBar2.Maximum = files2.Length;
-                    metroProgressBar2.PerformStep();
-                    metroProgressBar2.Refresh();
-                    string text3 = files2[j].Split(Path.DirectorySeparatorChar).Last();
-                    string text4 = name.Replace(" (Installed)", "");
-                    Control.CheckForIllegalCrossThreadCalls = false;
-                    AddTextBoxLog(Environment.NewLine);
-                    try
+                    DirectoryInfo directoryInfo2 = new DirectoryInfo(newbackuppath);
+                    num5 = directoryInfo2.GetFiles("*.upk").Count();
+                    num5 += directoryInfo2.GetFiles("*.umap").Count();
+                    flag = true;
+                }
+                else
+                {
+                    DirectoryInfo directoryInfo3 = new DirectoryInfo(RealModPath);
+                    num5 = directoryInfo3.GetFiles("*.upk").Count();
+                    num5 += directoryInfo3.GetFiles("*.umap").Count();
+                }
+                string empty2 = string.Empty;
+                int num6 = 0;
+                int num7 = 0;
+                int num8 = 0;
+                if (!flag)
+                {
+                    metroProgressBar2.Value = 0;
+                    string[] files2 = Directory.GetFiles(RealModPath);
+                    for (int j = 0; j < files2.Length; j++)
                     {
-                        if (text3.Contains(".upk") || text3.Contains(".umap"))
+                        metroProgressBar2.Maximum = files2.Length;
+                        metroProgressBar2.PerformStep();
+                        metroProgressBar2.Refresh();
+                        string text3 = files2[j].Split(Path.DirectorySeparatorChar).Last();
+                        string text4 = name.Replace(" (Installed)", "");
+                        Control.CheckForIllegalCrossThreadCalls = false;
+                        AddTextBoxLog(Environment.NewLine);
+                        try
                         {
-                            if (File.Exists(modsFolderPath + "\\" + text4 + "\\" + text3))
+                            if (text3.Contains(".upk") || text3.Contains(".umap"))
                             {
-                                AddTextBoxLog(Environment.NewLine + "[Removing] " + text3 + " [modded] from CookedPC/mod");
-                                File.Delete(modsFolderPath + "\\" + text4 + "\\" + text3);
-                                if (Directory.GetFiles(modsFolderPath + "\\" + text4).Length == 0)
+                                if (File.Exists(modsFolderPath + "\\" + text4 + "\\" + text3))
                                 {
-                                    Directory.Delete(modsFolderPath + "\\" + text4);
+                                    AddTextBoxLog(Environment.NewLine + "[Removing] " + text3 + " [modded] from CookedPC/mod");
+                                    File.Delete(modsFolderPath + "\\" + text4 + "\\" + text3);
+                                    if (Directory.GetFiles(modsFolderPath + "\\" + text4).Length == 0)
+                                    {
+                                        Directory.Delete(modsFolderPath + "\\" + text4);
+                                    }
+                                    AddTextBoxLog(Environment.NewLine + "[Removed] " + text3 + " [modded] from CookedPC/mod");
                                 }
-                                AddTextBoxLog(Environment.NewLine + "[Removed] " + text3 + " [modded] from CookedPC/mod");
+                                num6++;
+                                num7++;
+                                num8 = num7 * 100 / num5;
+                                //Thread.Sleep(50);
+                                bw_ProgressChangedV2();
                             }
-                            num6++;
-                            num7++;
-                            num8 = num7 * 100 / num5;
-                            if (bw.CancellationPending)
-                            {
-                                e.Cancel = true;
-                                goto IL_0650;
-                            }
-                            Thread.Sleep(50);
-                            bw.ReportProgress(num8);
+                        }
+                        catch
+                        {
+                            AddTextBoxLog(Environment.NewLine + "[Error] " + text3 + " could not be touched!");
                         }
                     }
-                    catch
-                    {
-                        AddTextBoxLog(Environment.NewLine + "[Error] " + text3 + " could not be touched!");
-                    }
                 }
-            }
-            goto IL_0650;
+                goto IL_0650;
             IL_0650:
-            if (flag)
-            {
-                metroProgressBar2.Value = 0;
-                string[] files3 = Directory.GetFiles(newbackuppath);
-                for (int k = 0; k < files3.Length; k++)
+                if (flag)
                 {
-                    metroProgressBar2.Maximum = files3.Length;
-                    metroProgressBar2.PerformStep();
-                    metroProgressBar2.Refresh();
-                    string text5 = files3[k].Split(Path.DirectorySeparatorChar).Last();
-                    Control.CheckForIllegalCrossThreadCalls = false;
-                    AddTextBoxLog(Environment.NewLine);
-                    try
+                    metroProgressBar2.Value = 0;
+                    string[] files3 = Directory.GetFiles(newbackuppath);
+                    for (int k = 0; k < files3.Length; k++)
                     {
-                        if (File.Exists(modsFolderPath + "\\" + text5))
+                        metroProgressBar2.Maximum = files3.Length;
+                        metroProgressBar2.PerformStep();
+                        metroProgressBar2.Refresh();
+                        string text5 = files3[k].Split(Path.DirectorySeparatorChar).Last();
+                        Control.CheckForIllegalCrossThreadCalls = false;
+                        AddTextBoxLog(Environment.NewLine);
+                        try
                         {
-                            AddTextBoxLog(Environment.NewLine + "[Copying] " + text5 + " [modded] to CookedPC_Mod");
-                            File.Copy(modsFolderPath + "\\" + text5, RealModPath + "\\" + text5, overwrite: true);
-                            AddTextBoxLog(Environment.NewLine + "[Copied] " + text5 + " [modded] to CookedPC_Mod");
-                            AddTextBoxLog(Environment.NewLine + "[Deleting] " + text5 + " [modded] from CookedPC/mod");
-                            File.Delete(modsFolderPath + "\\" + text5);
-                            AddTextBoxLog(Environment.NewLine + "[Deleted] " + text5 + " [modded] from CookedPC/mod");
-                        }
-                    }
-                    catch
-                    {
-                        AddTextBoxLog(Environment.NewLine + "[Error] " + text5 + " could not be touched!");
-                    }
-                    try
-                    {
-                        if (!File.Exists(newbackuppath + "\\" + text5) || text5.Contains("(unique)"))
-                        {
-                            try
+                            if (File.Exists(modsFolderPath + "\\" + text5))
                             {
-                                string str = text5.Replace(" (unique)", "");
-                                AddTextBoxLog(Environment.NewLine + "[Deleting] " + text5 + " [modded] from CookedPC_Mod");
-                                File.Copy(newbackuppath + "\\" + text5, RealModPath + "\\" + str, overwrite: true);
+                                AddTextBoxLog(Environment.NewLine + "[Deleting] " + text5 + " [modded] from CookedPC/mod");
+                                File.Delete(modsFolderPath + "\\" + text5);
+                                AddTextBoxLog(Environment.NewLine + "[Deleted] " + text5 + " [modded] from CookedPC/mod");
+                            }
+                        }
+                        catch
+                        {
+                            AddTextBoxLog(Environment.NewLine + "[Error] " + text5 + " could not be touched!");
+                        }
+                        try
+                        {
+                            if (!File.Exists(newbackuppath + "\\" + text5) || text5.Contains("(unique)"))
+                            {
+                                try
+                                {
+                                    string str = text5.Replace(" (unique)", "");
+                                    AddTextBoxLog(Environment.NewLine + "[Deleting] " + text5 + " [modded] from CookedPC_Mod");
+                                    File.Copy(newbackuppath + "\\" + text5, RealModPath + "\\" + str, overwrite: true);
+                                    File.Delete(newbackuppath + "\\" + text5);
+                                    File.Delete(modsFolderPath + "\\" + str);
+                                    AddTextBoxLog(Environment.NewLine + "[Deleted] " + text5 + " [modded] from CookedPC_Mod");
+                                }
+                                catch
+                                {
+                                    AddTextBoxLog(Environment.NewLine + "[Error] " + text5 + " (unique) couldn't be copied/deleted from CookedPC_Mod");
+                                }
+                            }
+                            else
+                            {
+                                AddTextBoxLog(Environment.NewLine + "[Copying] " + text5 + " [original] to CookedPC");
+                                File.Copy(newbackuppath + "\\" + text5, originalFolderPath + "\\" + text5, overwrite: true);
+                                AddTextBoxLog(Environment.NewLine + "[Copied] " + text5 + " [original] to CookedPC");
+                                AddTextBoxLog(Environment.NewLine + "[Deleting] " + text5 + " [original] from CookedPC_Backup");
                                 File.Delete(newbackuppath + "\\" + text5);
-                                File.Delete(modsFolderPath + "\\" + str);
-                                AddTextBoxLog(Environment.NewLine + "[Deleted] " + text5 + " [modded] from CookedPC_Mod");
-                            }
-                            catch
-                            {
-                                AddTextBoxLog(Environment.NewLine + "[Error] " + text5 + " (unique) couldn't be copied/deleted from CookedPC_Mod");
+                                AddTextBoxLog(Environment.NewLine + "[Deleted] " + text5 + " [original] from CookedPC_Backup");
                             }
                         }
-                        else
+                        catch
                         {
-                            AddTextBoxLog(Environment.NewLine + "[Copying] " + text5 + " [original] to CookedPC");
-                            File.Copy(newbackuppath + "\\" + text5, originalFolderPath + "\\" + text5, overwrite: true);
-                            AddTextBoxLog(Environment.NewLine + "[Copied] " + text5 + " [original] to CookedPC");
-                            AddTextBoxLog(Environment.NewLine + "[Deleting] " + text5 + " [original] from CookedPC_Backup");
-                            File.Delete(newbackuppath + "\\" + text5);
-                            AddTextBoxLog(Environment.NewLine + "[Deleted] " + text5 + " [original] from CookedPC_Backup");
+                            AddTextBoxLog(Environment.NewLine + "[Error] " + text5 + " could not be touched!");
                         }
+                        num6++;
+                        num7++;
+                        num8 = num7 * 100 / num5;
+                        //Thread.Sleep(50);
+                        bw_ProgressChangedV2();
                     }
-                    catch
-                    {
-                        AddTextBoxLog(Environment.NewLine + "[Error] " + text5 + " could not be touched!");
-                    }
-                    num6++;
-                    num7++;
-                    num8 = num7 * 100 / num5;
-                    if (bw.CancellationPending)
-                    {
-                        e.Cancel = true;
-                        break;
-                    }
-                    Thread.Sleep(50);
-                    bw.ReportProgress(num8);
+                }
+                if (Directory.Exists(newbackuppath) && Directory.GetFiles(newbackuppath).Length == 0)
+                {
+                    Directory.Delete(newbackuppath);
+                }
+                else if (flag)
+                {
+                    AddTextBoxLog(Environment.NewLine);
+                    AddTextBoxLog("[Log] Error: Restoring did not complete.");
+                }
+                if (num6 > 0)
+                {
+                    AddTextBoxLog(Environment.NewLine);
+                    AddTextBoxLog("[Log] Done! " + num6 + " files were removed.");
+                }
+                else
+                {
+                    AddTextBoxLog(Environment.NewLine);
+                    AddTextBoxLog("[Log] Done! No files were removed.");
                 }
             }
-            if (Directory.Exists(newbackuppath) && Directory.GetFiles(newbackuppath).Length == 0)
-            {
-                Directory.Delete(newbackuppath);
-            }
-            else if (flag)
-            {
-                AddTextBoxLog(Environment.NewLine);
-                AddTextBoxLog("[Log] Error: Restoring did not complete.");
-            }
-            if (num6 > 0)
-            {
-                AddTextBoxLog(Environment.NewLine);
-                AddTextBoxLog("[Log] Done! " + num6 + " files were removed.");
-            }
-            else
-            {
-                AddTextBoxLog(Environment.NewLine);
-                AddTextBoxLog("[Log] Done! No files were removed.");
-            }
-            try
-            {
-                string sourceDirName2 = FullModPathMan + "\\" + tmpnode;
-                string destDirName2 = FullModPathMan + "\\" + tmpnode.Replace(" (Installed)", "");
-                Directory.Move(sourceDirName2, destDirName2);
-                _workerCompleted.Set();
-            }
-            catch (Exception ex2)
-            {
-                Prompt.Popup(ex2.Message);
-            }
-        }
-
-        private void bw_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            var maxint = metroProgressBar2.Maximum;
-            var curint = metroProgressBar2.Value;
-            if (curint == maxint)
-            {
-                metroProgressBar2.Value = 0;
-            }
-        }
-
-        private void bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            if (e.Cancelled)
-            {
-                AddTextBoxLog(Convert.ToString(e.Cancelled));
-            }
-            else if (e.Error != null)
-            {
-                AddTextBoxLog(Convert.ToString(e.Error));
-            }
-            else
-            {
-                metroProgressBar2.Refresh();
-                enableButtons();
-            }
-            _workerCompleted.Set();
+            bw_RunWorkerCompletedV2();
         }
 
         public bool checkNode(string s)
@@ -6531,37 +6845,83 @@ namespace Revamped_BnS_Buddy
             return true;
         }
 
-        public void addnew()
-        {
-            string[] directories = Directory.GetDirectories(FullModPathMan);
-            foreach (string text in directories)
-            {
-                string text2 = text.Split(Path.DirectorySeparatorChar).Last();
-                if (text.Length != 0 && checkNode(text2))
-                {
-                    treeView2.Nodes.Add(new TreeNode(text2));
-                }
-            }
-        }
-
         public void removebad()
         {
             foreach (TreeNode node in treeView2.Nodes)
             {
                 if (node != null)
                 {
-                    RealModPath = FullModPathMan + "\\" + node.FullPath.ToString();
-                    if (Directory.Exists(RealModPath))
+                    if (node.Nodes.Count > 0)
                     {
-                        checkButtons(output: true);
+                        foreach (TreeNode subnode in node.Nodes)
+                        {
+                            if (subnode != null)
+                            {
+                                RealModPath = FullModPathMan + "\\" + subnode.FullPath.ToString().Replace(" (Installed)", "");
+                                if (Directory.Exists(RealModPath))
+                                {
+                                    checkButtons();
+                                }
+                                else
+                                {
+                                    subnode.Remove();
+                                }
+                            }
+                        }
                     }
-                    else
+                    if (node.Nodes.Count == 0)
                     {
-                        node.Remove();
+                        RealModPath = FullModPathMan + "\\" + node.FullPath.ToString().Replace(" (Installed)", "");
+                        if (Directory.Exists(RealModPath))
+                        {
+                            checkButtons();
+                        }
+                        else
+                        {
+                            node.Remove();
+                        }
                     }
                 }
             }
             treeView2.Sort();
+        }
+
+        public void colornodes()
+        {
+            treeView2.Refresh();
+            foreach (TreeNode ColorAT in treeView2.Nodes)
+            {
+                if (ColorAT != null)
+                {
+                    // Child support
+                    if (ColorAT.Nodes.Count > 0)
+                    {
+                        foreach (TreeNode subnode in ColorAT.Nodes)
+                        {
+                            if (subnode != null)
+                            {
+                                if (subnode.Text.Contains(" (Installed)"))
+                                {
+                                    subnode.ForeColor = Color.LightGreen;
+                                }
+                                else
+                                {
+                                    subnode.ForeColor = Color.White;
+                                }
+                            }
+                        }
+                    }
+                    // Parent Support
+                    if (ColorAT.Text.Contains(" (Installed)"))
+                    {
+                        ColorAT.ForeColor = Color.LightGreen;
+                    }
+                    else
+                    {
+                        ColorAT.ForeColor = Color.White;
+                    }
+                }
+            }
         }
 
         private void metroButton8_Click(object sender, EventArgs e)
@@ -6573,8 +6933,11 @@ namespace Revamped_BnS_Buddy
         {
             AddTextBoxLog(Environment.NewLine);
             AddTextBoxLog("[Log] Checking Mods Folder...");
-            addnew();
+            treeView2.BeginUpdate();
             removebad();
+            PopulateTreeView(FullModPathMan);
+            treeView2.Sort();
+            treeView2.EndUpdate();
             AddTextBoxLog(Environment.NewLine);
             AddTextBoxLog("[Log] Done Checking");
         }
@@ -6584,46 +6947,112 @@ namespace Revamped_BnS_Buddy
             catcher = "";
             metroProgressBar2.Visible = true;
             metroProgressBar2.Refresh();
-            installFlag = false;
             try
             {
+                List<string> todos = new List<string>();
+                Thread DoSwapThreads;
                 foreach (TreeNode node in treeView2.Nodes)
                 {
                     if (node != null)
                     {
-                        catcher = node.FullPath.ToString();
-                        if (node.Checked && catcher.Contains("(Installed)"))
+                        // Child support
+                        if (node.Nodes.Count > 0)
                         {
-                            tmpnode = "";
-                            doFileSwap(FullModPathMan + "\\" + node.FullPath.ToString());
-                            _workerCompleted.WaitOne();
-                            Directory.GetFiles(FullModPathMan);
-                            Thread.Sleep(50);
-                            if (catcher == tmpnode)
+                            foreach (TreeNode subnode in node.Nodes)
                             {
-                                Directory.GetFiles(FullModPathMan);
-                                Thread.Sleep(50);
-                                treeView2.Nodes.Remove(new TreeNode(tmpnode));
-                                treeView2.Refresh();
-                                Directory.GetFiles(FullModPathMan);
-                                Thread.Sleep(50);
-                                treeView2.Nodes.Add(tmpnode.Replace(" (Installed)", ""));
-                                treeView2.Refresh();
-                                Directory.GetFiles(FullModPathMan);
-                                Thread.Sleep(50);
+                                if (subnode != null)
+                                {
+                                    if (subnode.Checked && subnode.Text.Contains(" (Installed)"))
+                                    {
+                                        todos.Add(subnode.FullPath);
+                                    }
+                                    else if (subnode.Checked && !subnode.Text.Contains(" (Installed)"))
+                                    {
+                                        subnode.Checked = false;
+                                        AddTextBoxLog(Environment.NewLine + "Skipping: " + subnode.Text + " (Not Installed)");
+                                    }
+                                }
                             }
-                            _workerCompleted.Reset();
                         }
-                        if (node.Checked && !catcher.Contains("(Installed)"))
+                        // Parent support
+                        if (node.Checked && node.Text.Contains(" (Installed)"))
                         {
-                            AddTextBoxLog(Environment.NewLine + "Skipping: " + catcher + " (Not Installed)");
+                            todos.Add(node.FullPath);
+                        }
+                        else if (node.Checked && !node.Text.Contains(" (Installed)"))
+                        {
+                            node.Checked = false;
+                            AddTextBoxLog(Environment.NewLine + "Skipping: " + node.Text + " (Not Installed)");
                         }
                     }
                 }
+                foreach (string olla in todos)
+                {
+                    foreach (TreeNode node in treeView2.Nodes)
+                    {
+                        if (node != null)
+                        {
+                            // Child support
+                            if (node.Nodes.Count > 0)
+                            {
+                                foreach (TreeNode subnode in node.Nodes)
+                                {
+                                    if (subnode != null)
+                                    {
+                                        catcher = subnode.FullPath;
+                                        if (subnode.FullPath == olla)
+                                        {
+                                            if (Directory.GetFiles(FullModPathMan + "\\" + subnode.FullPath.ToString().Replace(" (Installed)", "")).Count() > 0)
+                                            {
+                                                DoSwapThreads = new Thread(() => doFileSwapV2(FullModPathMan + "\\" + subnode.FullPath.ToString().Replace(" (Installed)", ""), false));
+                                                DoSwapThreads.Priority = ThreadPriority.Normal;
+                                                DoSwapThreads.Start();
+                                                DoSwapThreads.Join();
+                                                Thread.Sleep(100);
+                                                Completed_Mod_Work(catcher.Replace(" (Installed)", ""), subnode, true);
+                                                PopulateTreeView(FullModPathMan);
+                                            }
+                                            else
+                                            {
+                                                AddTextBoxLog(Environment.NewLine + "Can't uninstall " + catcher + " because it's empty.");
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            // Parent support
+                            catcher = node.Text;
+                            if (olla == node.FullPath)
+                            {
+                                if (Directory.GetFiles(FullModPathMan + "\\" + node.FullPath.ToString().Replace(" (Installed)", "")).Count() > 0)
+                                {
+                                    DoSwapThreads = new Thread(() => doFileSwapV2(FullModPathMan + "\\" + node.FullPath.ToString().Replace(" (Installed)", ""), false));
+                                    DoSwapThreads.Priority = ThreadPriority.Normal;
+                                    DoSwapThreads.Start();
+                                    DoSwapThreads.Join();
+                                    Thread.Sleep(100);
+                                    Completed_Mod_Work(catcher.Replace(" (Installed)", ""), node);
+                                    PopulateTreeView(FullModPathMan);
+                                }
+                                else
+                                {
+                                    AddTextBoxLog(Environment.NewLine + "Can't uninstall " + catcher + " because it's empty.");
+                                }
+                            }
+                        }
+                    }
+                }
+                colornodes();
+                ModsConflictCheck();
+                treeView2.Sort();
             }
-            catch
+            catch (DirectoryNotFoundException)
             {
-                AddTextBoxLog("Error: Could not open" + catcher + " mod");
+                AddTextBoxLog(Environment.NewLine + "Error: Directory for installed mod " + catcher + " not found! ");
+            }
+            catch (Exception eio)
+            {
+                AddTextBoxLog(Environment.NewLine + "Error: Could not open " + catcher + " mod" + Environment.NewLine + eio.ToString());
             }
             metroProgressBar2.Visible = false;
             metroProgressBar2.Refresh();
@@ -6634,58 +7063,188 @@ namespace Revamped_BnS_Buddy
             catcher = "";
             metroProgressBar2.Visible = true;
             metroProgressBar2.Refresh();
-            installFlag = true;
             try
             {
-                Donewith = new Dictionary<int, string>();
-                int num = treeView2.Nodes.Count - 1;
-                int num2 = num + 2;
-                for (int i = 0; num2 > i; i++)
+                Thread DoSwapThreads;
+                foreach (TreeNode node in treeView2.Nodes)
                 {
-                    if (treeView2.Nodes[i] != null)
+                    if (node != null)
                     {
-                        catcher = treeView2.Nodes[i].FullPath.ToString();
-                        if (!Donewith.ContainsValue(catcher))
+                        // Child support
+                        if (node.Nodes.Count > 0)
                         {
-                            if (treeView2.Nodes[i].Checked && !catcher.Contains("(Installed)"))
+                            foreach (TreeNode subnode in node.Nodes)
                             {
-                                Donewith.Add(i, catcher);
-                                _workerCompleted.Reset();
-                                doFileSwap(FullModPathMan + "\\" + catcher);
-                                _workerCompleted.WaitOne();
+                                if (subnode != null)
+                                {
+                                    catcher = subnode.FullPath.ToString();
+                                    if (subnode.Checked && !catcher.Contains("(Installed)"))
+                                    {
+                                        if (Directory.GetFiles(FullModPathMan + "\\" + catcher).Count() > 0)
+                                        {
+                                            DoSwapThreads = new Thread(() => doFileSwapV2(FullModPathMan + "\\" + catcher, true));
+                                            DoSwapThreads.Priority = ThreadPriority.Normal;
+                                            DoSwapThreads.Start();
+                                            DoSwapThreads.Join();
+                                            Thread.Sleep(100);
+                                            Completed_Mod_Work(catcher + " (Installed)", subnode, true);
+                                        }
+                                        else
+                                        {
+                                            AddTextBoxLog(Environment.NewLine + "Can't install " + catcher + " because it's empty.");
+                                        }
+                                    }
+                                }
                             }
-                            if (treeView2.Nodes[i].Checked && catcher.Contains("(Installed)"))
+                        }
+                        if (node.Nodes.Count == 0)
+                        {
+                            // Parent support
+                            catcher = node.FullPath.ToString();
+                            if (node.Checked && !catcher.Contains("(Installed)"))
+                            {
+                                if (Directory.GetFiles(FullModPathMan + "\\" + catcher).Count() > 0)
+                                {
+                                    DoSwapThreads = new Thread(() => doFileSwapV2(FullModPathMan + "\\" + catcher, true));
+                                    DoSwapThreads.Priority = ThreadPriority.Normal;
+                                    DoSwapThreads.Start();
+                                    DoSwapThreads.Join();
+                                    Thread.Sleep(100);
+                                    Completed_Mod_Work(node.Text + " (Installed)", node);
+                                }
+                                else
+                                {
+                                    AddTextBoxLog(Environment.NewLine + "Can't install " + catcher + " because it's empty.");
+                                }
+                            }
+                            else if (node.Checked && catcher.Contains("(Installed)"))
                             {
                                 AddTextBoxLog(Environment.NewLine + "Skipping: " + catcher + " (Already Installed)");
                             }
                         }
                     }
-                    if (i == num)
-                    {
-                        addnew();
-                        removebad();
-                        i++;
-                    }
                 }
+                PopulateTreeView(FullModPathMan);
+                colornodes();
+                ModsConflictCheck();
+                treeView2.Sort();
             }
-            catch
+            catch (DirectoryNotFoundException)
             {
-                AddTextBoxLog(Environment.NewLine + "Error: Could not open " + catcher + " mod");
+                AddTextBoxLog(Environment.NewLine + "Error: Directory for installed mod " + catcher + " not found!");
+            }
+            catch (Exception eio)
+            {
+                AddTextBoxLog(Environment.NewLine + "Error: Could not open " + catcher + " mod" + Environment.NewLine + eio.ToString());
             }
             metroProgressBar2.Visible = false;
             metroProgressBar2.Refresh();
+        }
+
+        public void Completed_Mod_Work(string newtext, TreeNode toremove, bool isChild = false)
+        {
+            if (isChild)
+            {
+                if (toremove.Parent != null)
+                {
+                    // Child support
+                    treeView2.Nodes[toremove.Parent.Index].Nodes.Add(FullModPathMan + "\\" + newtext, newtext.Split(Path.DirectorySeparatorChar).Last());
+                    treeView2.Refresh();
+                    treeView2.Nodes[toremove.Parent.Index].Nodes.Remove(treeView2.Nodes[toremove.Parent.Index].Nodes[toremove.Index]);
+                    treeView2.Refresh();
+                }
+            }
+            else
+            {
+                // Readd childs if any
+                List<TreeNode> subnodes_toadd = new List<TreeNode>();
+                if (toremove.Nodes.Count > 0)
+                {
+                    foreach (TreeNode subnode in toremove.Nodes)
+                    {
+                        if (subnode != null)
+                        {
+                            subnodes_toadd.Add(subnode);
+                        }
+                    }
+                }
+                // Parent support
+                treeView2.Nodes.Add(FullModPathMan + "\\" + newtext, newtext);
+                treeView2.Refresh();
+                treeView2.Nodes.Remove(treeView2.Nodes[toremove.Index]);
+                treeView2.Refresh();
+                // Finish child nodes
+                if (subnodes_toadd.Count > 0)
+                {
+                    treeView2.Nodes[treeView2.Nodes.IndexOfKey(FullModPathMan + "\\" + newtext)].Nodes.AddRange(subnodes_toadd.ToArray());
+                }
+            }
         }
 
         private void treeView2_AfterSelect(object sender, TreeViewEventArgs e)
         {
             try
             {
-                string text = File.ReadAllText(FullModPathMan + "\\" + e.Node.FullPath.ToString() + "\\description.txt").ToString();
-                metroLabel40.Text = text;
+                treeView2.BeginUpdate();
+                if (File.Exists(FullModPathMan + "\\" + e.Node.FullPath.ToString().Replace(" (Installed)", "") + "\\description.txt"))
+                {
+                    string text = File.ReadAllText(FullModPathMan + "\\" + e.Node.FullPath.ToString().Replace(" (Installed)", "") + "\\description.txt").ToString();
+                    metroLabel40.Text = text;
+                    metroButton43.Visible = true;
+                }
+                else
+                {
+                    metroLabel40.Text = "No description provided!";
+                    metroButton43.Visible = false;
+                }
+
+                try
+                {
+                    if (File.Exists(FullModPathMan + "\\" + e.Node.FullPath.ToString().Replace(" (Installed)", "") + "\\preview.png"))
+                    {
+                        previewImage = Image.FromFile(FullModPathMan + "\\" + e.Node.FullPath.ToString().Replace(" (Installed)", "") + "\\preview.png");
+                        metroButton42.Enabled = true;
+                    }
+                    else if (File.Exists(FullModPathMan + "\\" + e.Node.FullPath.ToString().Replace(" (Installed)", "") + "\\preview.jpg"))
+                    {
+                        previewImage = Image.FromFile(FullModPathMan + "\\" + e.Node.FullPath.ToString().Replace(" (Installed)", "") + "\\preview.jpg");
+                        metroButton42.Enabled = true;
+                    }
+                    else if (File.Exists(FullModPathMan + "\\" + e.Node.FullPath.ToString().Replace(" (Installed)", "") + "\\preview.gif"))
+                    {
+                        previewImage = Image.FromFile(FullModPathMan + "\\" + e.Node.FullPath.ToString().Replace(" (Installed)", "") + "\\preview.gif");
+                        metroButton42.Enabled = true;
+                    }
+                    else
+                    {
+                        previewImage = null;
+                        metroButton42.Enabled = false;
+                    }
+                }
+                catch
+                {
+                    previewImage = null;
+                    metroButton42.Enabled = false;
+                }
+
+                if (e.Node.Nodes.Count > 0)
+                {
+                    bool tocheck = e.Node.Checked;
+                    foreach (TreeNode child in e.Node.Nodes)
+                    {
+                        if (child != null)
+                        {
+                            child.Checked = tocheck;
+                        }
+                    }
+                }
+                treeView2.EndUpdate();
             }
-            catch
+            catch (Exception r)
             {
-                metroLabel40.Text = "No description provided!";
+                metroLabel40.Text = "Error: " + r.ToString();
+                metroButton43.Visible = false;
+                treeView2.EndUpdate();
             }
         }
 
@@ -6695,20 +7254,214 @@ namespace Revamped_BnS_Buddy
             try
             {
                 string[] directories = Directory.GetDirectories(dir);
+                List<string> checkfolder = new List<string>();
                 foreach (string text in directories)
                 {
+                    string newtext = text.Replace(" (Installed)", "");
                     if (text.Length != 0)
                     {
-                        treeView2.Nodes.Add(text.Split(Path.DirectorySeparatorChar).Last());
-                        Directory.GetFiles(text);
-                        Thread.Sleep(50);
-                        PopulateTreeView(text);
+                        // Convert to new mod manager
+                        if (text.Contains(" (Installed)"))
+                        {
+                            try
+                            {
+                                Directory.Move(text, newtext);
+                            }
+                            catch (IOException)
+                            {
+                                Prompt.Popup("Error: Folder " + text + " could not be moved due to permission error." + Environment.NewLine + "Please check your antivirus settings or windows folder protection.");
+                            }
+                            catch (Exception eio)
+                            {
+                                Prompt.Popup("Error: " + eio.ToString());
+                            }
+                        }
+                        // continue
+                        if (!treeView2.Nodes.ContainsKey(newtext) && !treeView2.Nodes.ContainsKey(newtext + " (Installed)") && !checkfolder.Exists(x => x.ToString() == newtext))
+                        {
+                            checkfolder.Add(newtext);
+                            if (Directory.Exists(modsFolderPath + "\\" + newtext.Split(Path.DirectorySeparatorChar).Last()))
+                            {
+                                TreeNode tmpnode = new TreeNode();
+                                int CurrentlyInstalledFiles = Directory.GetFiles(modsFolderPath + "\\" + newtext.Split(Path.DirectorySeparatorChar).Last(), "*.umap").Length;
+                                CurrentlyInstalledFiles += Directory.GetFiles(modsFolderPath + "\\" + newtext.Split(Path.DirectorySeparatorChar).Last(), "*.upk").Length;
+                                int LocalReadyFiles = Directory.GetFiles(FullModPathMan + "\\" + newtext.Split(Path.DirectorySeparatorChar).Last(), "*.upk").Length;
+                                LocalReadyFiles += Directory.GetFiles(FullModPathMan + "\\" + newtext.Split(Path.DirectorySeparatorChar).Last(), "*.umap").Length;
+                                if (CurrentlyInstalledFiles > 0 && LocalReadyFiles == CurrentlyInstalledFiles)
+                                {
+                                    treeView2.Nodes.Add(newtext, newtext.Split(Path.DirectorySeparatorChar).Last() + " (Installed)");
+                                }
+                                else
+                                {
+                                    treeView2.Nodes.Add(newtext, newtext.Split(Path.DirectorySeparatorChar).Last());
+                                }
+                            }
+                            else
+                            {
+                                treeView2.Nodes.Add(newtext, newtext.Split(Path.DirectorySeparatorChar).Last());
+                            }
+                        }
+                        treeView2.Refresh();
+                        string[] subs = Directory.GetDirectories(newtext);
+                        foreach (string names in subs)
+                        {
+                            string newnames = names.Replace(" (Installed)", "");
+                            if (names.Length != 0)
+                            {
+                                // Convert to new mod manager
+                                if (names.Contains(" (Installed)"))
+                                {
+                                    Directory.Move(names, newnames);
+                                }
+                                // continue
+                                int indexofnode = treeView2.Nodes.IndexOfKey(newtext);
+                                if (!treeView2.Nodes[indexofnode].Nodes.ContainsKey(newnames) && !treeView2.Nodes[indexofnode].Nodes.ContainsKey(newnames + " (Installed)"))
+                                {
+                                    if (Directory.Exists(modsFolderPath + "\\" + newnames.Split(Path.DirectorySeparatorChar).Last()))
+                                    {
+                                        TreeNode tmpnode = new TreeNode();
+                                        int CurrentlyInstalledFiles = Directory.GetFiles(modsFolderPath + "\\" + newnames.Split(Path.DirectorySeparatorChar).Last(), "*.umap").Length;
+                                        CurrentlyInstalledFiles += Directory.GetFiles(modsFolderPath + "\\" + newnames.Split(Path.DirectorySeparatorChar).Last(), "*.upk").Length;
+                                        int LocalReadyFiles = Directory.GetFiles(FullModPathMan + "\\" + newtext.Split(Path.DirectorySeparatorChar).Last() + "\\" + newnames.Split(Path.DirectorySeparatorChar).Last(), "*.upk").Length;
+                                        LocalReadyFiles += Directory.GetFiles(FullModPathMan + "\\" + newtext.Split(Path.DirectorySeparatorChar).Last() + "\\" + newnames.Split(Path.DirectorySeparatorChar).Last(), "*.umap").Length;
+                                        if (CurrentlyInstalledFiles > 0 && LocalReadyFiles == CurrentlyInstalledFiles)
+                                        {
+                                            treeView2.Nodes[indexofnode].Nodes.Add(newnames, newnames.Split(Path.DirectorySeparatorChar).Last() + " (Installed)");
+                                        }
+                                        else
+                                        {
+                                            treeView2.Nodes[indexofnode].Nodes.Add(newnames, newnames.Split(Path.DirectorySeparatorChar).Last());
+                                        }
+                                    }
+                                    else
+                                    {
+                                        treeView2.Nodes[indexofnode].Nodes.Add(newnames, newnames.Split(Path.DirectorySeparatorChar).Last());
+                                    }
+
+                                }
+                            }
+                        }
                     }
                 }
+                colornodes();
+                ModsConflictCheck();
             }
             catch (Exception ex)
             {
                 Prompt.Popup(ex.ToString());
+            }
+        }
+
+        public bool CheckNodeExists(string name, TreeView tree)
+        {
+            foreach (TreeNode node in tree.Nodes)
+            {
+                if (node.Text == name)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void ModsConflictCheck()
+        {
+            Dictionary<string, string> ConflictLib = new Dictionary<string, string>();
+            Dictionary<string, TreeNode> NodeCollection = new Dictionary<string, TreeNode>();
+            // Check Installed Mods
+            foreach (TreeNode FilesAt in treeView2.Nodes)
+            {
+                if (FilesAt != null)
+                {
+                    // Ini strings
+                    string non_mani = "";
+                    string non_path_mani = "";
+                    bool skipped = false;
+                    // Child support
+                    if (FilesAt.Nodes.Count > 0)
+                    {
+                        foreach (TreeNode SubAt in FilesAt.Nodes)
+                        {
+                            if (SubAt != null)
+                            {
+                                non_mani = SubAt.Text;
+                                non_path_mani = SubAt.FullPath;
+                                skipped = false;
+                                if (Directory.Exists(modsFolderPath + "\\" + non_mani.Replace(" (Installed)", "")))
+                                {
+                                    bool conflict = false;
+                                    string[] tocheck = Directory.GetFiles(modsFolderPath + "\\" + non_mani.Replace(" (Installed)", ""));
+                                    foreach (string tocheckname in tocheck)
+                                    {
+                                        string tmp = tocheckname.Split(Path.DirectorySeparatorChar).Last();
+                                        if (!ConflictLib.ContainsKey(tmp))
+                                        {
+                                            ConflictLib.Add(tmp, non_mani);
+                                            if (!NodeCollection.ContainsKey(non_mani))
+                                            {
+                                                NodeCollection.Add(non_mani, SubAt);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (!skipped && ConflictLib[tmp] != non_mani)
+                                            {
+                                                AddTextBoxLog(Environment.NewLine + "Conflicting mod: " + ConflictLib[tmp].Replace(" (Installed)", "") + " with " + non_mani.Replace(" (Installed)", ""));
+                                                treeView2.Nodes[FilesAt.Index].Nodes[treeView2.Nodes[FilesAt.Index].Nodes.IndexOf(NodeCollection[ConflictLib[tmp]])].ForeColor = Color.IndianRed;
+                                                SubAt.ForeColor = Color.IndianRed;
+                                                skipped = true;
+                                                conflict = true;
+                                            }
+                                        }
+                                    }
+                                    if (conflict == false && SubAt.ForeColor != Color.IndianRed)
+                                    {
+                                        SubAt.ForeColor = Color.LightGreen;
+                                    }
+                                }
+                                treeView2.Refresh();
+                            }
+                        }
+                    }
+
+                    // Parent support
+                    non_mani = FilesAt.Text;
+                    non_path_mani = FilesAt.FullPath;
+                    skipped = false;
+                    if (Directory.Exists(modsFolderPath + "\\" + non_path_mani.Split(Path.DirectorySeparatorChar).Last().Replace(" (Installed)", "")))
+                    {
+                        bool conflict = false;
+                        string[] tocheck = Directory.GetFiles(modsFolderPath + "\\" + non_path_mani.Split(Path.DirectorySeparatorChar).Last().Replace(" (Installed)", ""));
+                        foreach (string tocheckname in tocheck)
+                        {
+                            string tmp = tocheckname.Split(Path.DirectorySeparatorChar).Last();
+                            if (!ConflictLib.ContainsKey(tmp))
+                            {
+                                ConflictLib.Add(tmp, non_mani);
+                                if (!NodeCollection.ContainsKey(non_mani))
+                                {
+                                    NodeCollection.Add(non_mani, FilesAt);
+                                }
+                            }
+                            else
+                            {
+                                if (!skipped && ConflictLib[tmp] != non_mani)
+                                {
+                                    AddTextBoxLog(Environment.NewLine + "Conflicting mod: " + ConflictLib[tmp].Replace(" (Installed)", "") + " with " + non_mani.Replace(" (Installed)", ""));
+                                    treeView2.Nodes[treeView2.Nodes.IndexOf(NodeCollection[ConflictLib[tmp]])].ForeColor = Color.IndianRed;
+                                    FilesAt.ForeColor = Color.IndianRed;
+                                    skipped = true;
+                                    conflict = true;
+                                }
+                            }
+                        }
+                        if (conflict == false && FilesAt.ForeColor != Color.IndianRed)
+                        {
+                            FilesAt.ForeColor = Color.LightGreen;
+                        }
+                    }
+                    treeView2.Refresh();
+                }
             }
         }
 
@@ -6750,6 +7503,35 @@ namespace Revamped_BnS_Buddy
             Process.Start("https://www.paypal.me/nebulahosts");
         }
 
+        private void MetroButton44_Click(object sender, EventArgs e)
+        {
+            if (PathFound)
+            {
+                try
+                {
+                    string backuptxt = metroLabel85.Text;
+                    metroLabel85.Text = "Loading Ui...";
+                    metroLabel85.Refresh();
+                    DialogResult result = DialogResult.Cancel;
+                    Affinity affinity = new Affinity();
+                    result = affinity.ShowDialog();
+                    if (result != DialogResult.OK)
+                    {
+                        metroLabel85.Text = backuptxt;
+                        lineChanger("affinityproc = " + backuptxt.Replace("Affinity: ", ""), AppPath + "\\Settings.ini", 47);
+                    }
+                    else
+                    {
+                        metroLabel85.Text = affinity.value;
+                    }
+                }
+                catch
+                {
+                    AddTextLog("Could not save option!");
+                }
+            }
+        }
+
         private void metroToggle20_CheckedChanged(object sender, EventArgs e)
         {
             if (PathFound)
@@ -6758,9 +7540,7 @@ namespace Revamped_BnS_Buddy
                 {
                     try
                     {
-                        string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text = text.Replace("boostprocess = false", "boostprocess = true");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text);
+                        lineChanger("boostprocess = true", AppPath + "\\Settings.ini", 35);
                     }
                     catch
                     {
@@ -6771,9 +7551,7 @@ namespace Revamped_BnS_Buddy
                 {
                     try
                     {
-                        string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text2 = text2.Replace("boostprocess = true", "boostprocess = false");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                        lineChanger("boostprocess = false", AppPath + "\\Settings.ini", 35);
                     }
                     catch
                     {
@@ -6793,9 +7571,7 @@ namespace Revamped_BnS_Buddy
                     groupBox7.Enabled = true;
                     try
                     {
-                        string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text = text.Replace("savelogs = false", "savelogs = true");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text);
+                        lineChanger("savelogs = true", AppPath + "\\Settings.ini", 3);
                     }
                     catch
                     {
@@ -6808,9 +7584,7 @@ namespace Revamped_BnS_Buddy
                     groupBox7.Enabled = false;
                     try
                     {
-                        string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text2 = text2.Replace("savelogs = true", "savelogs = false");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                        lineChanger("savelogs = false", AppPath + "\\Settings.ini", 3);
                     }
                     catch
                     {
@@ -6829,9 +7603,7 @@ namespace Revamped_BnS_Buddy
                     ShowLogs = true;
                     try
                     {
-                        string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text = text.Replace("showlogs = false", "showlogs = true");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text);
+                        lineChanger("showlogs = true", AppPath + "\\Settings.ini", 4);
                     }
                     catch
                     {
@@ -6843,9 +7615,7 @@ namespace Revamped_BnS_Buddy
                     ShowLogs = false;
                     try
                     {
-                        string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text2 = text2.Replace("showlogs = true", "showlogs = false");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                        lineChanger("showlogs = false", AppPath + "\\Settings.ini", 4);
                     }
                     catch
                     {
@@ -6864,9 +7634,7 @@ namespace Revamped_BnS_Buddy
                     LauncherLogs = true;
                     try
                     {
-                        string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text = text.Replace("launcherlogs = false", "launcherlogs = true");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text);
+                        lineChanger("launcherlogs = true", AppPath + "\\Settings.ini", 13);
                     }
                     catch
                     {
@@ -6878,9 +7646,7 @@ namespace Revamped_BnS_Buddy
                     LauncherLogs = false;
                     try
                     {
-                        string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text2 = text2.Replace("launcherlogs = true", "launcherlogs = false");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                        lineChanger("launcherlogs = false", AppPath + "\\Settings.ini", 13);
                     }
                     catch
                     {
@@ -6899,9 +7665,7 @@ namespace Revamped_BnS_Buddy
                     ModManLogs = true;
                     try
                     {
-                        string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text = text.Replace("modmanlogs = false", "modmanlogs = true");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text);
+                        lineChanger("modmanlogs = true", AppPath + "\\Settings.ini", 14);
                     }
                     catch
                     {
@@ -6913,9 +7677,7 @@ namespace Revamped_BnS_Buddy
                     ModManLogs = false;
                     try
                     {
-                        string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text2 = text2.Replace("modmanlogs = true", "modmanlogs = false");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                        lineChanger("modmanlogs = false", AppPath + "\\Settings.ini", 14);
                     }
                     catch
                     {
@@ -6935,9 +7697,7 @@ namespace Revamped_BnS_Buddy
                     metroButton30.Visible = false;
                     try
                     {
-                        string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text = text.Replace("automemorycleanup = false", "automemorycleanup = true");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text);
+                        lineChanger("automemorycleanup = true", AppPath + "\\Settings.ini", 32);
                     }
                     catch
                     {
@@ -6950,9 +7710,7 @@ namespace Revamped_BnS_Buddy
                     metroButton30.Visible = true;
                     try
                     {
-                        string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text2 = text2.Replace("automemorycleanup = true", "automemorycleanup = false");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                        lineChanger("automemorycleanup = false", AppPath + "\\Settings.ini", 32);
                     }
                     catch
                     {
@@ -6971,9 +7729,7 @@ namespace Revamped_BnS_Buddy
                     metroToolTip1.Active = true;
                     try
                     {
-                        string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text = text.Replace("tooltips = false", "tooltips = true");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text);
+                        lineChanger("tooltips = true", AppPath + "\\Settings.ini", 6);
                     }
                     catch
                     {
@@ -6985,9 +7741,7 @@ namespace Revamped_BnS_Buddy
                     metroToolTip1.Active = false;
                     try
                     {
-                        string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text2 = text2.Replace("tooltips = true", "tooltips = false");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                        lineChanger("tooltips = false", AppPath + "\\Settings.ini", 6);
                     }
                     catch
                     {
@@ -7006,9 +7760,7 @@ namespace Revamped_BnS_Buddy
                     metroLabel22.Visible = true;
                     try
                     {
-                        string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text = text.Replace("variables = false", "variables = true");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text);
+                        lineChanger("variables = true", AppPath + "\\Settings.ini", 5);
                     }
                     catch
                     {
@@ -7020,9 +7772,7 @@ namespace Revamped_BnS_Buddy
                     metroLabel22.Visible = false;
                     try
                     {
-                        string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text2 = text2.Replace("variables = true", "variables = false");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                        lineChanger("variables = false", AppPath + "\\Settings.ini", 5);
                     }
                     catch
                     {
@@ -7040,9 +7790,7 @@ namespace Revamped_BnS_Buddy
                 {
                     try
                     {
-                        string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text = text.Replace("admincheck = false", "admincheck = true");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text);
+                        lineChanger("admincheck = true", AppPath + "\\Settings.ini", 9);
                     }
                     catch
                     {
@@ -7053,9 +7801,7 @@ namespace Revamped_BnS_Buddy
                 {
                     try
                     {
-                        string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text2 = text2.Replace("admincheck = true", "admincheck = false");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                        lineChanger("admincheck = false", AppPath + "\\Settings.ini", 9);
                     }
                     catch
                     {
@@ -7073,9 +7819,7 @@ namespace Revamped_BnS_Buddy
                 {
                     try
                     {
-                        string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text = text.Replace("ncsoftlogin = false", "ncsoftlogin = true");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text);
+                        lineChanger("ncsoftlogin = true", AppPath + "\\Settings.ini", 10);
                     }
                     catch
                     {
@@ -7086,9 +7830,7 @@ namespace Revamped_BnS_Buddy
                 {
                     try
                     {
-                        string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text2 = text2.Replace("ncsoftlogin = true", "ncsoftlogin = false");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                        lineChanger("ncsoftlogin = false", AppPath + "\\Settings.ini", 10);
                     }
                     catch
                     {
@@ -7107,9 +7849,7 @@ namespace Revamped_BnS_Buddy
                     metroButton12.Visible = true;
                     try
                     {
-                        string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text = text.Replace("showdonate = false", "showdonate = true");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text);
+                        lineChanger("showdonate = true", AppPath + "\\Settings.ini", 11);
                     }
                     catch
                     {
@@ -7121,9 +7861,7 @@ namespace Revamped_BnS_Buddy
                     metroButton12.Visible = false;
                     try
                     {
-                        string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text2 = text2.Replace("showdonate = true", "showdonate = false");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                        lineChanger("showdonate = false", AppPath + "\\Settings.ini", 11);
                     }
                     catch
                     {
@@ -7141,9 +7879,7 @@ namespace Revamped_BnS_Buddy
                 {
                     try
                     {
-                        string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text = text.Replace("gamekiller = false", "gamekiller = true");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text);
+                        lineChanger("gamekiller = true", AppPath + "\\Settings.ini", 19);
                     }
                     catch
                     {
@@ -7154,9 +7890,7 @@ namespace Revamped_BnS_Buddy
                 {
                     try
                     {
-                        string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text2 = text2.Replace("gamekiller = true", "gamekiller = false");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                        lineChanger("gamekiller = false", AppPath + "\\Settings.ini", 19);
                     }
                     catch
                     {
@@ -7174,9 +7908,7 @@ namespace Revamped_BnS_Buddy
                 {
                     try
                     {
-                        string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text = text.Replace("pingchecker = false", "pingchecker = true");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text);
+                        lineChanger("pingchecker = true", AppPath + "\\Settings.ini", 18);
                         bw1.RunWorkerAsync();
                     }
                     catch
@@ -7188,9 +7920,7 @@ namespace Revamped_BnS_Buddy
                 {
                     try
                     {
-                        string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text2 = text2.Replace("pingchecker = true", "pingchecker = false");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                        lineChanger("pingchecker = false", AppPath + "\\Settings.ini", 18);
                         bw1.CancelAsync();
                     }
                     catch
@@ -7209,9 +7939,7 @@ namespace Revamped_BnS_Buddy
                 {
                     try
                     {
-                        string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text = text.Replace("autoupdate = false", "autoupdate = true");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text);
+                        lineChanger("autoupdate = true", AppPath + "\\Settings.ini", 23);
                     }
                     catch
                     {
@@ -7222,9 +7950,7 @@ namespace Revamped_BnS_Buddy
                 {
                     try
                     {
-                        string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text2 = text2.Replace("autoupdate = true", "autoupdate = false");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                        lineChanger("autoupdate = false", AppPath + "\\Settings.ini", 23);
                     }
                     catch
                     {
@@ -7242,9 +7968,7 @@ namespace Revamped_BnS_Buddy
                 {
                     try
                     {
-                        string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text = text.Replace("updatechecker = false", "updatechecker = true");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text);
+                        lineChanger("updatechecker = true", AppPath + "\\Settings.ini", 17);
                     }
                     catch
                     {
@@ -7255,9 +7979,40 @@ namespace Revamped_BnS_Buddy
                 {
                     try
                     {
-                        string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text2 = text2.Replace("updatechecker = true", "updatechecker = false");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                        lineChanger("updatechecker = false", AppPath + "\\Settings.ini", 17);
+                    }
+                    catch
+                    {
+                        AddTextLog("Could not save option!");
+                    }
+                }
+            }
+        }
+
+        private void MetroToggle42_CheckedChanged(object sender, EventArgs e)
+        {
+            if (PathFound) // here
+            {
+                if (metroToggle42.Checked)
+                {
+                    AlwaysOnTray = true;
+                    ActivateTray();
+                    try
+                    {
+                        lineChanger("keepintray = true", AppPath + "\\Settings.ini", 48);
+                    }
+                    catch
+                    {
+                        AddTextLog("Could not save option!");
+                    }
+                }
+                else
+                {
+                    AlwaysOnTray = false;
+                    NotifAction();
+                    try
+                    {
+                        lineChanger("keepintray = false", AppPath + "\\Settings.ini", 48);
                     }
                     catch
                     {
@@ -7276,9 +8031,7 @@ namespace Revamped_BnS_Buddy
                     AllowMinimize = true;
                     try
                     {
-                        string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text = text.Replace("minimize = false", "minimize = true");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text);
+                        lineChanger("minimize = true", AppPath + "\\Settings.ini", 12);
                     }
                     catch
                     {
@@ -7290,9 +8043,7 @@ namespace Revamped_BnS_Buddy
                     AllowMinimize = false;
                     try
                     {
-                        string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                        text2 = text2.Replace("minimize = true", "minimize = false");
-                        File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                        lineChanger("minimize = false", AppPath + "\\Settings.ini", 12);
                     }
                     catch
                     {
@@ -7351,18 +8102,19 @@ namespace Revamped_BnS_Buddy
 
         private static void lineChanger(string newText, string fileName, int line_to_edit)
         {
-            string[] array = File.ReadAllLines(fileName);
-            array[line_to_edit - 1] = newText;
-            File.WriteAllLines(fileName, array);
+            if (File.Exists(fileName))
+            {
+                string[] array = File.ReadAllLines(fileName);
+                array[line_to_edit - 1] = newText;
+                File.WriteAllLines(fileName, array);
+            }
         }
 
         private void metroButton15_Click(object sender, EventArgs e)
         {
             CustomGameSet = true;
             lineChanger("customgamepath = " + metroTextBox3.Text, AppPath + "\\Settings.ini", 16);
-            string text = File.ReadAllText(AppPath + "\\Settings.ini");
-            text = text.Replace("customgame = false", "customgame = true");
-            File.WriteAllText(AppPath + "\\Settings.ini", text);
+            lineChanger("customgame = true", AppPath + "\\Settings.ini", 7);
             RegPath = metroTextBox3.Text;
             AutoDirFinder();
             metroButton1.Enabled = true;
@@ -7381,9 +8133,7 @@ namespace Revamped_BnS_Buddy
             {
                 CustomModSet = true;
                 lineChanger("modfolder = " + metroTextBox7.Text, AppPath + "\\Settings.ini", 29);
-                string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                text = text.Replace("modfolderset = false", "modfolderset = true");
-                File.WriteAllText(AppPath + "\\Settings.ini", text);
+                lineChanger("modfolderset = true", AppPath + "\\Settings.ini", 30);
                 backupFolderPath = metroTextBox7.Text + "\\CookedPC_Backup";
                 FullModPathMan = metroTextBox7.Text + "\\CookedPC_Mod";
                 GetPath();
@@ -7397,9 +8147,7 @@ namespace Revamped_BnS_Buddy
             metroTextBox7.Text = "";
             CustomModSet = false;
             GetPath();
-            string text = File.ReadAllText(AppPath + "\\Settings.ini");
-            text = text.Replace("modfolderset = true", "modfolderset = false");
-            File.WriteAllText(AppPath + "\\Settings.ini", text);
+            lineChanger("modfolderset = false", AppPath + "\\Settings.ini", 30);
         }
 
         private void metroToggle19_CheckedChanged(object sender, EventArgs e)
@@ -7446,9 +8194,7 @@ namespace Revamped_BnS_Buddy
             CustomGameSet = false;
             metroTextBox3.Text = "";
             lineChanger("customgamepath = ", AppPath + "\\Settings.ini", 16);
-            string text = File.ReadAllText(AppPath + "\\Settings.ini");
-            text = text.Replace("customgame = true", "customgame = false");
-            File.WriteAllText(AppPath + "\\Settings.ini", text);
+            lineChanger("customgame = false", AppPath + "\\Settings.ini", 7);
             BnSFolder();
             CheckBackup();
             if (!CustomClientSet)
@@ -7495,9 +8241,7 @@ namespace Revamped_BnS_Buddy
         {
             CustomClientSet = true;
             lineChanger("customclientpath = " + metroTextBox4.Text, AppPath + "\\Settings.ini", 15);
-            string text = File.ReadAllText(AppPath + "\\Settings.ini");
-            text = text.Replace("customclient = false", "customclient = true");
-            File.WriteAllText(AppPath + "\\Settings.ini", text);
+            lineChanger("customclient = true", AppPath + "\\Settings.ini", 8);
             RegPathlol = metroTextBox4.Text;
             try
             {
@@ -7569,9 +8313,7 @@ namespace Revamped_BnS_Buddy
             CustomClientSet = false;
             metroTextBox4.Text = "";
             lineChanger("customclientpath = ", AppPath + "\\Settings.ini", 15);
-            string text = File.ReadAllText(AppPath + "\\Settings.ini");
-            text = text.Replace("customclient = true", "customclient = false");
-            File.WriteAllText(AppPath + "\\Settings.ini", text);
+            lineChanger("customclient = false", AppPath + "\\Settings.ini", 8);
             if (!CustomClientSet)
             {
                 CheckServer();
@@ -7596,7 +8338,7 @@ namespace Revamped_BnS_Buddy
             FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
             if (folderBrowserDialog.ShowDialog().ToString() == "OK")
             {
-                if (Directory.Exists(folderBrowserDialog.SelectedPath + "\\Download"))
+                if (Directory.Exists(folderBrowserDialog.SelectedPath + "\\Download") || File.Exists(folderBrowserDialog.SelectedPath + "\\Matryoshka.exe"))
                 {
                     metroTextBox4.Text = folderBrowserDialog.SelectedPath;
                 }
@@ -7641,9 +8383,6 @@ namespace Revamped_BnS_Buddy
         {
             if (AppStarted)
             {
-                File.ReadLines(AppPath + "\\Settings.ini").Skip(21).Take(1)
-                    .First()
-                    .Replace("prtime = ", "");
                 lineChanger("prtime = " + metroTrackBar1.Value.ToString(), AppPath + "\\Settings.ini", 22);
                 wakeywakey = metroTrackBar1.Value;
                 metroLabel47.Text = metroTrackBar1.Value.ToString();
@@ -7655,9 +8394,6 @@ namespace Revamped_BnS_Buddy
         {
             if (AppStarted)
             {
-                File.ReadLines(AppPath + "\\Settings.ini").Skip(35).Take(1)
-                    .First()
-                    .Replace("cleanint = ", "");
                 lineChanger("cleanint = " + metroComboBox7.Text.ToString(), AppPath + "\\Settings.ini", 36);
                 if (metroComboBox7.Text.ToString() != "OFF")
                 {
@@ -7668,53 +8404,56 @@ namespace Revamped_BnS_Buddy
 
         private void metroComboBox4_SelectedIndexChanged(object sender, EventArgs e)
         {
-            defaultclient = metroComboBox4.SelectedItem.ToString();
-            if ((defaultclient == "64bit" && Directory.Exists(RegPath + LauncherPath64)) || (defaultclient == "32bit" && Directory.Exists(RegPath + LauncherPath)))
+            if (metroComboBox4.SelectedItem != null)
             {
-                if (defaultclient == "64bit" && !is64bit)
+                defaultclient = metroComboBox4.SelectedItem.ToString();
+                if ((defaultclient == "64bit" && Directory.Exists(RegPath + LauncherPath64)) || (defaultclient == "32bit" && Directory.Exists(RegPath + LauncherPath)))
                 {
-                    Prompt.Popup("Can't set an unsupported Client archetype because your system is 32bit!");
-                    metroComboBox4.SelectedIndex = metroComboBox4.FindStringExact("32bit");
-                    metroComboBox4.Items.Remove("64bit");
-                    defaultclient = "";
+                    if (defaultclient == "64bit" && !is64bit)
+                    {
+                        Prompt.Popup("Can't set an unsupported Client archetype because your system is 32bit!");
+                        metroComboBox4.SelectedIndex = metroComboBox4.FindStringExact("32bit");
+                        metroComboBox4.Items.Remove("64bit");
+                        defaultclient = "";
+                    }
+                    else
+                    {
+                        lineChanger("defaultclient = " + defaultclient, AppPath + "\\Settings.ini", 27);
+                    }
                 }
                 else
                 {
-                    lineChanger("defaultclient = " + defaultclient, AppPath + "\\Settings.ini", 27);
+                    if (AppStarted)
+                    {
+                        Prompt.Popup("Error: Path to " + defaultclient + " does not exist.");
+                    }
+                    if (defaultclient == "32bit")
+                    {
+                        metroComboBox4.SelectedIndex = metroComboBox4.FindStringExact("64bit");
+                        metroComboBox4.Items.Remove("32bit");
+                        metroRadioButton2.Checked = true;
+                        metroRadioButton1.Enabled = false;
+                        defaultclient = "";
+                    }
+                    else
+                    {
+                        metroComboBox4.SelectedIndex = metroComboBox4.FindStringExact("32bit");
+                        metroComboBox4.Items.Remove("64bit");
+                        metroRadioButton1.Checked = true;
+                        metroRadioButton2.Enabled = false;
+                        defaultclient = "";
+                    }
                 }
-            }
-            else
-            {
-                if (AppStarted)
+                if (metroComboBox4.SelectedIndex == metroComboBox4.FindStringExact("64bit"))
                 {
-                    Prompt.Popup("Error: Path to " + defaultclient + " does not exist.");
-                }
-                if (defaultclient == "32bit")
-                {
-                    metroComboBox4.SelectedIndex = metroComboBox4.FindStringExact("64bit");
-                    metroComboBox4.Items.Remove("32bit");
+                    metroRadioButton1.Checked = false;
                     metroRadioButton2.Checked = true;
-                    metroRadioButton1.Enabled = false;
-                    defaultclient = "";
                 }
                 else
                 {
-                    metroComboBox4.SelectedIndex = metroComboBox4.FindStringExact("32bit");
-                    metroComboBox4.Items.Remove("64bit");
+                    metroRadioButton2.Checked = false;
                     metroRadioButton1.Checked = true;
-                    metroRadioButton2.Enabled = false;
-                    defaultclient = "";
                 }
-            }
-            if (metroComboBox4.SelectedIndex == metroComboBox4.FindStringExact("64bit"))
-            {
-                metroRadioButton1.Checked = false;
-                metroRadioButton2.Checked = true;
-            }
-            else
-            {
-                metroRadioButton2.Checked = false;
-                metroRadioButton1.Checked = true;
             }
         }
 
@@ -7724,9 +8463,7 @@ namespace Revamped_BnS_Buddy
             {
                 try
                 {
-                    string text = File.ReadAllText(AppPath + "\\Settings.ini");
-                    text = text.Replace("defaultset = true", "defaultset = false");
-                    File.WriteAllText(AppPath + "\\Settings.ini", text);
+                    lineChanger("defaultset = false", AppPath + "\\Settings.ini", 26);
                     lineChanger("default = ", AppPath + "\\Settings.ini", 25);
                     metroLabel48.Text = "None";
                     MultipleInstallationFound = false;
@@ -7933,7 +8670,7 @@ namespace Revamped_BnS_Buddy
 
         public void StartPatching(string filename, bool undo)
         {
-            if(!File.Exists(FullAddonPath + "\\" + filename))
+            if (!File.Exists(FullAddonPath + "\\" + filename))
             {
                 Prompt.Popup(String.Format("Skipping Addon: {0} no longer exists in the folder", filename.Replace(".patch", "")));
                 return;
@@ -7994,10 +8731,17 @@ namespace Revamped_BnS_Buddy
                         AddTextLog(string.Format("Skipped addon: {0} because the file {1} is missing", filename.Replace(".patch", ""), text2));
                         return;
                     }
-                    Dictionary<string, byte[]> dictionary = bNSDat.ExtractFile(text4, new List<string>
-                {
-                    text3
-                }, text2.Contains("64"));
+                    Dictionary<string, byte[]> dictionary;
+                    try
+                    {
+                        dictionary = bNSDat.ExtractFile(text4, new List<string>
+                        {
+                            text3
+                        }, text2.Contains("64"));
+                    } catch {
+                        AddTextLog(string.Format("Error: file {2} is damaged/corrupted. Please do a file repair then try again", filename.Replace(".patch", ""), text3, text2));
+                        return;
+                    }
                     if (dictionary.Count <= 0)
                     {
                         AddTextLog(string.Format("Skipped addon: {0} because the file {1} was not found in {2}", filename.Replace(".patch", ""), text3, text2));
@@ -8130,7 +8874,7 @@ namespace Revamped_BnS_Buddy
                         AddTextLog(string.Format("Skipped addon: {0} because the file {1} is missing", filename.Replace(".patch", ""), text12));
                         return;
                     }
-                    Dictionary<string, byte[]> dictionary4 = bNSDat2.ExtractFile(text14, new List<string>{text13}, text12.Contains("64"));
+                    Dictionary<string, byte[]> dictionary4 = bNSDat2.ExtractFile(text14, new List<string> { text13 }, text12.Contains("64"));
                     if (dictionary4.Count <= 0)
                     {
                         AddTextLog(string.Format("Skipped addon: {0} because the file {1} was not found in {2}", filename.Replace(".patch", ""), text13, text12));
@@ -8395,6 +9139,7 @@ namespace Revamped_BnS_Buddy
         }
 
         string nametofile = "";
+        TreeNode LastNode = null;
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
             try
@@ -8416,6 +9161,12 @@ namespace Revamped_BnS_Buddy
                     metroLabel39.Text = "Done!";
                     metroLabel39.Refresh();
                     treeView1.Enabled = true;
+                    e.Node.BackColor = ColorTranslator.FromHtml("#3399FF");
+                    if (LastNode != null)
+                    {
+                        LastNode.BackColor = ColorTranslator.FromHtml("#111111");
+                    }
+                    LastNode = e.Node;
                 }
             }
             catch
@@ -8423,7 +9174,7 @@ namespace Revamped_BnS_Buddy
                 metroLabel39.Text = "Error: Could not open file";
             }
         }
-        
+
         private TreeNode PopulateTreeNode2(string[] paths)
         {
             string pathSeparator = "\\";
@@ -8463,7 +9214,7 @@ namespace Revamped_BnS_Buddy
                     treeView1.Nodes.Add(PopulateTreeNode2(test));
                     treeView1.Nodes[0].Text = ActiveDataFile;
                     treeView1.Nodes[0].Expand();
-                    treeView1.AfterSelect += treeView1_AfterSelect;
+                    //treeView1.AfterSelect += treeView1_AfterSelect;
                     treeView1.Enabled = true;
                     metroLabel39.Text = "Loaded list!";
                     metroLabel39.Refresh();
@@ -8472,6 +9223,7 @@ namespace Revamped_BnS_Buddy
                 catch
                 {
                     metroLabel39.Text = "Corrupted file!";
+                    metroComboBox3.Enabled = true;
                     metroLabel39.Refresh();
                     Prompt.Popup("Error: The file " + ActiveDataFile + " is corrupted! Please do a file repair using NCLauncher.");
                 }
@@ -8514,19 +9266,139 @@ namespace Revamped_BnS_Buddy
             fastColoredTextBox1.ShowReplaceDialog();
         }
 
+        private bool CheckXmlTypos()
+        {
+            metroLabel39.Text = "Checking typos...";
+            metroLabel39.Refresh();
+            if (fastColoredTextBox1.Text.Contains("<!-- "))
+            {
+                fastColoredTextBox1.Text.Replace("<!-- ", "<!--");
+            }
+            if (fastColoredTextBox1.Text.Contains(" -->"))
+            {
+                fastColoredTextBox1.Text.Replace(" -->", "-->");
+            }
+            // Fix 0xfeff at start instead of reading string as is
+            byte[] encodedString = Encoding.UTF8.GetBytes(fastColoredTextBox1.Text);
+            MemoryStream ms = new MemoryStream(encodedString);
+            ms.Flush();
+            ms.Position = 0;
+            //
+            XmlDocument xmlDocument = new XmlDocument();
+            try
+            {
+                xmlDocument.Load(ms);
+                ms.Close();
+            }
+            catch
+            {
+                ms.Close();
+                metroLabel39.Text = "Invalid xml!";
+                metroLabel39.Refresh();
+                return false;
+            }
+            xmlDocument = new XmlDocument();
+            return true;
+        }
+
         public void bw2_Save(object Sender, DoWorkEventArgs e)
         {
             if (treeView1.SelectedNode != null && treeView1.SelectedNode.FullPath.ToString().Contains(".dat"))
             {
-                metroLabel39.Text = "Saving " + nametofile + "...";
-                metroLabel39.Refresh();
-                Dictionary<string, byte[]> newdatatosave = new Dictionary<string, byte[]>();
-                var addinv2 = System.Text.Encoding.UTF8.GetBytes(fastColoredTextBox1.Text);
-                newdatatosave.Add(nametofile, addinv2);
-                new BNSDat.BNSDat().CompressFiles(myDictionary[ActiveDataFile] + "\\" + ActiveDataFile, newdatatosave, ActiveDataFile.Contains("64"));
-                metroLabel39.Text = "Saved.";
+                if (CheckXmlTypos())
+                {
+                    metroLabel39.Text = "Saving " + nametofile + "...";
+                    metroLabel39.Refresh();
+                    Dictionary<string, byte[]> newdatatosave = new Dictionary<string, byte[]>();
+                    var addinv2 = System.Text.Encoding.UTF8.GetBytes(fastColoredTextBox1.Text);
+                    newdatatosave.Add(nametofile, addinv2);
+                    new BNSDat.BNSDat().CompressFiles(myDictionary[ActiveDataFile] + "\\" + ActiveDataFile, newdatatosave, ActiveDataFile.Contains("64"));
+                    metroLabel39.Text = "Saved.";
+                    metroLabel39.Refresh();
+                }
+            }
+        }
+
+        SaveFileDialog SaveAs = new SaveFileDialog();
+        private void toolStripButton2_Click(object sender, EventArgs e)
+        {
+            if (treeView1.SelectedNode != null && treeView1.SelectedNode.FullPath.ToString().Contains(".dat"))
+            {
+                if (CheckXmlTypos())
+                {
+                    metroLabel39.Text = "Saving as xml... ";
+                    metroLabel39.Refresh();
+
+                    SaveAs.FileName = nametofile;
+                    SaveAs.Filter = "xml files (*.xml)|*.xml";
+                    SaveAs.DefaultExt = "xml";
+                    SaveAs.Title = "Save as XML";
+                    SaveAs.RestoreDirectory = true;
+                    SaveAs.InitialDirectory = AppPath;
+                    DialogResult result = SaveAs.ShowDialog();
+                    if (result == DialogResult.Cancel || result == DialogResult.Abort)
+                    {
+                        metroLabel39.Text = "Cancelled!";
+                        metroLabel39.Refresh();
+                    }
+                    else if (result == DialogResult.OK)
+                    {
+                        File.WriteAllText(SaveAs.FileName, fastColoredTextBox1.Text);
+                        metroLabel39.Text = "Saved.";
+                        metroLabel39.Refresh();
+                    }
+                    SaveAs = new SaveFileDialog();
+                }
+            }
+        }
+
+        private void toolStripButton3_Click(object sender, EventArgs e)
+        {
+            if (metroComboBox3.Items[metroComboBox3.SelectedIndex].ToString() != "Select a File" && treeView1.SelectedNode != null)
+            {
+                if (treeView1.SelectedNode.Text.Contains(".xml") || treeView1.SelectedNode.Text.Contains(".x16"))
+                {
+                    fastColoredTextBox1.Text = FormatXml(fastColoredTextBox1.Text);
+                }
+            }
+            else { Prompt.Popup("No file selected."); }
+        }
+
+        string FormatXml(string xml)
+        {
+            string result = xml;
+            MemoryStream mStream = new MemoryStream();
+            XmlTextWriter writer = new XmlTextWriter(mStream, Encoding.Unicode);
+            XmlDocument document = new XmlDocument();
+            MemoryStream ms = new MemoryStream();
+            try
+            {
+                // Load the XmlDocument with the XML.
+                byte[] encodedString = Encoding.UTF8.GetBytes(fastColoredTextBox1.Text);
+                ms = new MemoryStream(encodedString);
+                ms.Flush();
+                ms.Position = 0;
+                document.Load(ms);
+                writer.Formatting = Formatting.Indented;
+                document.WriteContentTo(writer);
+                writer.Flush();
+                mStream.Flush();
+                mStream.Position = 0;
+                StreamReader sReader = new StreamReader(mStream);
+                string formattedXml = sReader.ReadToEnd();
+                result = formattedXml;
+                metroLabel39.Text = "Formatted";
                 metroLabel39.Refresh();
             }
+            catch (XmlException)
+            {
+                metroLabel39.Text = "Can't format!";
+                metroLabel39.Refresh();
+            }
+            mStream.Close();
+            writer.Close();
+            ms.Close();
+            return result;
         }
 
         private void toolStripButton6_Click(object sender, EventArgs e)
@@ -8538,7 +9410,6 @@ namespace Revamped_BnS_Buddy
             if (!bw2.IsBusy)
             {
                 bw2.RunWorkerAsync();
-                //toolStripButton3.Enabled = true;
             }
             else
             {
@@ -8997,34 +9868,96 @@ namespace Revamped_BnS_Buddy
             }
         }
 
+        public List<string> GetServerValues(string Server, string Service)
+        {
+            List<string> returnedValues = new List<string>();
+            if (Service == "Version")
+            {
+                if (Server == "Korean")
+                {
+                    returnedValues.Add("up4svr.plaync.co.kr");
+                    if (metroComboBox8.SelectedItem.ToString() == "Live")
+                    {
+                        returnedValues.Add("BNS_KOR"); /* launcher version check: ncLauncherS */ // here
+                    }
+                    else
+                    {
+                        returnedValues.Add("BNS_KOR_TEST");
+                    }
+                }
+                else if (Server == "North America" || Server == "Europe")
+                {
+                    returnedValues.Add("updater.nclauncher.ncsoft.com");
+                    returnedValues.Add("BnS");
+                }
+                else if (Server == "Taiwan")
+                {
+                    returnedValues.Add("up4svr.plaync.com.tw");
+                    returnedValues.Add("TWBNS22"); /* launcher version check: ncLauncherS */
+                }
+                else if (Server == "Japanese")
+                {
+                    returnedValues.Add("BnSUpdate.ncsoft.jp");
+                    returnedValues.Add("BNS_JPN");
+                }
+                else
+                {
+                    returnedValues.Add("updater.nclauncher.ncsoft.com");
+                    returnedValues.Add("BnS");
+                }
+                return returnedValues;
+            }
+            else if (Service == "Login")
+            {
+                if (Server == "Korean")
+                {
+                    returnedValues.Add("up4svr.plaync.co.kr");
+                    if (metroComboBox8.SelectedItem.ToString() == "Live")
+                    {
+                        returnedValues.Add("ncLauncherS"); /* launcher version check: ncLauncherS */ // here
+                    }
+                    else
+                    {
+                        returnedValues.Add("ncLauncherS");
+                    }
+                }
+                else if (Server == "North America" || Server == "Europe")
+                {
+                    returnedValues.Add("updater.nclauncher.ncsoft.com");
+                    returnedValues.Add("BnS");
+                }
+                else if (Server == "Taiwan")
+                {
+                    returnedValues.Add("up4svr.plaync.com.tw");
+                    returnedValues.Add("ncLauncherS"); /* launcher version check: ncLauncherS */
+                }
+                else if (Server == "Japanese")
+                {
+                    returnedValues.Add("BnSUpdate.ncsoft.jp");
+                    returnedValues.Add("ncLauncher");
+                }
+                else
+                {
+                    returnedValues.Add("updater.nclauncher.ncsoft.com");
+                    returnedValues.Add("ncLauncherS");
+                }
+                return returnedValues;
+            }
+            else
+            {
+                return returnedValues = null;
+            }
+        }
+
         private bool LauncherInfo()
         {
             metroButton1.Enabled = false;
             string a = metroComboBox1.SelectedItem.ToString();
-            string text = "";
-            string text2 = "";
-            if (a == "Korean")
-            {
-                text = "up4svr.plaync.co.kr";
-                text2 = "ncLauncherS";
-            }
-            else if (a == "North America" || a == "Europe")
-            {
-                text = "updater.nclauncher.ncsoft.com";
-                text2 = "BnS";
-            }
-            else if (a == "Taiwan")
-            {
-                text = "up4svr.plaync.com.tw";
-                text2 = "ncLauncherS";
-            }
-            else
-            {
-                text = "updater.nclauncher.ncsoft.com";
-                text2 = "BnS";
-            }
+            string text = GetServerValues(a, "Login")[0];
+            string text2 = GetServerValues(a, "Login")[1];
             try
             {
+                #region maintenace check
                 int port = 27500;
                 MemoryStream memoryStream = new MemoryStream();
                 BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
@@ -9077,7 +10010,131 @@ namespace Revamped_BnS_Buddy
                 metroButton1.Enabled = true;
                 return false;
             }
+            #endregion
+            #region Version Check
+            int Version = 0;
+            text = GetServerValues(a, "Version")[0];
+            text2 = GetServerValues(a, "Version")[1];
+            try
+            {
+                int port = 27500;
+                MemoryStream memoryStream = new MemoryStream();
+                BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
+                binaryWriter.Write((short)0);
+                binaryWriter.Write((short)6);
+                binaryWriter.Write((byte)10);
+                binaryWriter.Write((byte)text2.Length);
+                binaryWriter.Write(Encoding.ASCII.GetBytes(text2));
+                binaryWriter.BaseStream.Position = 0L;
+                binaryWriter.Write((short)memoryStream.Length);
+                NetworkStream stream = new TcpClient(text, port).GetStream();
+                stream.Write(memoryStream.ToArray(), 0, (int)memoryStream.Length);
+                binaryWriter.Close();
+                memoryStream.Close();
+                memoryStream = new MemoryStream();
+                BinaryReader binaryReader = new BinaryReader(memoryStream);
+                byte[] array = new byte[1024];
+                int num = 0;
+                do
+                {
+                    num = stream.Read(array, 0, array.Length);
+                    if (num > 0)
+                    {
+                        memoryStream.Write(array, 0, num);
+                    }
+                }
+                while (num == array.Length);
+                memoryStream.Position = 9L;
+                binaryReader.ReadBytes(binaryReader.ReadByte() + 5);
+                Version = binaryReader.ReadByte();
+                if (binaryReader.ReadInt16() != 40)
+                {
+                    memoryStream.Position -= 2;
+                    Version += 128 * (binaryReader.ReadByte() - 1);
+                }
+                stream.Close();
+                binaryReader.Close();
+                memoryStream.Close();
+            }
+            catch (Exception ex)
+            {
+                Prompt.Popup("There was an error connecting to the Login Server, please make sure your ip isn't blocked.");
+                if (Debugging)
+                {
+                    Prompt.Popup(ex.ToString());
+                }
+                metroButton1.Enabled = true;
+                return false;
+            }
+            try
+            {
+                string localVersion = "0";
+                string text3 = RegPath + "\\VersionInfo_" + text2 + ".ini";
+                // string fix
+                text3 = text3.Replace(@"\\", @"\");
+                // end fix
+                if (File.Exists(text3))
+                {
+                    foreach (string s in File.ReadAllLines(text3))
+                    {
+                        if (s.Contains("="))
+                        {
+                            string[] vp = s.Split('=');
+                            if (vp[0].ToLower().Trim() == "globalversion")
+                            {
+                                localVersion = vp[1].Trim();
+                            }
+                        }
+                    }
+                }
+                if (Version != 0)
+                {
+                    AddTextLog("Online Version: " + Version);
+                }
+                if (localVersion != "0")
+                {
+                    AddTextLog("Local Version: " + localVersion);
+                }
+                if (Version > int.Parse(localVersion))
+                {
+                    if (localVersion != "0")
+                    {
+                        //Prompt.Popup(Version + " | " + localVersion + " | " + text3);
+                        Prompt.Popup("Game client update available! Please use nclauncher to update the client.");
+                        AddTextLog("Client update available!");
+                    }
+                    else
+                    {
+                        Prompt.Popup("Game Client not installed/updated completely.");
+                    }
+                }
+                else
+                {
+                    AddTextLog("Client up to date.");
+                }
+            }
+            catch (Exception ex2)
+            {
+                Prompt.Popup("Error: Could not compare online version and local one!");
+                if (Debugging)
+                {
+                    Prompt.Popup(RegPath + "VersionInfo_" + text2 + ".ini" + Environment.NewLine + ex2.ToString());
+                }
+                metroButton1.Enabled = true;
+                return false;
+            }
+            #endregion
+            #region Available regions
+
+            if (a == "Japanese")
+            {
+                metroButton1.Enabled = true;
+                return true;
+            }
+
             AddTextLog("Adding available servers...");
+            text = GetServerValues(a, "Login")[0];
+            text2 = GetServerValues(a, "Login")[1];
             try
             {
                 int port2 = 27500;
@@ -9145,6 +10202,7 @@ namespace Revamped_BnS_Buddy
                 metroButton1.Enabled = true;
                 return false;
             }
+            #endregion
             metroButton1.Enabled = true;
             AddTextLog("Added");
             return true;
@@ -9177,19 +10235,7 @@ namespace Revamped_BnS_Buddy
         {
             if (AppStarted)
             {
-                string text = File.ReadLines(AppPath + "\\Settings.ini").Skip(36).Take(1)
-                    .First()
-                    .Replace("uniquepass = ", "");
-                string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
-                if (text.Length > 0)
-                {
-                    string contents = text2.Replace(text, metroTextBox8.Text);
-                    File.WriteAllText(AppPath + "\\Settings.ini", contents);
-                }
-                else
-                {
-                    lineChanger("uniquepass = " + metroTextBox8.Text, AppPath + "\\Settings.ini", 37);
-                }
+                lineChanger("uniquepass = " + metroTextBox8.Text, AppPath + "\\Settings.ini", 37);
                 metroTextBox8.Refresh();
                 if (metroTextBox8.Text == uniquekey && metroTabControl1.TabPages.Count >= 9)
                 {
@@ -9573,7 +10619,7 @@ namespace Revamped_BnS_Buddy
                 metroComboBox9.Style = Themer.Style;
                 metroComboBox11.Style = Themer.Style;
 
-                if(Themer.Style == MetroColorStyle.White)
+                if (Themer.Style == MetroColorStyle.White)
                 {
                     metroComboBox1.Style = MetroColorStyle.Silver;
                     metroComboBox2.Style = MetroColorStyle.Silver;
@@ -10637,7 +11683,7 @@ namespace Revamped_BnS_Buddy
 
         private void metroButton36_Click(object sender, EventArgs e)
         {
-            if(GameStarted)
+            if (GameStarted)
             {
                 Prompt.Popup("Can not change value while the game is running");
                 return;
@@ -10990,14 +12036,12 @@ namespace Revamped_BnS_Buddy
                         {
                             string text = key2.Replace("HKEY_CURRENT_USER\\", "");
                             RegistryKey registryKey = Registry.CurrentUser.OpenSubKey(text, writable: true);
-                            Prompt.Popup(text);
                             registryKey.DeleteValue(ToClearReg[key2], throwOnMissingValue: false);
                         }
                         if (key2.Contains("HKEY_LOCAL_MACHINE\\"))
                         {
                             string text2 = key2.Replace("HKEY_LOCAL_MACHINE\\", "");
                             RegistryKey registryKey2 = Registry.LocalMachine.OpenSubKey(text2, writable: true);
-                            Prompt.Popup(text2);
                             registryKey2.DeleteValue(ToClearReg[key2], throwOnMissingValue: false);
                         }
                         num++;
@@ -11883,14 +12927,35 @@ namespace Revamped_BnS_Buddy
                 {
                     if (node != null)
                     {
-                        RealModPath = FullModPathMan + "\\" + node.FullPath;
-                        if (Directory.Exists(RealModPath))
+                        if (node.Nodes.Count > 0)
                         {
-                            checkButtons(output: true);
+                            foreach (TreeNode subnode in node.Nodes)
+                            {
+                                if (subnode != null)
+                                {
+                                    RealModPath = FullModPathMan + "\\" + subnode.FullPath.ToString().Replace(" (Installed)", "");
+                                    if (Directory.Exists(RealModPath))
+                                    {
+                                        checkButtons(output: true);
+                                    }
+                                    else
+                                    {
+                                        subnode.Remove();
+                                    }
+                                }
+                            }
                         }
-                        else
+                        if (node.Nodes.Count == 0)
                         {
-                            node.Remove();
+                            RealModPath = FullModPathMan + "\\" + node.FullPath.ToString().Replace(" (Installed)", "");
+                            if (Directory.Exists(RealModPath))
+                            {
+                                checkButtons(output: true);
+                            }
+                            else
+                            {
+                                node.Remove();
+                            }
                         }
                     }
                 }
@@ -12005,5 +13070,75 @@ namespace Revamped_BnS_Buddy
                 metroProgressBar1.Visible = false;
             }
         }
+
+
+        public Image previewImage = null;
+        private void metroButton42_Click(object sender, EventArgs e)
+        {
+            if (previewImage == null)
+            {
+                if (File.Exists(FullModPathMan + "\\" + treeView2.SelectedNode.FullPath.ToString() + "\\preview.png"))
+                {
+                    previewImage = Image.FromFile(FullModPathMan + "\\" + treeView2.SelectedNode.FullPath.ToString() + "\\preview.png");
+                }
+                else if (File.Exists(FullModPathMan + "\\" + treeView2.SelectedNode.FullPath.ToString() + "\\preview.jpg"))
+                {
+                    previewImage = Image.FromFile(FullModPathMan + "\\" + treeView2.SelectedNode.FullPath.ToString() + "\\preview.jpg");
+                }
+                else if (File.Exists(FullModPathMan + "\\" + treeView2.SelectedNode.FullPath.ToString() + "\\preview.gif"))
+                {
+                    previewImage = Image.FromFile(FullModPathMan + "\\" + treeView2.SelectedNode.FullPath.ToString() + "\\preview.gif");
+                }
+            }
+            Form previewMod = new PreviewMod();
+            if (previewMod.ShowDialog() == DialogResult.Cancel)
+            {
+                if (previewImage != null)
+                {
+                    previewImage.Dispose();
+                    previewImage = null;
+                }
+            }
+        }
+
+        private void metroButton41_Click(object sender, EventArgs e)
+        {
+            Prompt.Popup("Tree Colors:" + Environment.NewLine + "Red Color-> Conflicting installed mods" + Environment.NewLine + "Green Color-> Installed mods" + Environment.NewLine + "White Color-> Non-installed mods" + Environment.NewLine + "Mod Preview Supported formats:" + Environment.NewLine + "gif, png and jpg");
+        }
+
+        private void metroButton43_Click(object sender, EventArgs e)
+        {
+            Prompt.Popup(metroLabel40.Text);
+        }
+
+        private void ReloadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!treeView1.SelectedNode.Name.EndsWith(".bin") && treeView1.SelectedNode.Name.Contains("."))
+                {
+                    treeView1.Enabled = false;
+                    metroLabel39.Text = "Reloading...";
+                    metroLabel39.Refresh();
+                    fastColoredTextBox1.Clear();
+                    nametofile = treeView1.SelectedNode.FullPath.Replace(ActiveDataFile + "\\", "");
+                    BNSDat.BNSDat bNSDat = new BNSDat.BNSDat();
+                    Dictionary<string, byte[]> dictionary = bNSDat.ExtractFile(myDictionary[ActiveDataFile] + "\\" + ActiveDataFile, new List<string>
+                    {
+                        nametofile
+                    }, ActiveDataFile.Contains("64"));
+                    var bytes = dictionary[nametofile];
+                    fastColoredTextBox1.Text = System.Text.Encoding.UTF8.GetString(bytes);
+                    metroLabel39.Text = "Reloaded!";
+                    metroLabel39.Refresh();
+                    treeView1.Enabled = true;
+                }
+            }
+            catch
+            {
+                metroLabel39.Text = "Error: Could not open file";
+            }
+        }
+
     }
 }

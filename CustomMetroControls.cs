@@ -1,18 +1,11 @@
-﻿using System;
-using System.Drawing;
-using System.ComponentModel;
-using System.Windows.Forms;
-
-using MetroFramework.Components;
+﻿using MetroFramework.Components;
 using MetroFramework.Drawing;
 using MetroFramework.Interfaces;
-using System.Drawing.Imaging;
-using System.Collections;
-using System.Reflection;
-using System.Globalization;
+using System;
+using System.ComponentModel;
+using System.Drawing;
 using System.Runtime.InteropServices;
-using MetroFramework;
-using MetroFramework.Controls;
+using System.Windows.Forms;
 
 namespace MetroFramework.CustomMetroControls
 {
@@ -41,7 +34,7 @@ namespace MetroFramework.CustomMetroControls
 
         protected override void WndProc(ref Message m)
         {
-            if(m.Msg == 133 && !DesignMode)
+            if (m.Msg == 133 && !DesignMode)
             {
                 IntPtr hDC = GetWindowDC(m.HWnd);
                 Graphics g = Graphics.FromHdc(hDC);
@@ -192,7 +185,7 @@ namespace MetroFramework.CustomMetroControls
         public MetroListBox()
         {
             this.Font = new Font("Segoe UI", 12.0f);
-            if(DesignMode)
+            if (DesignMode)
             {
             }
             else
@@ -231,7 +224,7 @@ namespace MetroFramework.CustomMetroControls
                 e.Graphics.FillRectangle(new SolidBrush(BackColor), e.Bounds);
             }
 
-            if(listBox.Items.Count > 0)
+            if (listBox.Items.Count > 0)
                 e.Graphics.DrawString(listBox.Items[e.Index].ToString(), e.Font, myBrush, e.Bounds);
             e.DrawFocusRectangle();
         }

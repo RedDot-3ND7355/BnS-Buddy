@@ -1,11 +1,7 @@
 ﻿using MetroFramework;
-using MetroFramework.Components;
-using MetroFramework.Controls;
 using MetroFramework.Forms;
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -30,9 +26,13 @@ namespace Revamped_BnS_Buddy
 
         private void GetColor()
         {
-            string a = File.ReadLines(AppPath + "\\Settings.ini").Skip(43).Take(1)
-                .First()
-                .Replace("buddycolor = ", "");
+            string a = "Blue";
+            if (File.Exists(AppPath + "\\Settings.ini"))
+            {
+                a = File.ReadLines(AppPath + "\\Settings.ini").Skip(43).Take(1)
+                    .First()
+                    .Replace("buddycolor = ", "");
+            }
             if (a == "Black")
             {
                 Themer.Style = MetroColorStyle.Black;

@@ -1,5 +1,4 @@
 ﻿using MetroFramework;
-using MetroFramework.Components;
 using MetroFramework.Controls;
 using MetroFramework.Forms;
 using Microsoft.Win32;
@@ -242,9 +241,14 @@ namespace Revamped_BnS_Buddy
 
         private void GetColor()
         {
-            string a = File.ReadLines(AppPath + "\\Settings.ini").Skip(43).Take(1)
+
+            string a = "Blue";
+            if (File.Exists(AppPath + "\\Settings.ini"))
+            {
+                a = File.ReadLines(AppPath + "\\Settings.ini").Skip(43).Take(1)
                 .First()
                 .Replace("buddycolor = ", "");
+            }
             if (a == "Black")
             {
                 Themer.Style = MetroColorStyle.Black;
@@ -310,7 +314,7 @@ namespace Revamped_BnS_Buddy
             metroComboBox1.Theme = MetroThemeStyle.Dark;
             metroComboBox1.Style = Themer.Style;
 
-            if(Themer.Style == MetroColorStyle.White)
+            if (Themer.Style == MetroColorStyle.White)
             {
                 metroComboBox1.Theme = MetroThemeStyle.Light;
                 metroComboBox1.Style = MetroColorStyle.Silver;

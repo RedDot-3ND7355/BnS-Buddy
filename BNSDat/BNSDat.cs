@@ -1,4 +1,3 @@
-using BNSDat;
 using Ionic.Zlib;
 using Revamped_BnS_Buddy;
 using System;
@@ -280,7 +279,7 @@ namespace BNSDat
             fileStream.Close();
             binaryReader = null;
             fileStream = null;
-            return toreturn; 
+            return toreturn;
         }
 
         public Dictionary<string, byte[]> ExtractFile(string FileName, List<string> filesToExtract, bool is64 = false)

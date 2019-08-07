@@ -94,7 +94,8 @@
             this.metroTextBox1.CustomButton.UseSelectable = true;
             this.metroTextBox1.CustomButton.Visible = false;
             this.metroTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.metroTextBox1.Lines = new string[0];
+            this.metroTextBox1.Lines = new string[] {
+        "Loading..."};
             this.metroTextBox1.Location = new System.Drawing.Point(20, 60);
             this.metroTextBox1.MaxLength = 32767;
             this.metroTextBox1.Multiline = true;
@@ -109,6 +110,7 @@
             this.metroTextBox1.Size = new System.Drawing.Size(760, 520);
             this.metroTextBox1.TabIndex = 3;
             this.metroTextBox1.TabStop = false;
+            this.metroTextBox1.Text = "Loading...";
             this.metroTextBox1.Theme = MetroFramework.MetroThemeStyle.Dark;
             this.metroTextBox1.UseSelectable = true;
             this.metroTextBox1.UseStyleColors = true;

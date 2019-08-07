@@ -1,5 +1,4 @@
 ﻿using MetroFramework;
-using MetroFramework.Components;
 using MetroFramework.Controls;
 using MetroFramework.Forms;
 using System.ComponentModel;
@@ -14,6 +13,7 @@ using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Revamped_BnS_Buddy
@@ -53,20 +53,22 @@ namespace Revamped_BnS_Buddy
                 metroForm.Text = "";
                 metroForm.StartPosition = FormStartPosition.CenterScreen;
                 MetroLabel metroLabel = new MetroLabel();
+                metroLabel.Dock = DockStyle.Fill;
                 metroLabel.AutoSize = true;
                 metroLabel.Left = 5;
-                metroLabel.Top = 20;
-                metroLabel.Text = Message;
+                metroLabel.Top = 0;
+                metroLabel.Text = Message + System.Environment.NewLine + System.Environment.NewLine;
                 metroLabel.Width = 270;
                 metroLabel.Height = 40;
                 metroLabel.TextAlign = ContentAlignment.MiddleCenter;
                 metroLabel.Theme = MetroThemeStyle.Dark;
                 MetroLabel value = metroLabel;
                 MetroButton metroButton = new MetroButton();
+                metroButton.Dock = DockStyle.Bottom;
                 metroButton.Text = "Ok";
                 metroButton.Left = 5;
                 metroButton.Width = 100;
-                metroButton.Top = 130;
+                metroButton.Top = metroForm.Height - 20;
                 metroButton.DialogResult = DialogResult.OK;
                 metroButton.Theme = MetroThemeStyle.Dark;
                 MetroButton metroButton2 = metroButton;
@@ -94,8 +96,14 @@ namespace Revamped_BnS_Buddy
             SetFormColor();
             ValidateBuddy();
             GrabCurrentVersion();
-            GrabOnlineVersion();
-            GrabOnlineChangelog();
+            Task.Delay(1000).ContinueWith(delegate
+            {
+                GrabOnlineVersion();
+            });
+            Task.Delay(1000).ContinueWith(delegate
+            {
+                GrabOnlineChangelog();
+            });
             metroButton1.DialogResult = DialogResult.OK;
             metroButton2.DialogResult = DialogResult.Cancel;
         }
