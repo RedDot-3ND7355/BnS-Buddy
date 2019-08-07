@@ -20,6 +20,7 @@ Credits:
 + LokiReborn - For porting bnsdat to C# and adding AuthToken
 + Yevvie - For Icons, Splash art and BnS Buddy Forum images
 + Airix - For providing a battleground fix
++ GunerX - For providing upk numbers for animation toggles
 
 
 Requirements:
@@ -30,6 +31,80 @@ Requirements:
 
 
 Change Log:
+
+Version 5.9.2.3
++ Optimisation: Buddy startup is faster
++ Optimisation: Loading affinity window now loads faster without hang
++ Fixed Bug: Starting buddy while server timeout occured hangs buddy
++ Fixed Bug: Wanting to update within buddy would freeze the app when server timeout occured
++ Fixed Bug: Some extras features were overlapping others
++ Fixed Bug: Loading bar now displayed properly on affinity window
+
+Version 5.9.2.2
++ Added: Scrollbars for Launcher text log and mod log
++ Added: Keep in tray toggle added to settings
++ Fixed Bug: Applying addons with a damaged dat file would result in an error
++ Fixed Bug: Picturebox for splash changer was out of bounds
++ Fixed Bug: When selecting a xml file to edit in dat editor, it would be loaded twice since v5.9.1.7
+
+Version 5.9.2.1
++ Fixed Bug: Wrong strings were used for login to ncsoft servers
++ Fixed Bug: Wrong local version string was used
+
+Version 5.9.2.0
++ Fixed Bug: Version check was checking the wrong strings
++ Fixed Bug: Version check was missing a backslash when on different windows version
+
+Version 5.9.1.9
++ Added: Reload button in dat editor
++ Added: Custom affinity
++ Added: Custom path support for nclauncher 2
++ Added: Version check for supported regions
++ Updated: Ip for na server
++ Reworked: Changed how the settings are handled when changed
++ Fixed Bug: Installing/Uninstalling parent folder of sub mod would cause an error/crash
++ Fixed Bug: Added a null check for bit selection
++ Fixed Bug: Leaving enter code empty and submitting would crash buddy
++ Fixed Bug: Changing some settings and having the settings file missing would cause an error
+
+Version 5.9.1.8
++ Added: Restoring already running buddy if new instance exists
++ Fixed Bug: Not being able to move mod folders for new mod manager would cause an io exception
++ Fixed Bug: Installing/Uninstalling a mod which the folder does no longer exist would trigger an error
+
+Updater 2.5.1.9
++ Fixed Bug: Popups styling from buddy would be broken and button would overlap
++ Fixed Bug: Not being able to move new update would cause an io exception
+
+Version 5.9.1.7
++ Added: A plus button for a full description for the mod
++ Added: Preview button in mod manager
++ Added: Help button for mod manager
++ Added: Beautify button to dat editor for xml cleanup
++ Added: Syntax check for dat editor to prevent corrupted files
++ Added: Disabling menu options when game is already running
++ Added: Save as xml button for dat editor
++ Added: Colors to installed mods
++ Added: Installed mods conflict check
++ Added: Sub mods to mod manager
++ Modified: Mod Manager to install mods with symlinks for faster operations & save space
++ Modified: Applying/removing mod buttons renamed
++ Reworked: Detection of installed mods
++ Reworked: Mod manager does it's job with threads instead of background worker
++ Fixed Bug: Duplicate process check within tick would cause error if overlapped
++ Fixed Bug: Grabbing color on other forms even if settings.ini didn't exist crashed buddy
++ Fixed Bug: BackColor for treeview for xmls in dat editor goes black randomnly and not readable
++ Fixed Bug: Popups styling from buddy would be broken and button would overlap
+
+Version 5.9.1.6
++ Added: Detection if game is already running
++ Added: Killing the already running game if Auto game killer is OFF
++ Added: Comment support for dat editor
++ Added: Autofix syntax color for comments in Dat
++ Removed: Popups when clearing count in extras
++ Updated: Detection for NCLauncher 2 settings
++ Updated: Credits has been modified
++ Fixed Bug: Allowing the user to start the game without having a region selected first
 
 Version 5.9.1.5
 + Added: Support for NCLauncher 2
