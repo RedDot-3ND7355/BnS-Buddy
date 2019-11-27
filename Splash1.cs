@@ -1,15 +1,13 @@
 ﻿using MetroFramework;
-using MetroFramework.Controls;
 using MetroFramework.Forms;
 using Microsoft.Win32;
+using Revamped_BnS_Buddy.Functions;
 using Security;
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Web.Security;
 using System.Windows.Forms;
 
@@ -30,7 +28,7 @@ namespace Revamped_BnS_Buddy
                 {
                     Registry.LocalMachine.CreateSubKey("SOFTWARE\\BnS Buddy");
                 }
-                if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("rememberme = true"))
+                if (File.ReadAllText(Prompt.AppPath + "\\Settings.ini").Contains("rememberme = true"))
                 {
                     metroComboBox1.Enabled = true;
                     localMachine = Registry.LocalMachine;
@@ -85,65 +83,7 @@ namespace Revamped_BnS_Buddy
             }
         }
 
-        public static class Prompt
-        {
-            public static MetroColorStyle ColorSet
-            {
-                get;
-                internal set;
-            }
-
-            public static void Popup(string Message)
-            {
-                ComponentResourceManager resources = new ComponentResourceManager(typeof(Form1));
-                MetroForm metroForm = new MetroForm();
-                metroForm.ShadowType = MetroFormShadowType.AeroShadow;
-                metroForm.Width = 280;
-                metroForm.Height = 135;
-                metroForm.FormBorderStyle = FormBorderStyle.None;
-                metroForm.Resizable = false;
-                metroForm.AutoSize = true;
-                metroForm.AutoSizeMode = AutoSizeMode.GrowOnly;
-                metroForm.Icon = (Icon)resources.GetObject("notifyIcon1.Icon");
-                metroForm.ControlBox = false;
-                metroForm.Theme = MetroThemeStyle.Dark;
-                metroForm.DisplayHeader = false;
-                metroForm.TopMost = true;
-                metroForm.Text = "";
-                metroForm.StartPosition = FormStartPosition.CenterScreen;
-                MetroForm metroForm2 = metroForm;
-                MetroLabel metroLabel = new MetroLabel();
-                metroLabel.Dock = DockStyle.Fill;
-                metroLabel.AutoSize = true;
-                metroLabel.Left = 5;
-                metroLabel.Top = 0;
-                metroLabel.Text = Message + Environment.NewLine + Environment.NewLine;
-                metroLabel.Width = 270;
-                metroLabel.Height = 40;
-                metroLabel.TextAlign = ContentAlignment.MiddleCenter;
-                metroLabel.Theme = MetroThemeStyle.Dark;
-                MetroLabel value = metroLabel;
-                MetroButton metroButton = new MetroButton();
-                metroButton.Dock = DockStyle.Bottom;
-                metroButton.Text = "Ok";
-                metroButton.Left = 5;
-                metroButton.Width = 100;
-                metroButton.Top = metroForm2.Height - 20;
-                metroButton.DialogResult = DialogResult.OK;
-                metroButton.Theme = MetroThemeStyle.Dark;
-                MetroButton metroButton2 = metroButton;
-                metroButton2.TabStop = false;
-                metroForm2.Controls.Add(metroButton2);
-                metroForm2.Controls.Add(value);
-                metroForm2.AcceptButton = metroButton2;
-                metroForm2.Style = ColorSet;
-                metroForm2.ShowDialog();
-            }
-        }
-
         public static Splash1 CurrentForm;
-
-        public string AppPath = Path.GetDirectoryName(Application.ExecutablePath);
 
         public string username = "";
 
@@ -241,74 +181,7 @@ namespace Revamped_BnS_Buddy
 
         private void GetColor()
         {
-
-            string a = "Blue";
-            if (File.Exists(AppPath + "\\Settings.ini"))
-            {
-                a = File.ReadLines(AppPath + "\\Settings.ini").Skip(43).Take(1)
-                .First()
-                .Replace("buddycolor = ", "");
-            }
-            if (a == "Black")
-            {
-                Themer.Style = MetroColorStyle.Black;
-            }
-            else if (a == "Red")
-            {
-                Themer.Style = MetroColorStyle.Red;
-            }
-            else if (a == "Purple")
-            {
-                Themer.Style = MetroColorStyle.Purple;
-            }
-            else if (a == "Pink")
-            {
-                Themer.Style = MetroColorStyle.Pink;
-            }
-            else if (a == "Orange")
-            {
-                Themer.Style = MetroColorStyle.Orange;
-            }
-            else if (a == "Magenta")
-            {
-                Themer.Style = MetroColorStyle.Magenta;
-            }
-            else if (a == "Lime")
-            {
-                Themer.Style = MetroColorStyle.Lime;
-            }
-            else if (a == "Green")
-            {
-                Themer.Style = MetroColorStyle.Green;
-            }
-            else if (a == "Default")
-            {
-                Themer.Style = MetroColorStyle.Blue;
-            }
-            else if (a == "Brown")
-            {
-                Themer.Style = MetroColorStyle.Brown;
-            }
-            else if (a == "Blue")
-            {
-                Themer.Style = MetroColorStyle.Blue;
-            }
-            else if (a == "Silver")
-            {
-                Themer.Style = MetroColorStyle.Silver;
-            }
-            else if (a == "Teal")
-            {
-                Themer.Style = MetroColorStyle.Teal;
-            }
-            else if (a == "White")
-            {
-                Themer.Style = MetroColorStyle.White;
-            }
-            else if (a == "Yellow")
-            {
-                Themer.Style = MetroColorStyle.Yellow;
-            }
+            Themer.Style = Prompt.ColorSet;
             base.Style = Themer.Style;
 
             metroComboBox1.Theme = MetroThemeStyle.Dark;
@@ -321,7 +194,6 @@ namespace Revamped_BnS_Buddy
             }
 
             Refresh();
-            Prompt.ColorSet = Themer.Style;
         }
 
         private string StringToHex(string s)
@@ -401,7 +273,7 @@ namespace Revamped_BnS_Buddy
                 metroButton1.Visible = false;
                 try
                 {
-                    username = metroTextBox1.Text.ToLower();
+                    username = metroTextBox1.Text.ToLower().Replace(" ", "");
                     password = metroTextBox2.Text;
                     if (metroCheckBox1.CheckState != CheckState.Checked)
                     {
@@ -418,11 +290,11 @@ namespace Revamped_BnS_Buddy
                                 {
                                     Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", writable: true).DeleteValue("lastused");
                                 }
-                                if (!CheckIfAny() && File.ReadAllText(AppPath + "\\Settings.ini").Contains("rememberme = true"))
+                                if (!CheckIfAny() && File.ReadAllText(Prompt.AppPath + "\\Settings.ini").Contains("rememberme = true"))
                                 {
-                                    string text2 = File.ReadAllText(AppPath + "\\Settings.ini");
+                                    string text2 = File.ReadAllText(Prompt.AppPath + "\\Settings.ini");
                                     text2 = text2.Replace("rememberme = true", "rememberme = false");
-                                    File.WriteAllText(AppPath + "\\Settings.ini", text2);
+                                    File.WriteAllText(Prompt.AppPath + "\\Settings.ini", text2);
                                 }
                             }
                         }
@@ -434,19 +306,25 @@ namespace Revamped_BnS_Buddy
                     {
                         try
                         {
-                            string text3 = metroTextBox1.Text;
-                            string text4 = text3.Substring(text3.IndexOf("@") + 1);
-                            text3 = text3.Substring(0, text3.IndexOf("@"));
-                            Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", writable: true).SetValue("lastused", text3 + " (" + text4 + ") ", RegistryValueKind.String);
-                            Registry.LocalMachine.CreateSubKey("SOFTWARE\\BnS Buddy\\" + text3 + " (" + text4 + ") ");
-                            Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy\\" + text3 + " (" + text4 + ") ", writable: true).SetValue("username", Enc(metroTextBox1.Text), RegistryValueKind.String);
-                            Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy\\" + text3 + " (" + text4 + ") ", writable: true).SetValue("password", Enc(metroTextBox2.Text), RegistryValueKind.String);
-                            if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("rememberme = false"))
+                            Regex regex = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$");
+                            Match match = regex.Match(@metroTextBox1.Text);
+                            if (match.Success)
                             {
-                                string text5 = File.ReadAllText(AppPath + "\\Settings.ini");
-                                text5 = text5.Replace("rememberme = false", "rememberme = true");
-                                File.WriteAllText(AppPath + "\\Settings.ini", text5);
+                                string text3 = metroTextBox1.Text;
+                                string text4 = text3.Substring(text3.IndexOf("@") + 1);
+                                text3 = text3.Substring(0, text3.IndexOf("@"));
+                                Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy", writable: true).SetValue("lastused", text3 + " (" + text4 + ") ", RegistryValueKind.String);
+                                Registry.LocalMachine.CreateSubKey("SOFTWARE\\BnS Buddy\\" + text3 + " (" + text4 + ") ");
+                                Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy\\" + text3 + " (" + text4 + ") ", writable: true).SetValue("username", Enc(metroTextBox1.Text), RegistryValueKind.String);
+                                Registry.LocalMachine.OpenSubKey("SOFTWARE\\BnS Buddy\\" + text3 + " (" + text4 + ") ", writable: true).SetValue("password", Enc(metroTextBox2.Text), RegistryValueKind.String);
+                                if (File.ReadAllText(Prompt.AppPath + "\\Settings.ini").Contains("rememberme = false"))
+                                {
+                                    string text5 = File.ReadAllText(Prompt.AppPath + "\\Settings.ini");
+                                    text5 = text5.Replace("rememberme = false", "rememberme = true");
+                                    File.WriteAllText(Prompt.AppPath + "\\Settings.ini", text5);
+                                }
                             }
+                            else { Prompt.Popup("Invalid character detected, please try again."); }
                         }
                         catch (Exception ex)
                         {
@@ -597,7 +475,7 @@ namespace Revamped_BnS_Buddy
 
         private void Splash1_Shown(object sender, EventArgs e)
         {
-            if (File.ReadAllText(AppPath + "\\Settings.ini").Contains("autologin = true") && Form1.CurrentForm.metroLabel81.Text != "Active" && Form1.CurrentForm.metroLabel82.Text != "Active" && autologinapproved)
+            if (File.ReadAllText(Prompt.AppPath + "\\Settings.ini").Contains("autologin = true") && Form1.CurrentForm.metroLabel81.Text != "Active" && Form1.CurrentForm.metroLabel82.Text != "Active" && autologinapproved)
             {
                 Perform();
             }
@@ -614,12 +492,12 @@ namespace Revamped_BnS_Buddy
         {
             if (metroCheckBox1.Checked)
             {
-                lineChanger("rememberme = true", AppPath + "\\Settings.ini", 31);
+                lineChanger("rememberme = true", Prompt.AppPath + "\\Settings.ini", 31);
                 Form1.CurrentForm.metroToggle28.Checked = true;
             }
             else
             {
-                lineChanger("rememberme = false", AppPath + "\\Settings.ini", 31);
+                lineChanger("rememberme = false", Prompt.AppPath + "\\Settings.ini", 31);
                 Form1.CurrentForm.metroToggle28.Checked = false;
             }
         }

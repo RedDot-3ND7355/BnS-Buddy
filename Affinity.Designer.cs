@@ -1,4 +1,8 @@
-﻿namespace Revamped_BnS_Buddy
+﻿using MetroFramework.Components;
+using MetroFramework.Controls;
+using System.Windows.Forms;
+
+namespace Revamped_BnS_Buddy
 {
     partial class Affinity
     {
@@ -44,6 +48,7 @@
             this.metroLabel2 = new MetroFramework.Controls.MetroLabel();
             this.metroButton1 = new MetroFramework.Controls.MetroButton();
             this.metroProgressBar1 = new MetroFramework.Controls.MetroProgressBar();
+            this.treeView1 = new Revamped_BnS_Buddy.Affinity.MyTreeView();
             ((System.ComponentModel.ISupportInitialize)(this.metroStyleManager1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -165,7 +170,8 @@
             "First Half",
             "Second Half",
             "Odd",
-            "Even"});
+            "Even",
+            "Custom"});
             this.metroComboBox1.Location = new System.Drawing.Point(459, 206);
             this.metroComboBox1.Name = "metroComboBox1";
             this.metroComboBox1.Size = new System.Drawing.Size(121, 29);
@@ -204,18 +210,35 @@
             this.metroProgressBar1.MarqueeAnimationSpeed = 200;
             this.metroProgressBar1.Maximum = 6;
             this.metroProgressBar1.Name = "metroProgressBar1";
-            this.metroProgressBar1.Size = new System.Drawing.Size(560, 175);
+            this.metroProgressBar1.Size = new System.Drawing.Size(560, 326);
             this.metroProgressBar1.Step = 1;
             this.metroProgressBar1.TabIndex = 18;
             this.metroProgressBar1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.metroProgressBar1.Theme = MetroFramework.MetroThemeStyle.Dark;
+            // 
+            // treeView1
+            // 
+            this.treeView1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.treeView1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.treeView1.CheckBoxes = true;
+            this.treeView1.Enabled = false;
+            this.treeView1.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.treeView1.ForeColor = System.Drawing.Color.White;
+            this.treeView1.Location = new System.Drawing.Point(20, 241);
+            this.treeView1.Name = "treeView1";
+            this.treeView1.ShowPlusMinus = false;
+            this.treeView1.ShowRootLines = false;
+            this.treeView1.Size = new System.Drawing.Size(560, 145);
+            this.treeView1.TabIndex = 19;
+            this.treeView1.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.TreeView1_AfterCheck);
+            this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.TreeView1_AfterCheck);
             // 
             // Affinity
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.metroButton2;
-            this.ClientSize = new System.Drawing.Size(600, 258);
+            this.ClientSize = new System.Drawing.Size(600, 412);
             this.ControlBox = false;
             this.Controls.Add(this.metroProgressBar1);
             this.Controls.Add(this.metroButton1);
@@ -224,6 +247,7 @@
             this.Controls.Add(this.metroLabel1);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.metroButton2);
+            this.Controls.Add(this.treeView1);
             this.ForeColor = System.Drawing.SystemColors.ControlText;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
@@ -244,21 +268,32 @@
 
         }
 
-        private MetroFramework.Controls.MetroButton metroButton2;
-
-        private MetroFramework.Components.MetroStyleManager metroStyleManager1;
+        private MetroButton metroButton2;
+        private MetroStyleManager metroStyleManager1;
+        public class MyTreeView : TreeView
+        {
+            protected override void WndProc(ref Message m)
+            {
+                if (m.Msg == 0x0203)
+                {
+                    m.Msg = 0x0201;
+                }
+                base.WndProc(ref m);
+            }
+        }
         #endregion
-        private System.Windows.Forms.GroupBox groupBox1;
-        private MetroFramework.Controls.MetroLabel Processor_Comp;
-        private MetroFramework.Controls.MetroLabel Processor_Speed;
-        private MetroFramework.Controls.MetroLabel Processor_Lcore;
-        private MetroFramework.Controls.MetroLabel Processor_cores;
-        private MetroFramework.Controls.MetroLabel Processor_name;
-        private MetroFramework.Controls.MetroLabel metroLabel1;
-        public MetroFramework.Controls.MetroComboBox metroComboBox1;
-        private MetroFramework.Controls.MetroLabel metroLabel2;
-        private MetroFramework.Controls.MetroLabel metroLabel3;
-        private MetroFramework.Controls.MetroButton metroButton1;
-        private MetroFramework.Controls.MetroProgressBar metroProgressBar1;
+        private GroupBox groupBox1;
+        private MetroLabel Processor_Comp;
+        private MetroLabel Processor_Speed;
+        private MetroLabel Processor_Lcore;
+        private MetroLabel Processor_cores;
+        private MetroLabel Processor_name;
+        private MetroLabel metroLabel1;
+        public MetroComboBox metroComboBox1;
+        private MetroLabel metroLabel2;
+        private MetroLabel metroLabel3;
+        private MetroButton metroButton1;
+        private MetroProgressBar metroProgressBar1;
+        public MyTreeView treeView1;
     }
 }

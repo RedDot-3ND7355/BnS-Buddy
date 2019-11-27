@@ -16,6 +16,6 @@ using System.Security;
 [assembly: AssemblyTrademark("Endless")]
 [assembly: ComVisible(false)]
 [assembly: Guid("1cb5fea7-827a-46a5-8bb7-72c86b8fa78f")]
-[assembly: AssemblyFileVersion("5.9.2.3")]
-[assembly: AssemblyVersion("5.9.2.3")]
+[assembly: AssemblyFileVersion("5.9.2.4")]
+[assembly: AssemblyVersion("5.9.2.4")]
 [module: UnverifiableCode]

@@ -21,6 +21,8 @@ Credits:
 + Yevvie - For Icons, Splash art and BnS Buddy Forum images
 + Airix - For providing a battleground fix
 + GunerX - For providing upk numbers for animation toggles
++ Yeti - For finding AMD ULPS interfering with bns performance
++ Megai2 - For his dx12 proxy mod for better bns performance
 
 
 Requirements:
@@ -31,6 +33,45 @@ Requirements:
 
 
 Change Log:
+
+Version 5.9.2.4
++ Added: Handler for patch files with no replace value
++ Added: Archer animation toggle
++ Added: 3rd spec animation toggle to KFM toggle
++ Added: D912PXY mod for win10 and win7 users only
++ Added: ULPS Toggle for AMD GPUs in extras to maximize performance
++ Added: Prompt warning when fth entries exists
++ Added: Manual selection of cores to run the game on
++ Added: Toggle for affinity manager
++ Added: Support for lower cased N in BNS for version file check
++ Added: Startup entry for BnS Buddy toggle in settings
++ Added: Handling of whitespace in email during login
++ Reworked: Detection of installed mods when installed with files
++ Reworked: Handling of Compat flags and fth are now seperate
++ Reworked: Handling of same folder name in modmanager but different mod files
++ Reworked: Partially reworked the settings handling for easier management
++ Fixed Bug: Launcher logs wouldn't be scrolled down auto for certain users
++ Fixed Bug: Mod Manager logs wouldn't be scrolled down at all without it being shown first
++ Fixed Bug: Keep-in-tray toggle would not dispose bns buddy logo in tray when closed
++ Fixed Bug: Typo for assassin in extras
++ Fixed Bug: Double clicking the mod manager list would trigger triple state
++ Fixed Bug: Startup spinner would not follow the settings color
++ Fixed Bug: Buddy would not close if icon or BW was already disposed
++ Fixed Bug: Typing invalid characters into text field would crash or cause an error
++ Fixed Bug: The theme code validation would not be the theme color selected
++ Fixed Bug: Receiving broken code validation emails when some info could not get grabbed by ncsoft
++ Fixed Bug: Overlapping box in extras
++ Fixed Bug: Unhandled errors when using unstable connection and could not connect to bns buddy domain
++ Fixed Bug: A rare dns bug would occur on ncsoft dns records and could not login anymore
++ Fixed Bug: Remote ip grab would hang and crash the login process
++ Fixed Bug: Adding/Modifying/Removing a folder in mod manager would create a duplicate of the entire tree
++ Fixed Bug: Uninstalling 2 mods or more of the same name would create an index error
++ Fixed Bug: Two mod folder of same name would both be green if only one of them is installed
+
+Updater 2.5.2.0
++ Added: Server status so users will know why the download button is grayed out
++ Added: Admin permission required from start
++ Fixed Bug: Unhandled errors when using unstable connection and could not connect to bns buddy domain
 
 Version 5.9.2.3
 + Optimisation: Buddy startup is faster
