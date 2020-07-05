@@ -272,6 +272,22 @@ namespace Revamped_BnS_Buddy.Functions
             {
                 metroComboBox.Items.Add("Korean Test");
             }
+            if (installs.ContainsKey("Korean Frontier") && installs["Korean Frontier"].ToString().Length > 1)
+            {
+                metroComboBox.Items.Add("Korean Frontier");
+            }
+            if (installs.ContainsKey("Russia") && installs["Russia"].ToString().Length > 1)
+            {
+                metroComboBox.Items.Add("Russia");
+            }
+            if (installs.ContainsKey("Garena") && installs["Garena"].ToString().Length > 1)
+            {
+                metroComboBox.Items.Add("Garena");
+            }
+            if (installs.ContainsKey("Chinese") && installs["Chinese"].ToString().Length > 1)
+            {
+                metroComboBox.Items.Add("Chinese");
+            }
             metroComboBox.TabStop = false;
             metroComboBox.SelectedIndex = 0;
             prompt.Controls.Add(metroComboBox);
@@ -405,6 +421,7 @@ namespace Revamped_BnS_Buddy.Functions
             obj.Controls.Add(value);
             obj.AcceptButton = metroButton;
             obj.Style = ColorSet;
+            obj.TopMost = true;
             obj.ShowDialog();
         }
     }

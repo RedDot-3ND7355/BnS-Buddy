@@ -1,5 +1,6 @@
 ﻿using MetroFramework.Forms;
 using Revamped_BnS_Buddy.Functions;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -21,7 +22,7 @@ namespace Revamped_BnS_Buddy
 
         private string BnSBuddySerial = "";
 
-        private string BnSServerCert = "";
+        private bool BnSServerCert = false;
 
         public UpdaterTransition()
         {
@@ -89,7 +90,7 @@ namespace Revamped_BnS_Buddy
             {
                 try
                 {
-                    string text = "updates.xxzer0modzxx.net";
+                    string text = "updates.bnsbuddy.com";
                     TcpClient tcpClient = new TcpClient(text, 443);
                     ServicePointManager.Expect100Continue = true;
                     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
@@ -97,12 +98,12 @@ namespace Revamped_BnS_Buddy
                     using (SslStream sslStream = new SslStream(tcpClient.GetStream(), false, userCertificateValidationCallback))
                     {
                         string text2 = "";
-                        sslStream.AuthenticateAsClient(text, null, SslProtocols.Tls12, false);
+                        sslStream.AuthenticateAsClient(text, null, SslProtocols.Tls12, true);
                         tcpClient.SendTimeout = 500;
                         tcpClient.ReceiveTimeout = 1000;
                         StringBuilder stringBuilder = new StringBuilder();
                         stringBuilder.AppendLine("GET /Changelog.txt HTTP/1.1");
-                        stringBuilder.AppendLine("Host: updates.xxzer0modzxx.net");
+                        stringBuilder.AppendLine("Host: updates.bnsbuddy.com");
                         stringBuilder.AppendLine("User-Agent: BnSBuddy/" + Application.ProductVersion + " (compatible;)");
                         stringBuilder.AppendLine("Connection: close");
                         stringBuilder.AppendLine();
@@ -150,7 +151,7 @@ namespace Revamped_BnS_Buddy
             {
                 try
                 {
-                    string text = "updates.xxzer0modzxx.net";
+                    string text = "updates.bnsbuddy.com";
                     TcpClient tcpClient = new TcpClient(text, 443);
                     ServicePointManager.Expect100Continue = true;
                     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
@@ -163,7 +164,7 @@ namespace Revamped_BnS_Buddy
                         tcpClient.ReceiveTimeout = 1000;
                         StringBuilder stringBuilder = new StringBuilder();
                         stringBuilder.AppendLine("GET /BuddyVersion.txt HTTP/1.1");
-                        stringBuilder.AppendLine("Host: updates.xxzer0modzxx.net");
+                        stringBuilder.AppendLine("Host: updates.bnsbuddy.com");
                         stringBuilder.AppendLine("User-Agent: BnSBuddy/" + Application.ProductVersion + " (compatible;)");
                         stringBuilder.AppendLine("Connection: close");
                         stringBuilder.AppendLine();
@@ -219,10 +220,10 @@ namespace Revamped_BnS_Buddy
                 X509Certificate2 x509Certificate = null;
                 try
                 {
-                    TcpClient tcpClient = new TcpClient("updates.xxzer0modzxx.net", 443);
+                    TcpClient tcpClient = new TcpClient("updates.bnsbuddy.com", 443);
                     using (SslStream sslStream = new SslStream(userCertificateValidationCallback: (object snd, X509Certificate certificate, X509Chain chainLocal, SslPolicyErrors sslPolicyErrors) => true, innerStream: tcpClient.GetStream(), leaveInnerStreamOpen: true))
                     {
-                        sslStream.AuthenticateAsClient("updates.xxzer0modzxx.net", null, SslProtocols.Tls12, checkCertificateRevocation: false);
+                        sslStream.AuthenticateAsClient("updates.bnsbuddy.com", null, SslProtocols.Tls12, checkCertificateRevocation: true);
                         x509Certificate = new X509Certificate2(sslStream.RemoteCertificate);
                     }
                 }
@@ -232,9 +233,12 @@ namespace Revamped_BnS_Buddy
                 }
                 if (x509Certificate != null)
                 {
-                    BnSServerCert = x509Certificate.GetHashCode().ToString();
+                    if (x509Certificate.Subject.Replace("CN=", "") == "updates.bnsbuddy.com")
+                    {
+                        BnSServerCert = x509Certificate.Verify();
+                    }
                 }
-                if (BnSBuddySerial == BnSServerCert && BnSBuddySerial == "1307602086")
+                if (BnSServerCert && BnSBuddySerial == "341c5692cb780377c82154ab75fdd99ef1c4813f")
                 {
                     return true;
                 }
@@ -244,14 +248,30 @@ namespace Revamped_BnS_Buddy
 
         private void ValidateBuddy()
         {
-            X509Certificate x509Certificate = null;
+            X509Certificate2 x509Certificate = null;
             try
             {
-                x509Certificate = X509Certificate.CreateFromSignedFile(Application.ExecutablePath);
-                BnSBuddySerial = x509Certificate.GetHashCode().ToString();
-                if (BnSBuddySerial != "1307602086")
+                var thecert = X509Certificate2.CreateFromSignedFile(Application.ExecutablePath);
+                x509Certificate = new X509Certificate2(thecert);
+                var theCertificateChain = new X509Chain();
+                theCertificateChain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
+                theCertificateChain.ChainPolicy.RevocationMode = X509RevocationMode.Offline;
+                theCertificateChain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
+                theCertificateChain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
+                bool chainIsValid = theCertificateChain.Build(x509Certificate);
+                
+                if (chainIsValid)
                 {
-                    Prompt.Popup("BnS Buddy Updater signature does not match! Please Delete and get a fresh copy.");
+                    BnSBuddySerial = x509Certificate.Thumbprint.ToLower();
+                    if (BnSBuddySerial != "341c5692cb780377c82154ab75fdd99ef1c4813f")
+                    {
+                        Prompt.Popup("BnS Buddy Updater signature does not match! Please Delete and get a fresh copy.");
+                        KillApp();
+                    }
+                } 
+                else
+                {
+                    Prompt.Popup("BnS Buddy Updater has been altered! Please Delete and get a fresh copy.");
                     KillApp();
                 }
             }

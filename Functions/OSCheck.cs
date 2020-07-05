@@ -16,7 +16,7 @@ namespace Revamped_BnS_Buddy.Functions
             }
             else if (int.Parse(OSVERSION.Version.Major.ToString()) >= 10 || (int.Parse(OSVERSION.Version.Major.ToString()) == 6 && int.Parse(OSVERSION.Version.Minor.ToString()) == 1))
             {
-                Form1.CurrentForm.metroToggle47.Enabled = true;
+                Form1.CurrentForm.CompatibleDx12 = true;
             }
         }
     }

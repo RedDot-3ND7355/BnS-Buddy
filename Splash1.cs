@@ -306,7 +306,7 @@ namespace Revamped_BnS_Buddy
                     {
                         try
                         {
-                            Regex regex = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$");
+                            Regex regex = new Regex(@"^[\w\.\-]+@[\w\-]+(?:\.\w{2,5})+$");
                             Match match = regex.Match(@metroTextBox1.Text);
                             if (match.Success)
                             {

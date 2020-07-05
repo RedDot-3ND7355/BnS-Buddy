@@ -34,6 +34,180 @@ Requirements:
 
 Change Log:
 
+Update 5.9.5.0
++ Added: General lang for error prompts
++ Added: Online grab of current key sets for each regions
++ Updated: Extracting of Dat files for regions that has the updated check
++ Updated: Added new method to check for Garena region paths via MUI cache
++ Fixed Bug: Emails ending with more than 3 characters after last dot would not be accepted
++ Fixed Bug: Color of prompts would not be applied before certain events
+
+Update 5.9.4.8
++ Updated: RU region key has been updated 
++ Fixed Bug: Unhandled exception when users patches game files with already running game
+
+Update 5.9.4.7
++ Added: Chinese region support
++ Added: Toggle to check for D912PXY updates
++ Updated: Chinese region key has been updated
++ Updated: NA and EU region key has been updated
++ Fixed Bug: Version check for frontier was broken
++ Fixed Bug: Korean paths were not switched properly when going live/test/frontier
++ Fixed Bug: Frontier paths were not fully supported
++ Fixed Bug: Censored text for error or crash logs was not censoring the proper information
++ Fixed Bug: Increased timer to detect processes to avoid hangs due to slow I/O on systems
+
+Update 5.9.4.6
++ Added: Toggle to keep cache or not at users risk
++ Updated: D912PXY now has an external management window
++ Updated: Libs now has updated DotNetZip
+- Removed: Deprecated libs
++ Fixed Bug: Installing D912PXY would only work once until next startup
++ Fixed Bug: Using D912PXY overall would hang the app for no reason
++ Fixed Bug: Getting the country code from certain countries would result a 404 on geolocation plugin for code generator
++ Fixed Bug: Popup would not appear above buddy under certain conditions
+
+Update 5.9.4.5
++ Added: Support for 3rd spec sin animation in animation toggles
++ Fixed Bug: Multiple installations was not updated for the latest regions added
+
+Update 5.9.4.4
++ Fixed Bug: Some files were not supposed to be touched anymore on certain toggles oopsie 
+
+Update 5.9.4.3
++ Fixed Bug: Path remembered was not used on certain conditions and caused the remembered path to not load before registry check
+
+Update 5.9.4.2
++ Updated: Internal updater has been updated
++ Updated: Garena(VN/TH) Key has been updated
++ Added: Support for Frontier server has been added in korean
+
+Updater 2.5.4.3
++ Fixed Bug: Internal library did not match updated and would cause crash on start
++ Fixed Bug: Even if no update was available, auto update routine would run
+
+Updater 2.5.4.2
++ Fixed Bug: Internal libraries were outdated and prevented users from auto extracting update on certain languages of the os
+
+Version 5.9.4.1
++ Updated: JP Key has been updated
++ Fixed Bug: Auto update would do absolutely nothing
+
+Updater 2.5.4.1
++ Fixed Bug: Auto update would do absolutely nothing
+
+Version 5.9.4.0
++ Updated: TW Key has been updated
++ Added: Remember the last path browsed to for the garena region client files
++ Fixed Bug: The warning icon at the top bar would float in the middle of nowhere when buddy is maximized for dat editing
+
+Version 5.9.3.9
++ Fixed Bug: Even if garena was uninstalled from the system, garena registry would stay in regedit and trigger a browse to folder
+
+Version 5.9.3.8
++ Added: Garena region support with manual path selection
++ Oups: Removed some annoying popups i forgot to remove while testing
+
+Version 5.9.3.7
++ Fixed Bug: Key for KR/RU Region was improperly encoded
++ Fixed Bug: Cancelling a region swap browse to folder will crash buddy and/or cause many error popups
++ Fixed Bug: MultiClient window would not appear certain times 
+
+Version 5.9.3.6
++ Added: Russian region support
++ Added: By region AES key for xml files
++ Fixed Bug: A measure I have implemented was not compatible with every system language
++ Fixed Bug: D912PXY Update Check would do a seperate thread and users would still be able to modify the toggle and break the ui and crash
+
+Version 5.9.3.5
++ Fixed Bug: Startup routine and play routine is broken due to last update
+
+Version 5.9.3.4
++ Updated: The encryption/decryption key for xml files has been updated to new one
++ Added: Proper handler for empty replace lines on addons
++ Removed: Archer Effects and KFM 3rd Spec Effects from toggles for compatibility with another tool
++ Fixed Bug: When starting game the interval cleaner would do a traditional clean of itself and not the game
++ Fixed Bug: Restoring addons with empty replace line threw an error
+
+Version 5.9.3.3
++ Oups: Forgot to remove certain popups that was used in testing from previous release
+
+Version 5.9.3.2
++ Added: Line breaks has been added to patches for addons
+
+Version 5.9.3.1
++ Updated: Save as for dat editor now supports x16 and text file types
++ Fixed Bug: Dat Editor save as would ignore the file extension and save as xml anyway
++ Fixed Bug: TimeStamp would have an extra space
++ Fixed Bug: Selecting all addons would show the description of the last one selected by it
++ Fixed Bug: When changing tab to mod manager, new lines would appear with no log and only timestamps
++ Fixed Bug: When loading or reloading files on dat editor, the old status would still show
+
+Version 5.9.3.0
++ Added: Proxy honoring for advanced users
++ Added: Toggle for Maintenance Check
++ Added: Toggle for timestamp in logs
++ Added: Extra check for Certificate
++ Updated: server for update fetching has been updated
++ Optimized: Startup process of buddy is now REALLY faster
++ Fixed Bug: Toggles for BnS Version Check and Maintenance Check in settings page 4 were ignored
+
+Updater 2.5.4.0
++ Added: Extra check for Certificate
++ Updated: server for update fetching has been updated
+
+Updater 2.5.3.5
++ Added: Loading form for users to know if the updater is loading or not
++ Fixed Bug: Unhandled error while fetching the bns buddy server status
+
+Version 5.9.2.9
++ Added: Toggle for BnS Version Check for faster BnS Buddy Startup
++ Updated: Some Nu-Get Packages were outdated
+
+Updater 2.5.3.1
++ Added: Updater build on gui
++ Added: Build comparer for users to know if their updater is the latest
+
+Version 5.9.2.8
++ Fixed Bug: Users being able to resize and break the gui on start
++ Fixed Bug: Users after they switch tab to launcher would see more and more empty lines on logs
+
+Version 5.9.2.7
++ Reworked: Entire Signature validation has been improved and overhauled for maximum effeciency
++ Added: Support for lower res images for mod preview
++ Fixed Bug: Refresh would not delete all unexisting mods
++ Fixed Bug: Textboxes on launcher would not be at the bottom on start
+
+Updater 2.5.3.0
++ Reworked: Entire Signature validation has been improved and overhauled for maximum effeciency
+
+Version 5.9.2.6
++ Removed: Scrolling behaviour on dropdown for server selection and all to prevent hang
++ Updated: Changed how the compat flags is handled and added for more accuracy
++ Updated: The message for the warning of compat entries has been modified, popup added for easier understanding and what are your options
++ Updated: The list of supported image type for mod preview under the help button
++ Fixed Bug: GETULPS Would have null references and crash on start because errors are not handled
++ Fixed Bug: Mod Manager would color non installed mods with installed mods even if they are not conflicting
++ Fixed Bug: After applying addons, logs would not stay in the box
++ Fixed Bug: Invalid images would throw an error in mod preview
++ Fixed Bug: Clear Compat button would not clear the entries
+
+Version 5.9.2.5
++ Renamed: AMD ULPS for easier understanding
++ Enabled: Ingame memory cleaner is back and improved
++ Updated: IDs for korean login/maintenance/version were changed
++ Updated: NCLauncher.ini has been changed and detection system has been updated
++ Added: A Seperate patch button in addons so users would not require to start game to patch games files if wanted
++ Added: Enhanced innerexception and stacktrace for error reports
++ Fixed Bug: Handling of corrupted file on startup of checking backup configs
++ Fixed Bug: Bool was not properly used to check if region was selected or not
++ Fixed Bug: Mail check on login input is broken
++ Fixed Bug: Parent node having sub folders would skip sub node if parent contained mods
++ Fixed Bug: Parent node not unticking after installing/uninstalling
++ Fixed Bug: Handler for unexisting folder mods would not remove invalid child and parent treenode
++ Fixed Bug: Mod Manager would not clear the entire parent if it had childrens and all does not exist
++ Fixed Bug: Mod Manager would not color both child and parent if both were conflicting and would throw error
+
 Version 5.9.2.4
 + Added: Handler for patch files with no replace value
 + Added: Archer animation toggle

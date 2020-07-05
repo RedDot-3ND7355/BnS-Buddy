@@ -1,5 +1,6 @@
+using BNSDat;
 using Ionic.Zlib;
-using Revamped_BnS_Buddy;
+using Revamped_BnS_Buddy.Functions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,12 +8,139 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace BNSDat
+namespace Revamped_BnS_Buddy.BNSDat
 {
 
     public class BNSDat
     {
-        public string AES_KEY = "bns_obt_kr_2014#";
+        public string AES_KEY = DecryptKey("EFBE9CEFBE90D9B6EFBE97EFBE9F55EFBF8554EFBEAC253425065C3EEFBE97EFBE9FD881EFBF8CEFBE8A5BEFBEBC10EFBF80");
+        private List<string> KeySet = new List<string>();
+
+        public void UpdateKey(int Default = 0)
+        {
+            if (KeySets.KeySet != null)
+            {
+                KeySet = KeySets.KeySet;
+                Form1.CurrentForm.AddTextLog("Using Online Keyset");
+            }
+            else
+            {
+                KeySet.Add("EFBE9CEFBE90D9B6EFBE97EFBE9F55EFBF8554EFBEAC253425065C3EEFBE97EFBE9FD881EFBF8CEFBE8A5BEFBEBC10EFBF80"); /* 0- na/eu */
+                KeySet.Add("EFBEA4EFBE90D886EFBE87EFBEA50BEFBF8444EFBE99274C2E28763FEFBE84EFBEB0D9B7EFBEB8EFBF8D70EFBE8A10EFBF80"); /* 1- CN */
+                KeySet.Add("EFBE9CEFBE90D9B5EFBE88EFBEA543EFBEB447EFBEB0274C36285D7FEFBE9BEFBEA4D99EEFBF88EFBE8770EFBEAC10EFBF80"); /* 2- kr/ru/tw/jp/garena */
+                Form1.CurrentForm.AddTextLog("Using Offline Keyset");
+            }
+
+            AES_KEY = DecryptKey(KeySet[Default]);
+        }
+
+        private static string DecryptKey(string enc_key)
+        {
+            Encoding EncType = Encoding.UTF8;
+            string tmp = EncType.GetString(FromHex(enc_key));
+            tmp = encryptDecrypt(tmp);
+            tmp = EncType.GetString(System.Convert.FromBase64String(tmp));
+            return tmp;
+        }
+
+        private static string encryptDecrypt(string input)
+        {
+            char[] key = Encoding.UTF8.GetString(XOR_KEY2).ToCharArray();
+            char[] output = new char[input.Length];
+
+            for (int i = 0; i < input.Length; i++)
+            {
+                output[i] = (char)(input[i] ^ key[i % key.Length]);
+            }
+
+            return new string(output);
+        }
+
+        public static byte[] FromHex(string hex)
+        {
+            return Enumerable.Range(0, hex.Length / 2).Select(i => System.Convert.ToByte(hex.Substring(i * 2, 2), 16)).ToArray<byte>();
+        }
+
+        private static class ROTA
+        {
+            static int[] keyC = { 7, 11, 8, 13, 12, 6, 4, 9, 5, 15, 17, 19, 16, 2, 14, 18, 3, 20, 10, 1 };
+            static int[] keyV = { 5, 6, 4, 1, 2, 3 };
+            static int[] keyN = { 10, 8, 6, 1, 7, 5, 3, 4, 9, 2 };
+            static string consonants = "bcdfghjklmnpqrstvwxz";
+            static string vowels = "aeiouy";
+
+            public static string Decrypt(string s)
+            {
+                if (String.IsNullOrEmpty(s)) return s;
+
+                int lenC = (s.Length - 1) % 20;
+                int lenV = (s.Length - 1) % 6;
+                int lenN = (s.Length - 1) % 10;
+
+                char[] ca = new char[s.Length];
+
+                for (int i = 0; i < s.Length; i++)
+                {
+                    char c = s[i];
+                    int j;
+                    if ((j = vowels.IndexOf(c)) > -1)
+                    {
+                        j -= keyV[(i + lenV) % 6];
+                        if (j < 0) j += 6;
+                        ca[i] = vowels[j];
+                    }
+                    else if ((j = consonants.IndexOf(c)) > -1)
+                    {
+                        j -= keyC[(i + lenC) % 20];
+                        if (j < 0) j += 20;
+                        ca[i] = consonants[j];
+                    }
+                    else if ((j = vowels.ToUpper().IndexOf(c)) > -1)
+                    {
+                        j -= keyV[(i + lenV) % 6];
+                        if (j < 0) j += 6;
+                        ca[i] = vowels.ToUpper()[j];
+                    }
+                    else if ((j = consonants.ToUpper().IndexOf(c)) > -1)
+                    {
+                        j -= keyC[(i + lenC) % 20];
+                        if (j < 0) j += 20;
+                        ca[i] = consonants.ToUpper()[j];
+                    }
+                    else if (c >= 48 && c <= 57)
+                    {
+                        j = c - keyN[(i + lenN) % 10];
+                        if (j < 48) j += 10;
+                        ca[i] = (char)j;
+                    }
+                    else
+                    {
+                        ca[i] = c;
+                    }
+                }
+                return new string(ca);
+            }
+        }
+
+        public static byte[] XOR_KEY2 = new byte[16]
+        {
+        164,
+        159,
+        216,
+        179,
+        246,
+        142,
+        57,
+        194,
+        45,
+        224,
+        97,
+        117,
+        92,
+        75,
+        26,
+        7
+        };
 
         public byte[] XOR_KEY = new byte[16]
         {
@@ -34,6 +162,27 @@ namespace BNSDat
         7
         };
 
+
+        private byte[] AES_KEY2 = new byte[16]
+        {
+            23,
+            81,
+            170,
+            213,
+            30,
+            54,
+            74,
+            27,
+            254,
+            96,
+            116,
+            231,
+            208,
+            133,
+            7,
+            104
+        };
+
         private byte[] Decrypt(byte[] buffer, int size)
         {
             int length = AES_KEY.Length;
@@ -44,7 +193,16 @@ namespace BNSDat
             buffer = null;
             Rijndael rijndael = Rijndael.Create();
             rijndael.Mode = CipherMode.ECB;
-            rijndael.CreateDecryptor(Encoding.ASCII.GetBytes(AES_KEY), new byte[16]).TransformBlock(array2, 0, num, array, 0);
+            if (PubVersion != 3)
+            {
+                rijndael.CreateDecryptor(Encoding.ASCII.GetBytes(AES_KEY), new byte[16]).TransformBlock(array2, 0, num, array, 0);
+            } 
+            else
+            {
+                rijndael.CreateDecryptor(AES_KEY2, new byte[16]).TransformBlock(array2, 0, num, array, 0); // v3 only
+            }
+            //Prompt.Popup(StringToHex(Encoding.UTF8.GetString(AES_KEY2)).ToString());
+            //System.Windows.Forms.Clipboard.SetText(BitConverter.ToString(AES_KEY2).Replace("-",""));
             array2 = array;
             array = new byte[size];
             Array.Copy(array2, 0, array, 0, size);
@@ -119,7 +277,14 @@ namespace BNSDat
             buffer = null;
             Rijndael rijndael = Rijndael.Create();
             rijndael.Mode = CipherMode.ECB;
-            rijndael.CreateEncryptor(Encoding.ASCII.GetBytes(AES_KEY), new byte[16]).TransformBlock(array2, 0, sizePadded, array, 0);
+            if (PubVersion != 3)
+            {
+                rijndael.CreateEncryptor(Encoding.ASCII.GetBytes(AES_KEY), new byte[16]).TransformBlock(array2, 0, sizePadded, array, 0); // v2
+            }
+            else
+            {
+                rijndael.CreateEncryptor(AES_KEY2, new byte[16]).TransformBlock(array2, 0, sizePadded, array, 0); // v3
+            }
             array2 = null;
             return array;
         }
@@ -143,12 +308,15 @@ namespace BNSDat
             return array;
         }
 
+        private byte PubVersion = 3;
+        private byte[] V3Signature = new byte[128];
         public void Extract(string FileName, bool is64 = false)
         {
             FileStream fileStream = new FileStream(FileName, FileMode.Open);
             BinaryReader binaryReader = new BinaryReader(fileStream);
             binaryReader.ReadBytes(8);
-            binaryReader.ReadUInt32();
+            int Version = (int)binaryReader.ReadUInt32();
+            PubVersion = (byte)Version; // V3 Support
             binaryReader.ReadBytes(5);
             if (!is64)
             {
@@ -161,6 +329,10 @@ namespace BNSDat
             int num = (int)(is64 ? binaryReader.ReadInt64() : binaryReader.ReadInt32());
             bool isCompressed = binaryReader.ReadByte() == 1;
             bool isEncrypted = binaryReader.ReadByte() == 1;
+            if (Version == 3)
+            {
+                V3Signature = binaryReader.ReadBytes(128);
+            }
             binaryReader.ReadBytes(62);
             int num2 = (int)(is64 ? binaryReader.ReadInt64() : binaryReader.ReadInt32());
             int sizeUnpacked = (int)(is64 ? binaryReader.ReadInt64() : binaryReader.ReadInt32());
@@ -231,7 +403,8 @@ namespace BNSDat
             FileStream fileStream = new FileStream(FileName, FileMode.Open);
             BinaryReader binaryReader = new BinaryReader(fileStream);
             binaryReader.ReadBytes(8);
-            binaryReader.ReadUInt32();
+            int Version = (int)binaryReader.ReadUInt32();
+            PubVersion = (byte)Version; // v3 support
             binaryReader.ReadBytes(5);
             if (!is64)
             {
@@ -245,6 +418,10 @@ namespace BNSDat
             toreturn = new string[num];
             bool isCompressed = binaryReader.ReadByte() == 1;
             bool isEncrypted = binaryReader.ReadByte() == 1;
+            if (Version == 3)
+            {
+                binaryReader.ReadBytes(128);
+            }
             binaryReader.ReadBytes(62);
             int num2 = (int)(is64 ? binaryReader.ReadInt64() : binaryReader.ReadInt32());
             int sizeUnpacked = (int)(is64 ? binaryReader.ReadInt64() : binaryReader.ReadInt32());
@@ -284,83 +461,104 @@ namespace BNSDat
 
         public Dictionary<string, byte[]> ExtractFile(string FileName, List<string> filesToExtract, bool is64 = false)
         {
-            Dictionary<string, byte[]> dictionary = new Dictionary<string, byte[]>();
-            FileStream fileStream = new FileStream(FileName, FileMode.Open);
-            BinaryReader binaryReader = new BinaryReader(fileStream);
-            binaryReader.ReadBytes(8);
-            binaryReader.ReadUInt32();
-            binaryReader.ReadBytes(5);
-            if (!is64)
+            try
             {
-                binaryReader.ReadInt32();
-            }
-            else
-            {
-                binaryReader.ReadInt64();
-            }
-            int num = (int)(is64 ? binaryReader.ReadInt64() : binaryReader.ReadInt32());
-            bool isCompressed = binaryReader.ReadByte() == 1;
-            bool isEncrypted = binaryReader.ReadByte() == 1;
-            binaryReader.ReadBytes(62);
-            int num2 = (int)(is64 ? binaryReader.ReadInt64() : binaryReader.ReadInt32());
-            int sizeUnpacked = (int)(is64 ? binaryReader.ReadInt64() : binaryReader.ReadInt32());
-            byte[] buffer = binaryReader.ReadBytes(num2);
-            int num3 = (int)(is64 ? binaryReader.ReadInt64() : binaryReader.ReadInt32());
-            num3 = (int)binaryReader.BaseStream.Position;
-            byte[] buffer2 = Unpack(buffer, num2, num2, sizeUnpacked, isEncrypted, isCompressed);
-            buffer = null;
-            MemoryStream memoryStream = new MemoryStream(buffer2);
-            BinaryReader binaryReader2 = new BinaryReader(memoryStream);
-            int num4 = 0;
-            for (int i = 0; i < num; i++)
-            {
-                if (num4 == filesToExtract.Count)
+                Dictionary<string, byte[]> dictionary = new Dictionary<string, byte[]>();
+                FileStream fileStream = new FileStream(FileName, FileMode.Open);
+                BinaryReader binaryReader = new BinaryReader(fileStream);
+                binaryReader.ReadBytes(8);
+                uint Version = binaryReader.ReadUInt32();
+                PubVersion = (byte)Version; // v3 support
+                binaryReader.ReadBytes(5);
+                if (!is64)
                 {
-                    break;
+                    binaryReader.ReadInt32();
                 }
-                BPKG_FTE bPKG_FTE = new BPKG_FTE();
-                bPKG_FTE.FilePathLength = (int)(is64 ? binaryReader2.ReadInt64() : binaryReader2.ReadInt32());
-                bPKG_FTE.FilePath = Encoding.Unicode.GetString(binaryReader2.ReadBytes(bPKG_FTE.FilePathLength * 2));
-                bPKG_FTE.Unknown_001 = binaryReader2.ReadByte();
-                bPKG_FTE.IsCompressed = (binaryReader2.ReadByte() == 1);
-                bPKG_FTE.IsEncrypted = (binaryReader2.ReadByte() == 1);
-                bPKG_FTE.Unknown_002 = binaryReader2.ReadByte();
-                bPKG_FTE.FileDataSizeUnpacked = (int)(is64 ? binaryReader2.ReadInt64() : binaryReader2.ReadInt32());
-                bPKG_FTE.FileDataSizeSheared = (int)(is64 ? binaryReader2.ReadInt64() : binaryReader2.ReadInt32());
-                bPKG_FTE.FileDataSizeStored = (int)(is64 ? binaryReader2.ReadInt64() : binaryReader2.ReadInt32());
-                bPKG_FTE.FileDataOffset = (int)(is64 ? binaryReader2.ReadInt64() : binaryReader2.ReadInt32()) + num3;
-                bPKG_FTE.Padding = binaryReader2.ReadBytes(60);
-                if (bPKG_FTE.FilePath != null && filesToExtract.Contains(bPKG_FTE.FilePath.ToLower()))
+                else
                 {
-                    binaryReader.BaseStream.Position = bPKG_FTE.FileDataOffset;
-                    buffer = binaryReader.ReadBytes(bPKG_FTE.FileDataSizeStored);
-                    byte[] array = Unpack(buffer, bPKG_FTE.FileDataSizeStored, bPKG_FTE.FileDataSizeSheared, bPKG_FTE.FileDataSizeUnpacked, bPKG_FTE.IsEncrypted, bPKG_FTE.IsCompressed);
-                    buffer = null;
-                    if (bPKG_FTE.FilePath.ToLower().EndsWith("xml") || bPKG_FTE.FilePath.ToLower().EndsWith("x16"))
+                    binaryReader.ReadInt64();
+                }
+                int num = (int)(is64 ? binaryReader.ReadInt64() : binaryReader.ReadInt32());
+                bool isCompressed = binaryReader.ReadByte() == 1;
+                bool isEncrypted = binaryReader.ReadByte() == 1;
+                if (Version == 3)
+                {
+                    binaryReader.ReadBytes(128);
+                }
+                binaryReader.ReadBytes(62);
+                int num2 = (int)(is64 ? binaryReader.ReadInt64() : binaryReader.ReadInt32());
+                int sizeUnpacked = (int)(is64 ? binaryReader.ReadInt64() : binaryReader.ReadInt32());
+                byte[] buffer = binaryReader.ReadBytes(num2);
+                int num3 = (int)(is64 ? binaryReader.ReadInt64() : binaryReader.ReadInt32());
+                num3 = (int)binaryReader.BaseStream.Position;
+                byte[] buffer2 = Unpack(buffer, num2, num2, sizeUnpacked, isEncrypted, isCompressed);
+                buffer = null;
+                MemoryStream memoryStream = new MemoryStream(buffer2);
+                BinaryReader binaryReader2 = new BinaryReader(memoryStream);
+                int num4 = 0;
+                for (int i = 0; i < num; i++)
+                {
+                    if (num4 == filesToExtract.Count)
                     {
-                        MemoryStream memoryStream2 = new MemoryStream();
-                        MemoryStream memoryStream3 = new MemoryStream(array);
-                        BXML bXML = new BXML(XOR_KEY);
-                        Convert(memoryStream3, bXML.DetectType(memoryStream3), memoryStream2, BXML_TYPE.BXML_PLAIN);
-                        memoryStream3.Close();
-                        array = memoryStream2.ToArray();
-                        memoryStream2.Close();
+                        break;
                     }
-                    dictionary.Add(bPKG_FTE.FilePath, array);
-                    num4++;
-                    bPKG_FTE = null;
-                    array = null;
+                    BPKG_FTE bPKG_FTE = new BPKG_FTE();
+                    bPKG_FTE.FilePathLength = (int)(is64 ? binaryReader2.ReadInt64() : binaryReader2.ReadInt32());
+                    bPKG_FTE.FilePath = Encoding.Unicode.GetString(binaryReader2.ReadBytes(bPKG_FTE.FilePathLength * 2));
+                    bPKG_FTE.Unknown_001 = binaryReader2.ReadByte();
+                    bPKG_FTE.IsCompressed = (binaryReader2.ReadByte() == 1);
+                    bPKG_FTE.IsEncrypted = (binaryReader2.ReadByte() == 1);
+                    bPKG_FTE.Unknown_002 = binaryReader2.ReadByte();
+                    bPKG_FTE.FileDataSizeUnpacked = (int)(is64 ? binaryReader2.ReadInt64() : binaryReader2.ReadInt32());
+                    bPKG_FTE.FileDataSizeSheared = (int)(is64 ? binaryReader2.ReadInt64() : binaryReader2.ReadInt32());
+                    bPKG_FTE.FileDataSizeStored = (int)(is64 ? binaryReader2.ReadInt64() : binaryReader2.ReadInt32());
+                    bPKG_FTE.FileDataOffset = (int)(is64 ? binaryReader2.ReadInt64() : binaryReader2.ReadInt32()) + num3;
+                    bPKG_FTE.Padding = binaryReader2.ReadBytes(60);
+                    if (bPKG_FTE.FilePath != null && filesToExtract.Contains(bPKG_FTE.FilePath.ToLower()))
+                    {
+                        binaryReader.BaseStream.Position = bPKG_FTE.FileDataOffset;
+                        buffer = binaryReader.ReadBytes(bPKG_FTE.FileDataSizeStored);
+                        byte[] array = Unpack(buffer, bPKG_FTE.FileDataSizeStored, bPKG_FTE.FileDataSizeSheared, bPKG_FTE.FileDataSizeUnpacked, bPKG_FTE.IsEncrypted, bPKG_FTE.IsCompressed);
+                        buffer = null;
+                        if (bPKG_FTE.FilePath.ToLower().EndsWith("xml") || bPKG_FTE.FilePath.ToLower().EndsWith("x16"))
+                        {
+                            MemoryStream memoryStream2 = new MemoryStream();
+                            MemoryStream memoryStream3 = new MemoryStream(array);
+                            BXML bXML = new BXML(XOR_KEY);
+                            Convert(memoryStream3, bXML.DetectType(memoryStream3), memoryStream2, BXML_TYPE.BXML_PLAIN);
+                            memoryStream3.Close();
+                            array = memoryStream2.ToArray();
+                            memoryStream2.Close();
+                        }
+                        dictionary.Add(bPKG_FTE.FilePath, array);
+                        num4++;
+                        bPKG_FTE = null;
+                        array = null;
+                    }
                 }
+                binaryReader2.Close();
+                memoryStream.Close();
+                binaryReader2 = null;
+                memoryStream = null;
+                binaryReader.Close();
+                fileStream.Close();
+                binaryReader = null;
+                fileStream = null;
+                return dictionary;
             }
-            binaryReader2.Close();
-            memoryStream.Close();
-            binaryReader2 = null;
-            memoryStream = null;
-            binaryReader.Close();
-            fileStream.Close();
-            binaryReader = null;
-            fileStream = null;
-            return dictionary;
+            catch (IOException)
+            {
+                Prompt.Popup("Please close game before applying any addons.");
+                Dictionary<string, byte[]> dictionary = new Dictionary<string, byte[]>();
+                return dictionary;
+            }
+            catch (Exception ex)
+            {
+                Prompt.Popup(ex.ToString());
+                Dictionary<string, byte[]> dictionary = new Dictionary<string, byte[]>();
+                return dictionary;
+            }
+
         }
 
         public void CompressFiles(string FileName, Dictionary<string, byte[]> filesToReplace, bool is64 = false, int compressionLevel = 1)
@@ -369,11 +567,17 @@ namespace BNSDat
             BinaryReader binaryReader = new BinaryReader(memoryStream);
             byte[] buffer = binaryReader.ReadBytes(8);
             uint value = binaryReader.ReadUInt32();
+            PubVersion = (byte)value; // v3 support
             byte[] buffer2 = binaryReader.ReadBytes(5);
             int num = (int)(is64 ? binaryReader.ReadInt64() : binaryReader.ReadInt32());
             int num2 = (int)(is64 ? binaryReader.ReadInt64() : binaryReader.ReadInt32());
             bool flag = binaryReader.ReadByte() == 1;
             bool flag2 = binaryReader.ReadByte() == 1;
+            byte[] bufferv3 = new byte[128];
+            if (value == 3)
+            {
+                bufferv3 = binaryReader.ReadBytes(128);
+            }
             byte[] buffer3 = binaryReader.ReadBytes(62);
             int num3 = (int)(is64 ? binaryReader.ReadInt64() : binaryReader.ReadInt32());
             int sizeUnpacked = (int)(is64 ? binaryReader.ReadInt64() : binaryReader.ReadInt32());
@@ -513,6 +717,10 @@ namespace BNSDat
             }
             binaryWriter3.Write(flag);
             binaryWriter3.Write(flag2);
+            if (value == 3)
+            {
+                binaryWriter3.Write(bufferv3); // v3 support
+            }
             binaryWriter3.Write(buffer3);
             sizeUnpacked = (int)binaryWriter2.BaseStream.Length;
             int sizeSheared = sizeUnpacked;
@@ -591,6 +799,7 @@ namespace BNSDat
                 bPKG_FTE.FilePath = text;
                 binaryWriter.Write(Encoding.Unicode.GetBytes(bPKG_FTE.FilePath));
                 bPKG_FTE.Unknown_001 = 2;
+                //bPKG_FTE.Unknown_001 = Unknown001; // Version 3
                 binaryWriter.Write(bPKG_FTE.Unknown_001);
                 bPKG_FTE.IsCompressed = true;
                 binaryWriter.Write(bPKG_FTE.IsCompressed);
@@ -691,7 +900,14 @@ namespace BNSDat
             binaryWriter3.Write(flag);
             bool flag2 = true;
             binaryWriter3.Write(flag2);
-            byte[] buffer5 = new byte[62];
+            // v3 support
+            if (PubVersion == 3)
+            {
+                byte[] buffer6 = V3Signature;
+                binaryWriter3.Write(buffer6);
+            }
+            // Continue 
+            byte[] buffer5 = new byte[62];  // here
             binaryWriter3.Write(buffer5);
             int num3 = (int)binaryWriter.BaseStream.Length;
             int sizeSheared = num3;
@@ -744,7 +960,7 @@ namespace BNSDat
             memoryStream4 = null;
             Form1.CurrentForm.SortOutputHandler("Done!");
         }
-
+        
         private void Convert(Stream iStream, BXML_TYPE iType, Stream oStream, BXML_TYPE oType)
         {
             if ((iType == BXML_TYPE.BXML_PLAIN && oType == BXML_TYPE.BXML_BINARY) || (iType == BXML_TYPE.BXML_BINARY && oType == BXML_TYPE.BXML_PLAIN))
