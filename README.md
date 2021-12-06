@@ -7,6 +7,10 @@
 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 
+THIS GIT PROJECT WILL NO LONGER BE MAINTAINED!
+INSTEAD A NEW REPO FOR V6 IS RELEASED TO REPLACE IT!
+
+
 Disclaimer: 
 +If game is rendered unstartable, you are the only one responsible. Therefore using this tool, you agree to the "risks".
 
